@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyLabourRights — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* Trusted Counsel tokens */
+  --ink:#0d2818;--ink-2:#16331f;--forest:#1c5234;--moss:#3d7a4f;--sage:#7fa886;
+  --paper:#f4f1e8;--paper-2:#e9e4d4;--cream:#fbfaf5;
+  --gold:#c79a3e;--gold-soft:#e3c989;--gold-deep:#9a7426;--rust:#a8412a;
+  --text-soft:#46564a;--text-mute:#5a6a5e;
+  --pill-ink:#4a3510;
+  --line:rgba(13,40,24,.12);--line-2:rgba(13,40,24,.22);
+  --r-sm:10px;--r-md:16px;--r-lg:24px;
+  --serif:'Fraunces',Georgia,serif;--sans:'Outfit',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.6;}
+.adminbar{background:var(--ink);color:var(--paper);padding:14px 22px;
+  display:flex;align-items:center;justify-content:space-between;}
+.adminbar .brand{font-family:var(--serif);font-weight:700;font-size:1.2rem;
+  display:flex;align-items:center;gap:9px;}
+.mark{width:32px;height:32px;border-radius:var(--r-sm);background:linear-gradient(150deg,var(--forest),var(--ink));
+  border:1px solid var(--gold-soft);display:grid;place-items:center;color:var(--gold-soft);
+  font-family:var(--serif);font-weight:900;}
+.wrap{max-width:880px;margin:0 auto;padding:26px 22px;}
+.card{background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:0 4px 16px rgba(13,40,24,.08);margin-bottom:20px;overflow:hidden;}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;}
+.card-head h2{font-family:var(--serif);font-size:1.2rem;font-weight:600;}
+.card-body{padding:20px;}
+label{display:block;font-size:.84rem;font-weight:600;margin-bottom:6px;}
+input,textarea,select{width:100%;padding:11px 13px;border:1.5px solid rgba(13,40,24,.25);
+  border-radius:var(--r-md);background:var(--cream);font-family:inherit;font-size:.94rem;margin-bottom:14px;}
+textarea{resize:vertical;min-height:90px;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--forest);}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.92rem;
+  padding:12px 22px;border-radius:var(--r-md);border:none;cursor:pointer;transition:transform .15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--ink);color:var(--cream);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#b3852f);color:#241a06;}
+.btn-ghost{background:transparent;border:1.5px solid rgba(13,40,24,.3);color:var(--ink);}
+.btn-rust{background:var(--rust);color:#fff;}
+.btn-sm{padding:8px 14px;font-size:.82rem;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;padding:4px 10px;border-radius:100px;
+  background:var(--gold-soft);color:var(--pill-ink);}
+.muted{color:var(--text-mute);font-size:.86rem;}
+.draft-preview{background:var(--paper-2);border-radius:var(--r-md);padding:16px;margin-top:12px;}
+.draft-preview h3{font-family:var(--serif);font-size:1.15rem;margin-bottom:6px;}
+.status{font-size:.84rem;padding:8px 12px;border-radius:var(--r-sm);margin-top:10px;display:none;}
+.status.ok{background:var(--sage);color:var(--ink);display:block;}
+.status.err{background:#e6b8aa;color:#4a1a0e;display:block;}
+.status.info{background:var(--paper-2);color:var(--ink);display:block;}
+.published-item{border:1px solid var(--line);border-radius:var(--r-md);padding:13px 15px;
+  margin-bottom:10px;background:var(--cream);}
+.published-item h4{font-family:var(--serif);font-size:1rem;}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.note{background:var(--paper-2);border-left:3px solid var(--gold);border-radius:var(--r-sm);
+  padding:12px 14px;font-size:.85rem;margin-bottom:18px;}
+.steps-list{font-size:.86rem;padding-left:18px;}
+.steps-list li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="adminbar">
+  <div class="brand"><span class="mark">C</span> MyLabourRights Admin</div>
+  <a href="../index.html" class="btn btn-ghost btn-sm" style="color:var(--paper);border-color:rgba(255,255,255,.3)">View site</a>
+</div>
+
+<div class="wrap">
+
+  <div class="note">
+    This panel runs the blog workflow from your spec: <strong>AI drafts an article
+    &rarr; it is emailed to you &rarr; you edit &amp; approve &rarr; it publishes and
+    auto-posts to LinkedIn &amp; Facebook.</strong> Drafting and social posting need
+    the backend keys set in Netlify (see the Setup Guide).
+  </div>
+
+  <!-- STEP 1: generate draft -->
+  <div class="card">
+    <div class="card-head"><h2>1 &middot; Generate a draft</h2>
+      <span class="pill">AI writes it</span></div>
+    <div class="card-body">
+      <label>Article topic / question</label>
+      <input id="topic" placeholder="e.g. Can my employer suspend me without pay?" />
+      <p class="muted" style="margin-bottom:14px">Pick from your approved question list,
+        or type any SA labour-law topic. The AI writes a full draft and emails it to you.</p>
+      <button class="btn btn-primary" id="genBtn">Generate draft</button>
+      <div class="status" id="genStatus"></div>
+      <div id="draftBox"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: review & publish -->
+  <div class="card">
+    <div class="card-head"><h2>2 &middot; Review &amp; publish</h2>
+      <span class="pill">You approve</span></div>
+    <div class="card-body">
+      <p class="muted" style="margin-bottom:14px">Edit anything below, then publish.
+        Publishing auto-posts to your connected social accounts.</p>
+      <label>Title</label><input id="pTitle" placeholder="Article title" />
+      <label>Category</label>
+      <select id="pCategory">
+        <option>Unfair dismissal</option>
+        <option>CCMA process</option>
+        <option>Workplace rights</option>
+        <option>Employment contracts</option>
+        <option>Retrenchment</option>
+      </select>
+      <label>Summary (one sentence)</label><input id="pSummary" placeholder="One-line summary" />
+      <label>Body (HTML)</label>
+      <textarea id="pBody" style="min-height:160px" placeholder="<p>Article body...</p>"></textarea>
+      <div class="row">
+        <button class="btn btn-gold" id="pubBtn">Publish &amp; share</button>
+        <button class="btn btn-ghost" id="copyBtn">Copy as data.js entry</button>
+      </div>
+      <div class="status" id="pubStatus"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: published log -->
+  <div class="card">
+    <div class="card-head"><h2>3 &middot; Published articles</h2></div>
+    <div class="card-body">
+      <p class="muted" style="margin-bottom:12px">Articles published in this browser session.
+        Copy each as a <code>data.js</code> entry and paste into the site to make it permanent.</p>
+      <div id="pubList"><p class="muted">Nothing published yet.</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>How publishing works</h2></div>
+    <div class="card-body">
+      <ol class="steps-list">
+        <li>The backend stores nothing permanently (serverless is stateless).</li>
+        <li>After publishing, use <strong>"Copy as data.js entry"</strong> and paste the
+          object into the <code>window.BLOG_POSTS</code> array in your site source.</li>
+        <li>Re-deploy the site &mdash; the article is now live for everyone.</li>
+        <li>Social posting (LinkedIn / Facebook) happens at publish time, automatically,
+          if those tokens are set in Netlify.</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = '/.netlify/functions/blog';
+const $ = id => document.getElementById(id);
+const published = [];
+
+function setStatus(el, msg, kind){
+  el.className = 'status ' + kind;
+  el.innerHTML = msg;
+}
+
+/* ---- generate draft ---- */
+$('genBtn').onclick = async () => {
+  const topic = $('topic').value.trim();
+  if(!topic){ setStatus($('genStatus'),'Enter a topic first.','err'); return; }
+  $('genBtn').innerHTML = '<span class="spin"></span> Writing...';
+  $('genBtn').disabled = true;
+  try{
+    const res = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'draft',topic})});
+    const data = await res.json();
+    if(data.error){
+      setStatus($('genStatus'),
+        'Draft failed: '+data.error+'. Check GEMINI_API_KEY in Netlify.','err');
+    } else if(data.post){
+      // fill the review form
+      $('pTitle').value = data.post.title || '';
+      $('pCategory').value = data.post.category || 'Workplace rights';
+      $('pSummary').value = data.post.summary || '';
+      $('pBody').value = data.post.body || '';
+      $('draftBox').innerHTML =
+        '<div class="draft-preview"><h3>'+ (data.post.title||'') +'</h3>'+
+        '<p class="muted">'+ (data.post.summary||'') +'</p></div>';
+      setStatus($('genStatus'),
+        data.emailed ? 'Draft created and emailed to you for approval. Review it below.'
+                     : 'Draft created (email not configured). Review it below.','ok');
+    } else {
+      setStatus($('genStatus'),'Unexpected response.','err');
+    }
+  }catch(e){
+    setStatus($('genStatus'),
+      'Could not reach the backend. Is the site deployed on Netlify?','err');
+  }
+  $('genBtn').innerHTML = 'Generate draft';
+  $('genBtn').disabled = false;
+};
+
+/* ---- publish ---- */
+$('pubBtn').onclick = async () => {
+  const post = {
+    title: $('pTitle').value.trim(),
+    category: $('pCategory').value,
+    summary: $('pSummary').value.trim(),
+    body: $('pBody').value.trim(),
+  };
+  if(!post.title || !post.body){
+    setStatus($('pubStatus'),'Title and body are required.','err'); return;
+  }
+  $('pubBtn').innerHTML = '<span class="spin"></span> Publishing...';
+  $('pubBtn').disabled = true;
+  try{
+    const res = await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'publish',post,siteUrl:location.origin})});
+    const data = await res.json();
+    let social = '';
+    if(data.social && Object.keys(data.social).length){
+      social = ' Social: ' + Object.entries(data.social)
+        .map(([k,v])=>k+' '+v).join(', ') + '.';
+    } else {
+      social = ' (No social accounts connected.)';
+    }
+    setStatus($('pubStatus'),'Published.'+social+
+      ' Now use "Copy as data.js entry" to make it permanent.','ok');
+    published.push(post);
+    renderPublished();
+  }catch(e){
+    setStatus($('pubStatus'),'Backend unreachable — deploy to Netlify first.','err');
+  }
+  $('pubBtn').innerHTML = 'Publish &amp; share';
+  $('pubBtn').disabled = false;
+};
+
+/* ---- copy as data.js entry ---- */
+$('copyBtn').onclick = () => {
+  const post = {
+    title: $('pTitle').value.trim(),
+    category: $('pCategory').value,
+    summary: $('pSummary').value.trim(),
+    body: $('pBody').value.trim(),
+  };
+  const entry = '  ' + JSON.stringify(post, null, 2).replace(/\n/g,'\n  ') + ',';
+  navigator.clipboard.writeText(entry).then(()=>{
+    setStatus($('pubStatus'),'Copied. Paste into window.BLOG_POSTS in data.js.','info');
+  });
+};
+
+function renderPublished(){
+  if(!published.length){ $('pubList').innerHTML='<p class="muted">Nothing published yet.</p>'; return; }
+  $('pubList').innerHTML = published.map((p,i)=>
+    '<div class="published-item"><h4>'+p.title+'</h4>'+
+    '<p class="muted">'+p.category+' &middot; '+p.summary+'</p>'+
+    '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="copyEntry('+i+')">Copy data.js entry</button></div>'
+  ).join('');
+}
+function copyEntry(i){
+  const entry = '  ' + JSON.stringify(published[i], null, 2).replace(/\n/g,'\n  ') + ',';
+  navigator.clipboard.writeText(entry);
+  alert('Copied — paste into window.BLOG_POSTS in data.js');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "mylabourlaws",
+  "version": "1.0.0",
+  "description": "MyLabourRights — South African labour-law case platform",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
