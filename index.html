@@ -6670,8 +6670,22 @@ function openPrivacySettings() {
           </ul>
         </section>
 
+        <section class="ps-sec">
+          <h4>Account</h4>
+          <p class="ps-sub">Signed in as <strong>${esc(State.user.name || State.user.email || 'you')}</strong>.</p>
+          <button class="btn btn-ghost btn-sm" id="psLogout">${ICONS.arrowLeft} Log out</button>
+        </section>
+
       </div>
     </div>`);
+
+  // logout from settings (works on mobile, where the sidebar is hidden)
+  node.querySelector('#psLogout').onclick = async () => {
+    await DB.put('meta', { key: 'session', userId: null });
+    State.user = null; State.cases = []; State.activeCaseId = null;
+    Modal.close();
+    go('landing');
+  };
 
   function renderConsent() {
     const host = node.querySelector('#psConsent');
