@@ -484,6 +484,41 @@ a{color:inherit;text-decoration:none;}
   background:var(--ink);border-top:1px solid rgba(255,255,255,.1);
   padding-bottom:var(--safe-bottom);
 }
+/* Fix 1 — mobile header with clear back-to-cases button */
+.mobile-header{display:none;align-items:center;gap:8px;padding:calc(8px + var(--safe-top)) 12px 8px;
+  background:var(--cream);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:25;}
+.mh-back{display:flex;align-items:center;gap:4px;padding:8px 10px;border-radius:10px;
+  background:var(--paper-2);color:var(--forest);font-size:var(--fs-sm);font-weight:600;min-height:40px;flex-shrink:0;}
+.mh-back svg{width:18px;height:18px;}
+.mh-title{flex:1;text-align:center;font-weight:600;font-size:var(--fs-base);color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mh-settings{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;
+  background:var(--paper-2);color:var(--moss);flex-shrink:0;}
+.mh-settings svg{width:18px;height:18px;}
+.mh-brand{display:flex;align-items:center;flex-shrink:0;}
+.mh-brand svg{width:26px;height:26px;}
+/* case picker (shown when no case is open) */
+.case-picker{max-width:560px;margin:0 auto;padding:8px 0;}
+.cp-title{font-family:var(--serif);font-size:var(--fs-xl);color:var(--ink);margin-bottom:4px;}
+.cp-sub{font-size:var(--fs-sm);color:var(--text-mute);margin-bottom:20px;}
+.cp-list{display:flex;flex-direction:column;gap:10px;}
+.cp-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;
+  border:1px solid var(--line-strong);border-radius:var(--r-md,14px);background:var(--cream);
+  min-height:64px;transition:border-color var(--dur),transform var(--dur-fast);}
+.cp-card:hover{border-color:var(--forest);}
+.cp-card:active{transform:scale(.99);}
+.cp-card-ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
+  background:var(--gold-soft);color:var(--gold-deep);flex-shrink:0;}
+.cp-card-ico svg{width:21px;height:21px;}
+.cp-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.cp-card-body strong{font-size:var(--fs-base);color:var(--ink);}
+.cp-card-body span{font-size:var(--fs-sm);color:var(--text-mute);}
+.cp-card-go{color:var(--moss);font-size:var(--fs-lg);flex-shrink:0;}
+@media(max-width:760px){
+  .mobile-header{display:flex;}
+}
+
+/* Fix 1 — mobile header with clear back-to-cases button (end) */
 .mobnav-inner{display:flex;}
 /* C1 — segmented sub-nav for grouped tabs */
 .subnav{display:flex;gap:2px;background:var(--paper-2);border-radius:100px;padding:3px;
@@ -756,6 +791,50 @@ a{color:inherit;text-decoration:none;}
 .install-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .install-x{width:34px;height:34px;display:grid;place-items:center;color:var(--sage);border-radius:8px;}
 .install-x svg{width:16px;height:16px;}
+
+/* ===== PREPARE TAB (grievance & CCMA toolkit) ===== */
+.prep-intro h2{font-family:var(--serif);font-size:var(--fs-xl);color:var(--ink);margin-bottom:6px;}
+.prep-intro p{font-size:var(--fs-base);color:var(--text-soft);line-height:var(--lh-body);margin-bottom:12px;}
+.prep-disclaimer{display:flex;gap:8px;align-items:flex-start;background:var(--gold-soft);
+  border-radius:var(--r-md,12px);padding:11px 13px;font-size:var(--fs-sm);color:var(--text-soft);line-height:var(--lh-snug);}
+.prep-disclaimer svg{width:16px;height:16px;flex-shrink:0;color:var(--gold-deep);margin-top:1px;}
+.prep-switch{display:flex;gap:4px;background:var(--paper-2);border-radius:100px;padding:4px;margin:18px 0;}
+.prep-switch .prep-tab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px;border-radius:100px;font-size:var(--fs-sm);font-weight:600;color:var(--text-mute);min-height:46px;
+  transition:background var(--dur),color var(--dur);}
+.prep-switch .prep-tab svg{width:16px;height:16px;}
+.prep-switch .prep-tab.on{background:var(--forest);color:#fff;box-shadow:var(--shadow-sm);}
+.prep-sec{padding:18px 0;border-bottom:1px solid var(--line);}
+.prep-sec:last-child{border-bottom:none;}
+.prep-sec h3{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-size:var(--fs-md);
+  font-weight:600;color:var(--ink);margin-bottom:8px;}
+.prep-sec h3 svg{width:18px;height:18px;color:var(--forest);flex-shrink:0;}
+.prep-lead{font-size:var(--fs-sm);color:var(--text-soft);line-height:var(--lh-body);margin-bottom:12px;}
+.prep-acc{border:1px solid var(--line);border-radius:var(--r-md,10px);margin-bottom:8px;overflow:hidden;}
+.prep-acc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  text-align:left;padding:13px 14px;background:var(--cream);font-size:var(--fs-sm);font-weight:600;
+  color:var(--ink);min-height:48px;}
+.prep-acc-caret{color:var(--moss);transition:transform var(--dur);flex-shrink:0;}
+.prep-acc-caret svg{width:16px;height:16px;}
+.prep-acc-head.open .prep-acc-caret{transform:rotate(90deg);}
+.prep-acc-body{padding:0 14px 14px;font-size:var(--fs-sm);color:var(--text-soft);line-height:var(--lh-body);}
+.prep-acc-body p{margin-top:10px;}
+.prep-dd{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prep-dd-col{border-radius:var(--r-md,10px);padding:13px;}
+.prep-dd-col.do{background:rgba(31,79,46,.06);border:1px solid rgba(31,79,46,.2);}
+.prep-dd-col.dont{background:rgba(160,82,45,.05);border:1px solid rgba(160,82,45,.2);}
+.prep-dd-col h5{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);font-weight:700;margin-bottom:8px;}
+.prep-dd-col.do h5{color:var(--forest);} .prep-dd-col.dont h5{color:var(--rust);}
+.prep-dd-col h5 svg{width:14px;height:14px;}
+.prep-dd-col ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.prep-dd-col li{font-size:var(--fs-sm);color:var(--text-soft);line-height:var(--lh-snug);padding-left:14px;position:relative;}
+.prep-dd-col li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;}
+.prep-dd-col.do li::before{background:var(--forest);}
+.prep-dd-col.dont li::before{background:var(--rust);}
+.prep-email{width:100%;min-height:280px;font-family:ui-monospace,Menlo,monospace;font-size:var(--fs-sm);
+  line-height:1.55;padding:14px;border:1px solid var(--line-strong);border-radius:var(--r-md,10px);
+  background:var(--paper);color:var(--ink);resize:vertical;}
+@media(max-width:560px){ .prep-dd{grid-template-columns:1fr;} }
 
 /* C3 — next-move hero card */
 .nextmove{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s5);
@@ -1420,7 +1499,7 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
   .main-tabs{display:none;}
   .mobnav{display:block;}
   .auth-form-side{padding:34px 22px;}
-  .main-body{padding:16px;}
+  .main-body{padding:16px 16px calc(80px + var(--safe-bottom));}
   .chat-msg{max-width:92%;}
   .modal{border-radius:var(--r-lg);}
   .nav-actions .btn:not(.btn-gold){display:none;}
@@ -1614,7 +1693,7 @@ const I18N = {
     cta_start: 'Start your free case', cta_have: 'I already have an account',
     tab_dashboard: 'Dashboard', tab_chat: 'AI Attorney', tab_docs: 'Documents',
     tab_timeline: 'Timeline', tab_actions: 'AI Actions', tab_firms: 'Law Firms',
-    tab_resources: 'Resources', tab_notes: 'Case Notes', tab_builder: 'Case Builder',
+    tab_prepare: 'Grievance & CCMA', tab_resources: 'Resources', tab_notes: 'Case Notes', tab_builder: 'Case Builder',
     q_left: 'questions left today', q_unlimited: 'Unlimited questions',
     send: 'Send', new_case: 'New case',
   },
@@ -1624,7 +1703,7 @@ const I18N = {
     cta_start: 'Begin jou gratis saak', cta_have: 'Ek het reeds \u2019n rekening',
     tab_dashboard: 'Paneelbord', tab_chat: 'KI-Prokureur', tab_docs: 'Dokumente',
     tab_timeline: 'Tydlyn', tab_actions: 'KI-Aksies', tab_firms: 'Prokureursfirmas',
-    tab_resources: 'Hulpbronne', tab_notes: 'Saaknotas', tab_builder: 'Saakbouer',
+    tab_prepare: 'Grief & CCMA', tab_resources: 'Hulpbronne', tab_notes: 'Saaknotas', tab_builder: 'Saakbouer',
     q_left: 'vrae oor vandag', q_unlimited: 'Onbeperkte vrae',
     send: 'Stuur', new_case: 'Nuwe saak',
   },
@@ -3177,7 +3256,36 @@ const Voice = (() => {
   /* Choose the most natural available voice for the current language.
      Browsers expose cloud/"natural"/"enhanced" voices that sound far better
      than the default robotic one — prefer those, then fall back gracefully. */
+  let _cachedVoice = null;
   function pickVoice() {
+    if (_cachedVoice) return _cachedVoice;
+    const voices = synth.getVoices();
+    if (!voices.length) return null;
+    const want = State.lang === 'af' ? 'af' : 'en';
+    const za = State.lang === 'af' ? 'af-ZA' : 'en-ZA';
+    const inLang = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(want));
+    const pool = inLang.length ? inLang : voices;
+    // Named voices that are known to sound natural across platforms, best first.
+    const PREFERRED = [
+      /Google UK English Female/i, /Google US English/i, /Microsoft (Aria|Jenny|Libby|Sonia|Natasha)/i,
+      /Samantha/i, /Karen/i, /Moira/i, /Tessa/i, /Siri/i,
+    ];
+    for (const re of PREFERRED) {
+      const hit = pool.find(v => re.test(v.name));
+      if (hit) return (_cachedVoice = hit);
+    }
+    // generic quality hints
+    const good = /natural|neural|enhanced|premium|google|siri|online|wavenet/i;
+    _cachedVoice = (
+      pool.find(v => v.lang === za && good.test(v.name)) ||
+      pool.find(v => good.test(v.name)) ||
+      pool.find(v => v.lang === za && !/compact/i.test(v.name)) ||
+      pool.find(v => !/compact/i.test(v.name)) ||
+      pool[0]
+    );
+    return _cachedVoice;
+  }
+  function pickVoice_old() {
     const voices = synth.getVoices();
     if (!voices.length) return null;
     const want = State.lang === 'af' ? 'af' : 'en';
@@ -3329,6 +3437,7 @@ const ICONS = {
   lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
   bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
   arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 19l-7-7 7-7"/></svg>',
   heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 12 5 5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/></svg>',
   alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
@@ -3417,7 +3526,7 @@ document.addEventListener('keydown', (e) => {
    ============================================================ */
 /* A5 — theme (auto / light / dark) with persistence */
 function currentTheme() {
-  try { return localStorage.getItem('mlr-theme') || 'auto'; } catch { return 'auto'; }
+  try { return localStorage.getItem('mlr-theme') || 'light'; } catch { return 'light'; }
 }
 function applyTheme(mode) {
   try { localStorage.setItem('mlr-theme', mode); } catch {}
@@ -4212,6 +4321,7 @@ const Views = (() => {
     ['timeline', 'tab_timeline', ICONS.clock],
     ['builder', 'tab_builder', ICONS.list],
     ['actions', 'tab_actions', ICONS.spark],
+    ['prepare', 'tab_prepare', ICONS.shield],
     ['firms', 'tab_firms', ICONS.building],
     ['resources', 'tab_resources', ICONS.book],
   ];
@@ -4222,12 +4332,12 @@ const Views = (() => {
     { id: 'home',     label: 'Home',     ic: ICONS.grid,     members: ['dashboard'] },
     { id: 'talk',     label: 'Talk',     ic: ICONS.chat,     members: ['chat'] },
     { id: 'evidence', label: 'Evidence', ic: ICONS.doc,      members: ['docs', 'notes', 'timeline'] },
-    { id: 'build',    label: 'Build',    ic: ICONS.spark,    members: ['builder', 'actions'] },
+    { id: 'prepare',  label: 'Prepare',  ic: ICONS.shield,   members: ['prepare', 'builder', 'actions'] },
     { id: 'help',     label: 'Help',     ic: ICONS.building, members: ['firms', 'resources'] },
   ];
   const SUBLABELS = {
     docs: 'Documents', notes: 'Notes', timeline: 'Timeline',
-    builder: 'Case builder', actions: 'AI actions', firms: 'Law firms', resources: 'Resources',
+    prepare: 'Grievance & CCMA', builder: 'Case builder', actions: 'AI actions', firms: 'Law firms', resources: 'Resources',
   };
   const groupOf = (tabId) => GROUPS.find(g => g.members.includes(tabId)) || GROUPS[0];
 
@@ -4261,6 +4371,11 @@ const Views = (() => {
         </aside>
 
         <div class="main-area">
+          <div class="mobile-header">
+            ${c ? `<button class="mh-back" id="mhBack" aria-label="Back to my cases">${ICONS.arrowLeft || ICONS.arrow || '\u2039'}<span>Cases</span></button>` : `<span class="mh-brand">${brandMark}</span>`}
+            <span class="mh-title" id="mhTitle">${c ? esc(c.name) : 'My cases'}</span>
+            <button class="mh-settings" id="mhSettings" aria-label="Settings">${ICONS.shield}</button>
+          </div>
           <div class="main-top">
             <div class="main-tabs" id="mainTabs"></div>
             <div class="flex center gap8">
@@ -4269,9 +4384,15 @@ const Views = (() => {
           </div>
           <div class="health-strip" id="healthStrip" role="status" aria-label="Case health summary"></div>
           <div class="main-body" id="mainBody"></div>
-          <nav class="mobnav"><div class="mobnav-inner" id="mobNav"></div></nav>
+          ${c ? `<nav class="mobnav"><div class="mobnav-inner" id="mobNav"></div></nav>` : ''}
         </div>
       </div>`;
+
+    // Fix 1 — mobile header: back to case list + settings
+    const mhBack = root.querySelector('#mhBack');
+    if (mhBack) mhBack.onclick = () => { State.activeCaseId = null; State.tab = 'dashboard'; render(); };
+    const mhSettings = root.querySelector('#mhSettings');
+    if (mhSettings) mhSettings.onclick = () => openPrivacySettings();
 
     // R8: case health strip (strength · deadline · chase count)
     fillHealthStrip(root.querySelector('#healthStrip'), c);
@@ -4306,20 +4427,21 @@ const Views = (() => {
       mt.appendChild(b);
     });
     // C1 — mobile: five groups. Tapping a group opens its last-used (or default) member.
-    State.lastSub = State.lastSub || {};
-    const activeGroup = groupOf(State.tab);
-    GROUPS.forEach(g => {
-      const on = g.id === activeGroup.id;
-      const mb = el(`<button class="${on ? 'on' : ''}" aria-label="${g.label}">${g.ic}<span>${g.label}</span></button>`);
-      mb.onclick = () => {
-        const target = (State.lastSub[g.id] && g.members.includes(State.lastSub[g.id]))
-          ? State.lastSub[g.id] : g.members[0];
-        State.tab = target; render();
-      };
-      mn.appendChild(mb);
-    });
-    // remember the sub-tab chosen within the active group
-    State.lastSub[activeGroup.id] = State.tab;
+    if (mn) {
+      State.lastSub = State.lastSub || {};
+      const activeGroup = groupOf(State.tab);
+      GROUPS.forEach(g => {
+        const on = g.id === activeGroup.id;
+        const mb = el(`<button class="${on ? 'on' : ''}" aria-label="${g.label}">${g.ic}<span>${g.label}</span></button>`);
+        mb.onclick = () => {
+          const target = (State.lastSub[g.id] && g.members.includes(State.lastSub[g.id]))
+            ? State.lastSub[g.id] : g.members[0];
+          State.tab = target; render();
+        };
+        mn.appendChild(mb);
+      });
+      State.lastSub[activeGroup.id] = State.tab;
+    }
 
     root.querySelector('#sideNew').onclick = () => openNewCaseModal(false);
     root.querySelector('#privacyBtn').onclick = () => openPrivacySettings();
@@ -4356,6 +4478,7 @@ const Views = (() => {
       const view = {
         dashboard: tabDashboard, chat: tabChat, notes: tabNotes, docs: tabDocs,
         timeline: tabTimeline, builder: tabBuilder, actions: tabActions, firms: tabFirms,
+        prepare: tabPrepare,
         resources: tabResources,
       }[State.tab] || tabDashboard;
       view(body, c);
@@ -4364,6 +4487,31 @@ const Views = (() => {
   }
 
   function noCaseEmpty() {
+    // If the person has cases, show a picker so they can re-enter one.
+    if (State.cases && State.cases.length) {
+      const n = el(`<div class="case-picker">
+        <h2 class="cp-title">Your cases</h2>
+        <p class="cp-sub">Pick a case to continue, or start a new one.</p>
+        <div class="cp-list" id="cpList"></div>
+        <button class="btn btn-primary btn-block mt16" id="cpNew">${ICONS.plus} ${t('new_case')}</button>
+      </div>`);
+      const list = n.querySelector('#cpList');
+      State.cases.forEach(cs => {
+        const cfg = CASE_TYPES[cs.caseType] || {};
+        const card = el(`<button class="cp-card">
+          <div class="cp-card-ico">${ICONS.scale}</div>
+          <div class="cp-card-body">
+            <strong>${esc(cs.name)}</strong>
+            <span>${esc(cfg.label || cs.caseType)}${cs.successRate ? ' \u00b7 ' + cs.successRate + '% strength' : ''}</span>
+          </div>
+          <span class="cp-card-go">${ICONS.arrow || '\u203a'}</span>
+        </button>`);
+        card.onclick = () => { State.activeCaseId = cs.id; State.tab = 'dashboard'; render(); };
+        list.appendChild(card);
+      });
+      n.querySelector('#cpNew').onclick = () => openNewCaseModal(false);
+      return n;
+    }
     const n = el(`<div class="empty">${ICONS.scale}
       <h3>No case open yet</h3>
       <p>Create your first case to start building your file with the AI attorney.</p>
@@ -6633,6 +6781,220 @@ function tabFirms(body, c) {
 /* ------------------------------------------------------------
    RESOURCES TAB — blog + guides
    ------------------------------------------------------------ */
+/* ============================================================
+   PREPARE TAB — Grievance & CCMA preparation toolkit
+   Practical, plain-language guidance + email generators for the
+   two moments that matter most: the internal grievance, and the
+   CCMA. Content is educational (not legal advice) and points to a
+   human attorney for anything complex.
+   ============================================================ */
+function tabPrepare(body, c) {
+  const wrap = el(`<div class="tabview on"></div>`);
+
+  // expandable guidance block helper
+  const acc = (items) => items.map((it, i) => `
+    <div class="prep-acc">
+      <button class="prep-acc-head" aria-expanded="false">
+        <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
+      </button>
+      <div class="prep-acc-body" hidden>${it.a}</div>
+    </div>`).join('');
+
+  const doDont = (dos, donts) => `
+    <div class="prep-dd">
+      <div class="prep-dd-col do">
+        <h5>${ICONS.check} Do</h5>
+        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+      </div>
+      <div class="prep-dd-col dont">
+        <h5>${ICONS.x} Don\u2019t</h5>
+        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+      </div>
+    </div>`;
+
+  wrap.innerHTML = `
+    <div class="prep-intro">
+      <h2>Grievance &amp; CCMA toolkit</h2>
+      <p>Practical, step-by-step preparation for the two moments that decide most cases: your internal <strong>grievance</strong>, and the <strong>CCMA</strong>. Plain language, what to say, what to avoid, and email drafts you can use.</p>
+      <div class="prep-disclaimer">${ICONS.shield} This is preparation guidance, not legal advice. For anything complex \u2014 dismissal, discrimination, or the Labour Court \u2014 use the Help tab to reach a real attorney.</div>
+    </div>
+
+    <div class="prep-switch" role="tablist">
+      <button class="prep-tab on" data-p="grievance" role="tab">${ICONS.note} Grievance</button>
+      <button class="prep-tab" data-p="ccma" role="tab">${ICONS.scale} CCMA</button>
+    </div>
+
+    <div id="prepPanel"></div>`;
+
+  body.appendChild(wrap);
+
+  const panel = wrap.querySelector('#prepPanel');
+
+  function wireAcc(scope) {
+    scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
+      const b = h.nextElementSibling;
+      const open = !b.hidden;
+      b.hidden = open; h.setAttribute('aria-expanded', String(!open));
+      h.classList.toggle('open', !open);
+    });
+  }
+
+  /* ---------- GRIEVANCE PANEL ---------- */
+  function renderGrievance() {
+    panel.innerHTML = `
+      <section class="prep-sec">
+        <h3>${ICONS.spark} What a grievance is \u2014 and why it matters</h3>
+        <p class="prep-lead">A grievance is your formal, written complaint to your employer <em>before</em> things escalate. Done well, it builds your record, forces a response, and can resolve the issue without the CCMA. Done badly, it can hand your employer a defence. This is where you quietly win or lose later.</p>
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.list} Everything to do before you lodge</h3>
+        ${acc([
+          { q: 'Get your facts and dates straight first', a: '<p>Write a simple timeline: what happened, when, who was there, and what was said. Vague complaints get dismissed. Specific, dated facts get taken seriously. Use the <strong>Timeline</strong> tab to build this.</p>' },
+          { q: 'Gather your evidence quietly', a: '<p>Save emails, WhatsApps, payslips, your contract, and any policy that was breached \u2014 <em>before</em> you complain, in case access is cut. Upload them in the <strong>Documents</strong> tab. Never delete anything, even things that look bad.</p>' },
+          { q: 'Read your employer\u2019s grievance policy', a: '<p>Most workplaces have a grievance procedure (often in the contract or handbook). Follow it exactly \u2014 to whom, in what form, and in what timeframe. Following their own process removes their easiest defence.</p>' },
+          { q: 'Decide what outcome you actually want', a: '<p>Be clear: an apology, a reversal, back-pay, a transfer, a stop to the behaviour? A grievance with a clear ask is far stronger than a general complaint. Set this in your case so the AI can help frame it.</p>' },
+        ])}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.check} What to say \u2014 and what not to</h3>
+        ${doDont(
+          ['Stick to facts, dates, and what was said or done', 'Reference the specific policy or contract term breached', 'State the outcome you want, clearly', 'Keep a calm, professional tone throughout', 'Keep copies of everything you send and receive', 'Put it in writing, even if you also raise it verbally'],
+          ['Don\u2019t exaggerate, guess, or add things you can\u2019t prove', 'Don\u2019t insult, threaten, or make it personal', 'Don\u2019t resign in anger before getting advice', 'Don\u2019t lie or hide facts \u2014 it destroys your credibility', 'Don\u2019t delay past your policy\u2019s time limit', 'Don\u2019t sign anything you don\u2019t understand']
+        )}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.mail} Grievance email generator</h3>
+        <p class="prep-lead">Generate a professional grievance email from your case details. Always read it, edit it, and check the facts before sending.</p>
+        <button class="btn btn-primary" id="prepGrievEmail">${ICONS.mail} Generate my grievance email</button>
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.clock} What to do after the grievance hearing</h3>
+        ${acc([
+          { q: 'Get the outcome in writing', a: '<p>Ask for the decision and reasons in writing. If they only tell you verbally, send a polite email summarising what you were told and asking them to confirm \u2014 this creates a record.</p>' },
+          { q: 'If you win: confirm and follow up', a: '<p>Make sure the agreed action actually happens. Diarise it. If they don\u2019t follow through, that itself becomes new evidence.</p>' },
+          { q: 'If you lose: check for an internal appeal', a: '<p>Most procedures allow an appeal within a set number of days. Use it \u2014 it shows you exhausted internal remedies, which strengthens any later CCMA referral.</p>' },
+          { q: 'Watch the CCMA clock', a: '<p>If the issue is dismissal or an unfair labour practice and it isn\u2019t resolved, strict CCMA deadlines apply (often 30 or 90 days). Check your <strong>Home</strong> tab \u2014 the deadline clock is running.</p>' },
+        ])}
+      </section>`;
+    wireAcc(panel);
+    const eb = panel.querySelector('#prepGrievEmail');
+    if (eb) eb.onclick = () => generatePrepEmail(c, 'grievance');
+  }
+
+  /* ---------- CCMA PANEL ---------- */
+  function renderCCMA() {
+    panel.innerHTML = `
+      <section class="prep-sec">
+        <h3>${ICONS.scale} How the CCMA works (in plain language)</h3>
+        <p class="prep-lead">The CCMA is a free, informal dispute-resolution body. Most matters go to <strong>conciliation</strong> first (an attempt to settle), and if that fails, to <strong>arbitration</strong> (a commissioner hears both sides and decides). You don\u2019t need a lawyer, but you do need to be prepared.</p>
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.clock} How to log (refer) a case with the CCMA</h3>
+        ${acc([
+          { q: 'Check you\u2019re in time', a: '<p>Unfair dismissal: refer within <strong>30 days</strong>. Unfair labour practice: <strong>90 days</strong>. Discrimination: <strong>6 months</strong>. Late? You can ask for condonation, but it\u2019s not guaranteed. Your <strong>Home</strong> tab tracks this.</p>' },
+          { q: 'Complete the LRA 7.11 referral form', a: '<p>This is the form that starts your case. Use the <strong>AI Actions \u2192 CCMA forms</strong> tool to pre-fill it from your case details. State the dispute type and what you want clearly.</p>' },
+          { q: 'Serve it on your employer and keep proof', a: '<p>You must give a copy to your employer and prove you did (email read-receipt, registered post slip, or signed acknowledgement). No proof of service = a jurisdiction attack on day one.</p>' },
+          { q: 'Wait for the set-down notice', a: '<p>The CCMA will notify you of the date and venue. Diarise it. Missing it can end your case.</p>' },
+        ])}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.doc} What to put in your case (and what to leave out)</h3>
+        ${doDont(
+          ['A clear, dated account of what happened', 'Your strongest documents, organised (use Evidence \u2192 bundle)', 'The specific right or term that was breached', 'A realistic remedy and how you calculated it', 'Witnesses who actually saw or heard the events'],
+          ['Don\u2019t dump every document \u2014 lead with the strongest', 'Don\u2019t include hearsay or unverified screenshots as your main proof', 'Don\u2019t overclaim the remedy \u2014 it damages credibility', 'Don\u2019t bring irrelevant personal grievances', 'Don\u2019t rely on memory alone \u2014 back it with documents']
+        )}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.spark} How to use evidence (and how not to)</h3>
+        ${acc([
+          { q: 'Organise it so it tells the story', a: '<p>A commissioner should grasp your case from the first few documents. Use <strong>AI Actions \u2192 Organise evidence bundle</strong> to sort, number, and index everything.</p>' },
+          { q: 'Authenticate it', a: '<p>For screenshots and messages, be ready to say where they came from and when. The employer\u2019s own emails are your strongest evidence \u2014 they\u2019re admissions, not hearsay.</p>' },
+          { q: 'Don\u2019t ambush or fabricate', a: '<p>Never alter a document or invent a date. One fabrication destroys your whole case. Disclose your bundle properly.</p>' },
+        ])}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.chat} What to say at the CCMA \u2014 and what not to</h3>
+        ${doDont(
+          ['Answer the question asked, calmly and briefly', 'Refer to your bundle by page/number', 'Stick to facts you can prove', 'Admit what you genuinely don\u2019t know', 'Let the documents carry the emotion'],
+          ['Don\u2019t argue, interrupt, or get personal', 'Don\u2019t guess or exaggerate under pressure', 'Don\u2019t volunteer weaknesses you weren\u2019t asked about', 'Don\u2019t lose your temper \u2014 it\u2019s used against you', 'Don\u2019t accept a bad settlement out of fear']
+        )}
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.shield} Practice a mock CCMA cross-examination</h3>
+        <p class="prep-lead">The best preparation is rehearsing tough questions in private, at your own pace. The mock drill simulates an employer\u2019s representative questioning you.</p>
+        <button class="btn btn-primary" id="prepMock">${ICONS.shield} Start mock CCMA practice</button>
+      </section>
+
+      <section class="prep-sec">
+        <h3>${ICONS.spark} See your case through the employer\u2019s eyes</h3>
+        <p class="prep-lead">Know every attack before the day. The employer-attack analysis shows their likely arguments and your answer to each.</p>
+        <button class="btn btn-ghost" id="prepAttack">${ICONS.scale} Run employer attack analysis</button>
+      </section>`;
+    wireAcc(panel);
+    const mb = panel.querySelector('#prepMock');
+    if (mb) mb.onclick = () => { if (typeof openCrossExam === 'function') openCrossExam(c); else { State.tab = 'actions'; render(); } };
+    const ab = panel.querySelector('#prepAttack');
+    if (ab) ab.onclick = () => { if (typeof openEmployerAttack === 'function') openEmployerAttack(c); else { State.tab = 'actions'; render(); } };
+  }
+
+  // switch tabs
+  wrap.querySelectorAll('.prep-tab').forEach(b => b.onclick = () => {
+    wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    b.dataset.p === 'ccma' ? renderCCMA() : renderGrievance();
+  });
+
+  renderGrievance();
+}
+
+/* generate a grievance/manager email via the AI (falls back to a template) */
+async function generatePrepEmail(c, kind) {
+  toast('Drafting your email\u2026', 'mic');
+  const prompt = kind === 'grievance'
+    ? 'Write a professional, calm formal grievance email to my employer based on my case. Include: a clear subject line, the specific issue with dates, the policy or contract term breached if known, and the outcome I am seeking. Keep it factual and non-emotional. End by requesting a written response within a reasonable time.'
+    : 'Write a professional email to my manager raising my workplace concern calmly and factually, aiming to resolve it informally before any formal step.';
+  let text = null;
+  try {
+    if (window.Backend && window.Backend.ai) {
+      const turn = await window.Backend.ai(c, prompt);
+      text = turn && turn.text;
+    }
+  } catch {}
+  if (!text) {
+    // offline template fallback
+    text = `Subject: Formal Grievance \u2014 ${c.name || 'Workplace concern'}\n\nDear [Manager / HR],\n\nI am writing to formally raise a grievance regarding [briefly state the issue] which occurred on [date(s)].\n\nThe facts are as follows:\n- [What happened, with dates]\n- [Who was involved / present]\n- [The policy or contract term you believe was breached]\n\nThe outcome I am seeking is [state clearly what you want].\n\nI would appreciate a written response by [reasonable date]. I remain willing to resolve this matter constructively.\n\nYours sincerely,\n[Your name]`;
+  }
+  // show in a simple modal with copy
+  const node = el(`<div class="modal modal-lg">
+    <div class="modal-head"><h3>${ICONS.mail} Your grievance email (draft)</h3>
+      <button class="modal-close" id="geX" aria-label="Close">${ICONS.x}</button></div>
+    <div class="modal-body">
+      <div class="prep-disclaimer">${ICONS.shield} A draft only \u2014 read it, check every fact, and edit before sending.</div>
+      <textarea id="geText" class="prep-email">${esc(text)}</textarea>
+      <div class="flex gap8 mt12" style="flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="geCopy">Copy</button>
+        <button class="btn btn-ghost btn-sm" id="geClose2">Close</button>
+      </div>
+    </div></div>`);
+  node.querySelector('#geX').onclick = Modal.close;
+  node.querySelector('#geClose2').onclick = Modal.close;
+  node.querySelector('#geCopy').onclick = () => {
+    navigator.clipboard?.writeText(node.querySelector('#geText').value)
+      .then(() => toast('Copied.'), () => toast('Select and copy manually.'));
+  };
+  Modal.open(node);
+}
+
+
 function tabResources(body, c) {
   const wrap = el(`<div class="tabview on"></div>`);
   const posts = (window.BLOG_POSTS || []);
