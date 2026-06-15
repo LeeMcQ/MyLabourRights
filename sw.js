@@ -1,10 +1,11 @@
 /* ============================================================
    MyLabourRights — Service Worker
-   Offline-first caching for the PWA shell.
-   Bump CACHE_VERSION whenever you deploy a new index.html.
+   App shell: stale-while-revalidate (fast load, never stuck on old build).
+   Static assets: cache-first. API: network only.
+   Bump CACHE_VERSION whenever you deploy.
    ============================================================ */
 
-const CACHE_VERSION = 'mlr-v1';
+const CACHE_VERSION = 'mlr-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,7 +14,6 @@ const CORE_ASSETS = [
   './icons/icon-512.png',
 ];
 
-/* Install — pre-cache the app shell */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
@@ -22,7 +22,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-/* Activate — clear old caches */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
@@ -33,11 +32,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-/* Fetch strategy:
-   - API calls (/.netlify/functions/*) -> network only, never cached
-   - Google Fonts -> cache-first (rarely change)
-   - Everything else -> cache-first, fall back to network, then cache the result
-*/
+/* allow the page to trigger an immediate update */
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') self.skipWaiting();
+});
+
+const isShell = (url) =>
+  url.origin === location.origin &&
+  (url.pathname.endsWith('/') || url.pathname.endsWith('/index.html'));
+
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -54,14 +57,34 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // only handle GET requests for caching
   if (event.request.method !== 'GET') return;
 
+  // F4 — app shell: stale-while-revalidate. Serve cached instantly, fetch fresh
+  // in the background, and tell open pages when a newer build is ready.
+  if (isShell(url) || event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.open(CACHE_VERSION).then(async (cache) => {
+        const cached = await cache.match('./index.html');
+        const network = fetch('./index.html').then((response) => {
+          if (response && response.status === 200) {
+            cache.put('./index.html', response.clone());
+            // notify clients a fresh version is available
+            self.clients.matchAll().then((cs) =>
+              cs.forEach((c) => c.postMessage({ type: 'sw-updated' })));
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    );
+    return;
+  }
+
+  // static assets: cache-first, then network (and cache the result)
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        // cache same-origin and font responses
         if (response && response.status === 200 &&
             (url.origin === location.origin || url.host.includes('fonts.g'))) {
           const clone = response.clone();
@@ -69,7 +92,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       }).catch(() => {
-        // offline fallback for navigation requests
         if (event.request.mode === 'navigate') return caches.match('./index.html');
       });
     })

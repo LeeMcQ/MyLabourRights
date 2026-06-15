@@ -1,0 +1,19 @@
+# Never commit real secret keys — they go in the Netlify dashboard, not here
+.env
+.env.local
+.env.*.local
+
+# Dependencies (Netlify installs these automatically)
+node_modules/
+
+# Local build / cache
+.netlify/
+dist/
+.cache/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

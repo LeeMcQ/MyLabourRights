@@ -34,3 +34,7 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+# Tender database: daily sync from the official eTenders OCDS API
+[functions."tenders-sync"]
+  schedule = "@daily"

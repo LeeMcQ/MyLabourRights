@@ -74,6 +74,7 @@ hidden. You don't edit these — you just add keys in the Netlify dashboard.
 |------|-------------|
 | **`SETUP-GUIDE.md`** | **The main event.** Step-by-step, click-by-click, to take the site live and switch on each service. |
 | `ROUTING-AND-SECURITY.md` | How the AI routing saves you money, what security is built in, and the honest limits of this stack. |
+| `PHASE-3-NOTES.md` | What the advanced features (CCMA forms, privacy controls, accessibility) do, and what still needs the future backend. |
 | `README.md` | This file. |
 
 ---

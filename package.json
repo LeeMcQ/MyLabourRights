@@ -4,9 +4,19 @@
   "description": "MyLabourRights — South African labour-law case platform",
   "private": true,
   "scripts": {
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "test": "node tests/engines.test.mjs && node tests/flow.test.mjs",
+    "test:engines": "node tests/engines.test.mjs",
+    "test:flow": "node tests/flow.test.mjs"
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0",
+    "fake-indexeddb": "^5.0.0"
   }
 }

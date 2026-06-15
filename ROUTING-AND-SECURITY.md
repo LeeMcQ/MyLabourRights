@@ -173,3 +173,38 @@ prompt before the call. This is optional — the app works without it — but it
 makes the live model's guidance match what the user told the deadline and
 outcome tools. Keep it to non-identifying facts (no names/ID numbers) to stay
 aligned with the privacy posture above.
+
+---
+
+## G — Backend hardening (build status)
+
+**Done in this pass (code-complete):**
+- **G1 — shared-store rate limit + daily AI-spend cap.** `ai.js` now prefers
+  Netlify Blobs (`@netlify/blobs`) for both the per-IP burst limit and a
+  per-id **daily capable-model cap** (`DAILY_HARD_CAP`, default 40). If Blobs
+  isn't configured it falls back to the in-memory limiter; if the daily cap is
+  hit it degrades hard-tier requests to the cheap model, or to the built-in
+  simulation — never an error to the user.
+- **G4 — case context to the live model.** The client sends a compact,
+  non-identifying `caseContext` (dispute type, deadline status, days left,
+  desired outcome, doc count, strength). `ai.js` folds it into the system
+  message so live answers line up with the deadline clock and strength tools.
+  No names or ID numbers are ever sent.
+- **G5 — model names in env vars.** `GEMINI_MODEL` / `CLAUDE_MODEL` with the
+  current values as defaults, so models can be upgraded without a code change.
+
+**Requires a live Netlify environment to finish + test safely (next infra step):**
+- **G2 — streaming responses.** Both providers support token streaming; the
+  plan is an SSE/chunked endpoint with the chat rendering progressively (pairs
+  with the staged-reveal UI already built in D2). Deliberately NOT shipped blind:
+  streaming needs a real deployment to test, and a broken stream would degrade
+  the working chat. Keep the non-streaming path for the bundle/attack JSON modes.
+- **G3 — durable, tamper-proof paid unlock.** Move from the optimistic
+  `?paid=1` return to a Blobs/Redis record written by the verified PayFast ITN
+  handler (case id → paid + expiry), with the app confirming paid status
+  server-side. Touches billing, so it must be tested against PayFast's sandbox
+  before release.
+
+**To enable G1 in production:** add the `@netlify/blobs` dependency and deploy
+on Netlify (Blobs is auto-provisioned). Set `DAILY_HARD_CAP`, `GEMINI_MODEL`,
+`CLAUDE_MODEL` as needed in the Netlify environment.
