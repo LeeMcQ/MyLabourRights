@@ -1,0 +1,224 @@
+<!--
+  MyLabourRights — POPIA & UI Patches
+  ════════════════════════════════════════════════════════════════
+  CRITICAL B: Replace existing privacy notice text in index.html
+  CRITICAL A: Add staleness banner HTML + init script
+  CRITICAL B: Add first-AI-use processing notice modal
+
+  Instructions:
+  1. Find the existing privacy notice section in index.html (search for "Privacy")
+     and replace the notice body text with the POPIA_NOTICE text below.
+  2. Add the STALENESS_BANNER immediately after <div id="app"> opens.
+  3. Add the PROCESSING_NOTICE_MODAL before </body>.
+  4. Add the INIT_SCRIPT before </body> (after all other scripts).
+  ════════════════════════════════════════════════════════════════
+-->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     POPIA NOTICE — replace existing privacy notice body text
+     Critical B fix: honest disclosure of what is/isn't stored
+     ═══════════════════════════════════════════════════════════ -->
+<!--
+  REPLACE THE EXISTING PRIVACY NOTICE PARAGRAPH(S) WITH:
+-->
+<template id="popia-notice-text">
+  <div class="privacy-notice-body">
+    <h3>How your information is handled</h3>
+    <p><strong>Your case notes stay on your device.</strong>
+    Everything you build in this app — your case notes, uploaded documents,
+    and timeline — is stored in your browser only. We do not store your case
+    details on our servers.</p>
+
+    <p><strong>When you chat with Lee.</strong>
+    When you send a message, it is sent to our server to generate a response
+    and is not stored by us after that response is sent back to you.
+    Our AI providers (Anthropic / Google) process your message subject to
+    their own privacy policies:
+    <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic</a> ·
+    <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google</a>.</p>
+
+    <p><strong>What we recommend.</strong>
+    Do not include your full name, ID number, or your employer's full legal name
+    in chat messages. Describe your situation in general terms.
+    Your evidence documents are processed locally on your device and are not
+    uploaded to our servers.</p>
+
+    <p><strong>Deletion.</strong>
+    "Delete my data" clears everything stored on this device.
+    Because we do not store your case data on our servers, there is nothing
+    server-side to delete.</p>
+
+    <p><strong>Your rights under POPIA.</strong>
+    You have the right to access, correct, and delete any personal information
+    we hold. Contact us at
+    <a href="mailto:privacy@mylabourrights.co.za">privacy@mylabourrights.co.za</a>.
+    You may also lodge a complaint with the Information Regulator of South Africa:
+    <a href="https://inforegulator.org.za" target="_blank" rel="noopener">inforegulator.org.za</a>.</p>
+
+    <p class="privacy-version">Privacy notice version 2.0 — June 2026</p>
+  </div>
+</template>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     STALENESS BANNER — Critical A fix
+     Add immediately after <div id="app"> opens.
+     Hidden by default; JS shows it when checkLegalFactsStaleness() fires.
+     ═══════════════════════════════════════════════════════════ -->
+<div id="legal-staleness-banner" role="alert" aria-live="assertive"
+     style="display:none; background:#7c3d0e; color:#fff; padding:12px 16px;
+            font-size:14px; text-align:center; position:sticky; top:0; z-index:9999;">
+  <strong>⚠️ Legal figures update due.</strong>
+  Some figures in this app (minimum wage, earnings thresholds) are due for review.
+  We are working to update them. Please verify current figures at
+  <a href="https://www.labour.gov.za" target="_blank" rel="noopener"
+     style="color:#ffd88a; text-decoration:underline;">labour.gov.za</a>
+  before relying on them.
+  <button onclick="document.getElementById('legal-staleness-banner').style.display='none'"
+          aria-label="Dismiss staleness notice"
+          style="margin-left:12px; background:transparent; border:1px solid #ffd88a;
+                 color:#ffd88a; padding:2px 8px; border-radius:4px; cursor:pointer;">
+    Dismiss
+  </button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PROCESSING NOTICE MODAL — Critical B fix
+     Shows once, on first AI message send.
+     Add before </body>.
+     ═══════════════════════════════════════════════════════════ -->
+<div id="processing-notice-modal" role="dialog" aria-modal="true"
+     aria-labelledby="pnm-heading"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+            z-index:10000; display:flex; align-items:center; justify-content:center;">
+  <div style="background:#fff; color:#111; max-width:480px; width:90%; border-radius:12px;
+              padding:24px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+    <h2 id="pnm-heading" style="margin:0 0 12px; font-size:18px;">
+      Before you continue
+    </h2>
+    <p style="margin:0 0 10px; font-size:14px; line-height:1.5;">
+      Your message will be sent to an AI service to generate a response.
+      To protect yourself:
+    </p>
+    <ul style="margin:0 0 14px; padding-left:20px; font-size:14px; line-height:1.7;">
+      <li>Do <strong>not</strong> include your full name, ID number, or your employer's full name in your first message.</li>
+      <li>Describe your situation in general terms first <em>(e.g. "I was dismissed after 8 years")</em>.</li>
+      <li>Your case notes are stored on <strong>your device only</strong> — not on our servers.</li>
+    </ul>
+    <p style="margin:0 0 20px; font-size:13px; color:#555;">
+      You can always add more detail once you are comfortable.
+      See our <a href="#" id="pnm-privacy-link" style="color:#1a56a0;">full privacy notice</a>.
+    </p>
+    <button id="pnm-confirm"
+            style="width:100%; padding:12px; background:#0c4a2e; color:#fff;
+                   border:none; border-radius:8px; font-size:15px; cursor:pointer;
+                   font-weight:600;">
+      I understand — continue
+    </button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     INIT SCRIPT — wire up all new UI components
+     Add before </body>, after all other scripts.
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Critical A: staleness banner ───────────────────────────
+  // checkLegalFactsStaleness() is defined in the main app script.
+  // This runs after the app initialises.
+  function initStalenessCheck() {
+    if (typeof checkLegalFactsStaleness !== 'function') return;
+    const result = checkLegalFactsStaleness();
+    if (result.stale) {
+      const banner = document.getElementById('legal-staleness-banner');
+      if (banner) {
+        // Update banner text with specific stale items
+        const itemList = result.items.join(', ');
+        const strongEl = banner.querySelector('strong');
+        if (strongEl) {
+          strongEl.textContent = '⚠️ Legal figures need review: ' + itemList + '.';
+        }
+        banner.style.display = 'block';
+      }
+    }
+  }
+
+  // ── Critical B: processing notice modal ───────────────────
+  const NOTICE_KEY = 'ai-processing-notice-v1';
+
+  function shouldShowNotice() {
+    try { return !localStorage.getItem(NOTICE_KEY); } catch { return false; }
+  }
+
+  function markNoticeSeen() {
+    try { localStorage.setItem(NOTICE_KEY, '1'); } catch {}
+  }
+
+  function showProcessingNotice(onConfirm) {
+    const modal = document.getElementById('processing-notice-modal');
+    if (!modal) { onConfirm(); return; }
+    modal.style.display = 'flex';
+
+    const confirmBtn = document.getElementById('pnm-confirm');
+    const privacyLink = document.getElementById('pnm-privacy-link');
+
+    function confirm() {
+      markNoticeSeen();
+      modal.style.display = 'none';
+      confirmBtn.removeEventListener('click', confirm);
+      onConfirm();
+    }
+
+    confirmBtn.addEventListener('click', confirm);
+
+    if (privacyLink) {
+      privacyLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Navigate to privacy settings — adjust selector to match your nav
+        const privacyTab = document.querySelector('[data-nav="privacy"]');
+        if (privacyTab) privacyTab.click();
+      });
+    }
+
+    // Trap focus within modal
+    modal.addEventListener('keydown', function trapFocus(e) {
+      if (e.key === 'Escape') {
+        // Don't allow escape without confirming — user must acknowledge
+        e.preventDefault();
+      }
+    });
+
+    confirmBtn.focus();
+  }
+
+  /**
+   * Call this function INSTEAD of directly calling the AI send function.
+   * It intercepts the first send and shows the notice if not yet acknowledged.
+   *
+   * Usage in your chat send handler:
+   *   interceptFirstAiSend(function() { actualSendFunction(userText); });
+   */
+  window.interceptFirstAiSend = function(onConfirmed) {
+    if (shouldShowNotice()) {
+      showProcessingNotice(onConfirmed);
+    } else {
+      onConfirmed();
+    }
+  };
+
+  // ── Run on DOM ready ───────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStalenessCheck);
+  } else {
+    // Small delay to allow main app script to define checkLegalFactsStaleness
+    setTimeout(initStalenessCheck, 200);
+  }
+
+})();
+</script>
