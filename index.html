@@ -3682,7 +3682,15 @@ function render() {
   app.innerHTML = '';
   if (State.screen === 'landing') app.appendChild(Views.landing());
   else if (State.screen === 'auth') app.appendChild(Views.auth());
-  else if (State.screen === 'app') app.appendChild(Views.appShell());
+  else if (State.screen === 'app') {
+    app.appendChild(Views.appShell());
+    // Show triage wizard once per new user — only when fully in the app,
+    // only when a case exists, only when the flag is not already set.
+    if (State.activeCaseId && !localStorage.getItem('mlr_triage_done') &&
+        !document.getElementById('triage-wizard')) {
+      showTriageWizard();
+    }
+  }
   window.scrollTo(0, 0);
   // restore scroll for the tab we're now on
   const newBody = app.querySelector('#mainBody');
@@ -8043,18 +8051,10 @@ async function completeTriage(answers, overlay) {
 }
 
 /* ── Boot-time additions ────────────────────────────────────────── */
-const _originalBoot = typeof boot === 'function' ? boot : null;
 document.addEventListener('DOMContentLoaded', () => {
-  // Simplified mode
+  // Simplified mode — apply immediately on load before render
   const simplified = localStorage.getItem('mlr_simplified') === '1';
   if (simplified) document.documentElement.dataset.simplified = 'true';
-
-  // Show triage wizard after short delay (so app renders first)
-  setTimeout(() => {
-    if (document.getElementById('app') && State.screen !== 'landing') {
-      showTriageWizard();
-    }
-  }, 800);
 });
 
 /* ── Simplified mode toggle ────────────────────────────────────── */
