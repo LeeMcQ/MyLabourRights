@@ -12,7 +12,13 @@
 <meta name="apple-mobile-web-app-title" content="MyLabourRights" />
 <meta name="mobile-web-app-capable" content="yes" />
 <title>MyLabourRights — South African Labour Law Platform</title>
-<meta name="description" content="AI-powered CCMA and labour dispute case management for South Africans." />
+<meta name="description" content="AI-powered CCMA and labour dispute case management for South Africans. Chat with Lee, our AI labour-law advisor." />
+<meta property="og:title" content="MyLabourRights — Free CCMA Help" />
+<meta property="og:description" content="Unfairly dismissed? You have 30 days to act. Chat with Lee — our free AI labour-law advisor. No lawyer needed to start." />
+<meta property="og:image" content="https://chipper-manatee-569bf6.netlify.app/icons/icon-512.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://chipper-manatee-569bf6.netlify.app" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" />
@@ -72,6 +78,14 @@
   --safe-bottom:env(safe-area-inset-bottom);
   --safe-left:env(safe-area-inset-left);
   --safe-right:env(safe-area-inset-right);
+
+  /* ── Semantic state tokens (Expert #2 implementation) ── */
+  --danger:#c0392b;
+  --danger-soft:#fdecea;
+  --success:#1c7a3a;
+  --success-soft:#eaf5ee;
+  --warning:#b7791f;
+  --warning-soft:#fef3c7;
 }
 
 /* A5 — dark mode via token swap (manual override wins over system) */
@@ -87,6 +101,10 @@
     --line-strong:rgba(255,255,255,.2);
     --shadow-sm:0 1px 3px rgba(0,0,0,.4); --shadow-md:0 8px 26px rgba(0,0,0,.5);
     --shadow-lg:0 22px 56px rgba(0,0,0,.6);
+    --danger:#e57373; --danger-soft:#3d1515;
+    --success:#5fae77; --success-soft:#1a2e1f;
+    --warning:#f6ad55; --warning-soft:#2d1f00;
+    --text-mute:#b8a98f;
   }
 }
 :root[data-theme="dark"]{
@@ -874,6 +892,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
 /* H4 — comfortable tap targets on the primary nav controls */
 .mtab,.mobnav button,.nc-dchip,.subnav button{min-height:44px;}
+@media (max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)!important;}}
 @media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto!important;} }
 /* R8 health strip */
 .health-strip{display:none;align-items:center;gap:8px;padding:7px 16px;
@@ -1691,21 +1710,92 @@ const I18N = {
     nav_pricing: 'Pricing', nav_how: 'How it works', nav_resources: 'Resources',
     nav_login: 'Log in', nav_start: 'Start free trial',
     cta_start: 'Start your free case', cta_have: 'I already have an account',
-    tab_dashboard: 'Dashboard', tab_chat: 'AI Attorney', tab_docs: 'Documents',
-    tab_timeline: 'Timeline', tab_actions: 'AI Actions', tab_firms: 'Law Firms',
-    tab_prepare: 'Grievance & CCMA', tab_resources: 'Resources', tab_notes: 'Case Notes', tab_builder: 'Case Builder',
+    tab_dashboard: 'Home', tab_chat: 'Ask Lee', tab_docs: 'Documents',
+    tab_timeline: 'Timeline', tab_actions: 'Strategy', tab_firms: 'Get a Lawyer',
+    tab_prepare: 'File Forms', tab_resources: 'Know Your Rights', tab_notes: 'Case Notes', tab_builder: 'Build My Case',
     q_left: 'questions left today', q_unlimited: 'Unlimited questions',
     send: 'Send', new_case: 'New case',
+    lee_role: 'AI Labour-Law Advisor \u00b7 Preparation guidance only',
+    ai_typing: 'Lee is thinking\u2026',
+    deadline_days: 'Days to file', deadline_filed: 'Case filed',
+    ctx_title: '\u25b8 What Lee knows about your case',
+    ctx_dispute: 'Dispute', ctx_date: 'Incident date', ctx_deadline: 'Deadline', ctx_docs: 'Documents',
+    empty_notes: 'No notes yet \u2014 add your first note to start your case record.',
+    empty_docs: 'No documents yet \u2014 upload your dismissal letter or payslips.',
+    empty_timeline: 'No events yet \u2014 add key dates to build your timeline.',
+    share_msg: 'MyLabourRights \u2014 Free CCMA case help \ud83c\uddff\ud83c\udde6\nAsk Lee, our free AI labour-law advisor. No lawyer needed to start.\n\ud83d\udc49 ',
+    continue_lee: 'Continue with Lee',
   },
   af: {
     nav_pricing: 'Pryse', nav_how: 'Hoe dit werk', nav_resources: 'Hulpbronne',
     nav_login: 'Teken in', nav_start: 'Begin gratis proeftydperk',
     cta_start: 'Begin jou gratis saak', cta_have: 'Ek het reeds \u2019n rekening',
-    tab_dashboard: 'Paneelbord', tab_chat: 'KI-Prokureur', tab_docs: 'Dokumente',
-    tab_timeline: 'Tydlyn', tab_actions: 'KI-Aksies', tab_firms: 'Prokureursfirmas',
-    tab_prepare: 'Grief & CCMA', tab_resources: 'Hulpbronne', tab_notes: 'Saaknotas', tab_builder: 'Saakbouer',
+    tab_dashboard: 'Tuis', tab_chat: 'Vra vir Lee', tab_docs: 'Dokumente',
+    tab_timeline: 'Tydlyn', tab_actions: 'Strategie', tab_firms: 'Kry \u2019n Prokureur',
+    tab_prepare: 'Dien In', tab_resources: 'Ken Jou Regte', tab_notes: 'Saaknotas', tab_builder: 'Bou My Saak',
     q_left: 'vrae oor vandag', q_unlimited: 'Onbeperkte vrae',
     send: 'Stuur', new_case: 'Nuwe saak',
+    lee_role: 'KI Arbeidsreg-adviseur \u00b7 Slegs voorbereidingsleiding',
+    ai_typing: 'Lee dink na\u2026',
+    deadline_days: 'Dae om in te dien', deadline_filed: 'Saak ingedien',
+    ctx_title: '\u25b8 Wat Lee van jou saak weet',
+    ctx_dispute: 'Dispuut', ctx_date: 'Voorvaldatum', ctx_deadline: 'Sperdatum', ctx_docs: 'Dokumente',
+    empty_notes: 'Nog geen notas nie \u2014 voeg jou eerste nota by.',
+    empty_docs: 'Nog geen dokumente nie \u2014 laai jou ontslagbrief op.',
+    empty_timeline: 'Nog geen gebeure nie \u2014 voeg sleuteldatums by.',
+    share_msg: 'MyLabourRights \u2014 Gratis KVBA-saakhulp \ud83c\uddff\ud83c\udde6\nVra vir Lee, ons gratis KI-adviseur. Begin gratis.\n\ud83d\udc49 ',
+    continue_lee: 'Gaan voort met Lee',
+  },
+  zu: {
+    tab_dashboard: 'Ikhaya', tab_chat: 'Buza uLee', tab_docs: 'Amaxwayisi',
+    tab_timeline: 'Umlando', tab_actions: 'Amasu', tab_firms: 'Thola Ummeli',
+    tab_prepare: 'Faka Amaxwayiso', tab_resources: 'Yazi Amalungelo', tab_notes: 'Amanothi', tab_builder: 'Wakha Icala',
+    q_left: 'imibuzo esele namuhla', q_unlimited: 'Imibuzo engenamkhawulo',
+    send: 'Thumela', new_case: 'Icala elisha',
+    lee_role: 'Umeluleki we-AI \u00b7 Isiqondiso sokuzilungiselela kuphela',
+    ai_typing: 'ULee uyacabanga\u2026',
+    deadline_days: 'Izinsuku zokufaka', deadline_filed: 'Icala lifakiwe',
+    ctx_title: '\u25b8 Lokho uLee akwaziyo ngecala lakho',
+    ctx_dispute: 'Ingxabano', ctx_date: 'Usuku lwokwenzeka', ctx_deadline: 'Usuku lokufaka', ctx_docs: 'Amaxwayisi',
+    empty_notes: 'Awekho amanothi \u2014 faka inothi lokuqala.',
+    empty_docs: 'Awekho amaxwayisi \u2014 layisha incwadi yakho yokuxoshwa.',
+    empty_timeline: 'Awekho amahlelo \u2014 faka izikhathi ezibalulekile.',
+    share_msg: 'MyLabourRights \u2014 Usizo lwamahhala le-CCMA \ud83c\uddff\ud83c\udde6\nBuza uLee, umeluleki we-AI wamahhala.\n\ud83d\udc49 ',
+    continue_lee: 'Qhubeka noLee',
+  },
+  xh: {
+    tab_dashboard: 'Ikhaya', tab_chat: 'Buza uLee', tab_docs: 'Amaxwebhu',
+    tab_timeline: 'Imbali', tab_actions: 'Amacebo', tab_firms: 'Fumana Igqwetha',
+    tab_prepare: 'Faka Amaxwebhu', tab_resources: 'Yazi Amalungelo', tab_notes: 'Amanqaku', tab_builder: 'Yakha Ityala',
+    q_left: 'imibuzo esalayo namhlanje', q_unlimited: 'Imibuzo engenamda',
+    send: 'Thumela', new_case: 'Ityala elitsha',
+    lee_role: 'Icebisa le-AI \u00b7 Isinxibo sokuzilungiselela kuphela',
+    ai_typing: 'ULee uyacinga\u2026',
+    deadline_days: 'Iintsuku zokufaka', deadline_filed: 'Ityala lifakiwe',
+    ctx_title: '\u25b8 Oko uLee akwaziyo ngokumalunga netyala lakho',
+    ctx_dispute: 'Ingxabano', ctx_date: 'Umhla wesiganeko', ctx_deadline: 'Umhla wokugqibela', ctx_docs: 'Amaxwebhu',
+    empty_notes: 'Akukho manqaku \u2014 faka inothi lokuqala.',
+    empty_docs: 'Akukho maxwebhu \u2014 layisha incwadi yakho yokucuthwa.',
+    empty_timeline: 'Akukho mxholo \u2014 faka iimini ezibalulekileyo.',
+    share_msg: 'MyLabourRights \u2014 Uncedo lwamahhala le-CCMA \ud83c\uddff\ud83c\udde6\nBuza uLee, icebisa le-AI lamahhala.\n\ud83d\udc49 ',
+    continue_lee: 'Qhubeka noLee',
+  },
+  st: {
+    tab_dashboard: 'Lapeng', tab_chat: 'Botsa Lee', tab_docs: 'Mantswe',
+    tab_timeline: 'Nalane', tab_actions: 'Maano', tab_firms: 'Fumana Ramolao',
+    tab_prepare: 'Kenya Mantswe', tab_resources: 'Tseba Ditokelo', tab_notes: 'Dintlha', tab_builder: 'Haha Nyeoe',
+    q_left: 'dipotso tse setseng kajeno', q_unlimited: 'Dipotso tse sa limilwang',
+    send: 'Romela', new_case: 'Nyeoe e ntjha',
+    lee_role: 'Moeletsi wa AI \u00b7 Tataiso ya ho itokisetsa feela',
+    ai_typing: 'Lee o a nahana\u2026',
+    deadline_days: 'Matsatsi a ho hlahisa', deadline_filed: 'Nyeoe e hlahisitswe',
+    ctx_title: '\u25b8 Se Lee se se tsebang ka nyeoe ya hao',
+    ctx_dispute: 'Khang', ctx_date: 'Letsatsi la tiragalo', ctx_deadline: 'Letsatsi la ho fela', ctx_docs: 'Mantswe',
+    empty_notes: 'Ha ho na lintlha \u2014 kenya lintlha tsa pele.',
+    empty_docs: 'Ha ho na mantswe \u2014 kenya lengolo la ho ntshwa mosebetsi.',
+    empty_timeline: 'Ha ho na diketsahalo \u2014 kenya matsatsi a bohlokwa.',
+    share_msg: 'MyLabourRights \u2014 Thuso e mahala ya CCMA \ud83c\uddff\ud83c\udde6\nBotsa Lee, moeletsi wa AI wa mahala.\n\ud83d\udc49 ',
+    continue_lee: 'Tswela pele le Lee',
   },
 };
 const t = (key) => (I18N[State.lang] && I18N[State.lang][key]) || I18N.en[key] || key;
@@ -2884,7 +2974,27 @@ const Quota = {
 const CaseEngine = (() => {
 
   /* The senior SA labour-law attorney persona — drives tone */
-  const PERSONA = `You are a senior South African labour-law attorney and advocate with 30+ years of exclusive experience in CCMA conciliation and arbitration, Labour Court litigation, unfair labour practice disputes, benefits disputes, unilateral change disputes, relocation disputes, medical-aid and employment-benefit disputes, and employee-side labour strategy. You have acted for both employees and employers, but in this matter you advise from the employee's perspective: protective, practical, firm, evidence-driven, and aggressive where justified, but always realistic and legally defensible. You apply South African labour law only: the Labour Relations Act 66 of 1995, the Basic Conditions of Employment Act 75 of 1997, the Employment Equity Act 55 of 1998 where relevant, the CCMA Rules, relevant CCMA/Labour Court/Labour Appeal Court/Constitutional Court authorities, and applicable evidence principles including hearsay, electronic evidence, authenticity, and witness credibility. Do not assume facts that are not supported by the documents or the employee's account. If a fact is unclear, mark it as "unclear / needs confirmation". If the evidence is weak, say so directly.`;
+  const PERSONA = `You are Lee, MyLabourRights' AI labour-law advisor for South Africa.
+
+IDENTITY: You are Lee — a knowledgeable, warm, and direct AI labour-law advisor. You have deep expertise in CCMA arbitrations, Labour Court litigation, and unfair-labour-practice matters. You always give employees the most protective, practical and realistic advice possible. You apply South African labour law only: the LRA 66/1995, BCEA 75/1997, EEA 55/1998, CCMA Rules, and key authorities.
+
+TONE: Plain language a non-lawyer immediately understands. One focused follow-up question per turn. Honest about pitfalls — never false reassurance. For harassment/trauma: lead with empathy before analysis.
+
+CITATION FORMAT: When you reference a law section, wrap it: <cite law="LRA s188">plain-language summary</cite>
+
+LANGUAGE: If the conversation is not in English, respond in the same language. Supported: English, Afrikaans, isiZulu, isiXhosa, Sesotho. State legal terms in the target language then explain plainly.
+
+PROHIBITED — never say any of the following regardless of context:
+- "You will win" or any guarantee of outcome
+- "Your employer is definitely liable"  
+- Any specific compensation amount as guaranteed — say "up to X months' pay"
+- "The deadline has not passed" without calculating from the user's actual date
+- "You do not need a lawyer" — always acknowledge complex matters benefit from legal advice
+- "This contract is invalid"
+- "Ignore" any official correspondence
+- "I cannot help" — always give what you can and explain the limit
+
+Do not assume facts not in the documents. If unclear, mark as "unclear / needs confirmation".`;
 
   /* Keyword sets used to classify the user's message */
   const TOPIC = {
@@ -4358,6 +4468,9 @@ const Views = (() => {
             <div class="lang-toggle" id="appLang" style="margin-bottom:12px">
               <button data-l="en" class="${State.lang === 'en' ? 'on' : ''}">EN</button>
               <button data-l="af" class="${State.lang === 'af' ? 'on' : ''}">AF</button>
+              <button data-l="zu" class="${State.lang === 'zu' ? 'on' : ''}">ZU</button>
+              <button data-l="xh" class="${State.lang === 'xh' ? 'on' : ''}">XH</button>
+              <button data-l="st" class="${State.lang === 'st' ? 'on' : ''}">ST</button>
             </div>
             <div class="side-user">
               <div class="side-avatar">${(State.user.name || '?')[0].toUpperCase()}</div>
@@ -4514,7 +4627,7 @@ const Views = (() => {
     }
     const n = el(`<div class="empty">${ICONS.scale}
       <h3>No case open yet</h3>
-      <p>Create your first case to start building your file with the AI attorney.</p>
+      <p>Create your first case to start building your file with Lee, your AI advisor.</p>
       <button class="btn btn-primary" id="emptyNew">${ICONS.plus} ${t('new_case')}</button></div>`);
     n.querySelector('#emptyNew').onclick = () => openNewCaseModal(false);
     return n;
@@ -4588,7 +4701,7 @@ function tabDashboard(body, c) {
         <div class="panel-head"><h3>${ICONS.scale} Case progress</h3>
           <span class="pill pill-line">${c.status}</span></div>
         <div class="panel-body">
-          <p class="txt-sm txt-muted" style="margin-bottom:14px">${esc(c.description || 'No summary yet \u2014 chat with the AI attorney to build your account.')}</p>
+          <p class="txt-sm txt-muted" style="margin-bottom:14px">${esc(c.description || 'No summary yet \u2014 chat with Lee to build your account.')}</p>
           <div style="display:flex;flex-direction:column;gap:10px">
             ${progressRow('Intake interview', (c.messageCount || 0) > 0)}
             ${progressRow('Evidence uploaded', (c.docCount || 0) > 0)}
@@ -4596,7 +4709,7 @@ function tabDashboard(body, c) {
             ${progressRow('Success estimate generated', !!c.successRate)}
             ${progressRow('Law firm matched', !!c.firmMatched)}
           </div>
-          <button class="btn btn-primary mt16" id="dashChat">${ICONS.chat} Continue with AI attorney</button>
+          <button class="btn btn-primary mt16" id="dashChat">${ICONS.chat} ${t('continue_lee') || 'Continue with Lee'}</button>
         </div>
       </div>
 
@@ -4969,23 +5082,59 @@ function progressRow(label, done) {
    ------------------------------------------------------------ */
 async function tabChat(body, c) {
   const wrap = el(`<div class="tabview on" style="margin:-26px"></div>`);
-  wrap.innerHTML = `
-    <div class="chat-wrap">
-      <div class="chat-scroll" id="chatScroll" role="log" aria-live="polite" aria-label="Conversation with your AI attorney"></div>
-      <div class="chat-input-bar">
-        <div class="chat-quota" id="chatQuota"></div>
-        <div id="voiceStatus" class="voice-status" role="status" aria-live="assertive"></div>
-        <div class="chat-input-row">
-          <textarea id="chatInput" rows="1" placeholder="Type your message\u2026" aria-label="Type your message to the AI attorney"></textarea>
-          <button class="chat-action mic" id="chatAction" aria-label="Hold to talk">${ICONS.mic}</button>
-          <button class="chat-voicemode" id="voiceModeBtn" aria-label="Voice options">${ICONS.phone}</button>
-        </div>
-        <div class="voice-modes" id="voiceModes" hidden>
-          <button class="vmode-btn" data-mode="ptt">${ICONS.mic} Push to talk</button>
-          <button class="vmode-btn" data-mode="hands">${ICONS.phone} Hands-free call</button>
-        </div>
+
+  // ── Lee identity header ──────────────────────────────────────
+  const leeHdr = el(`<div class="lee-hdr">
+    <div class="lee-av" aria-hidden="true">L</div>
+    <div>
+      <div class="lee-name">Lee</div>
+      <div class="lee-role">${t('lee_role') || 'AI Labour-Law Advisor \u00b7 Preparation guidance only'}</div>
+    </div>
+    <div class="lee-online">Online</div>
+  </div>`);
+  wrap.appendChild(leeHdr);
+
+  // ── Lee context panel (what the AI knows) ────────────────────
+  if (c && (c.disputeKey || c.incidentDate)) {
+    const dl = (c.disputeKey && c.incidentDate && window.Deadline)
+      ? window.Deadline.compute(c.disputeKey, c.incidentDate) : null;
+    const ctxEl = el(`<details class="lee-ctx">
+      <summary>${t('ctx_title') || '\u25b8 What Lee knows about your case'}</summary>
+      ${c.disputeKey ? `<div class="lee-ctx-row"><span class="lee-ctx-key">${t('ctx_dispute') || 'Dispute'}</span><span class="lee-ctx-val">${esc(c.disputeKey.replace(/_/g,' '))}</span></div>` : ''}
+      ${c.incidentDate ? `<div class="lee-ctx-row"><span class="lee-ctx-key">${t('ctx_date') || 'Incident date'}</span><span class="lee-ctx-val">${esc(c.incidentDate)}</span></div>` : ''}
+      ${dl ? `<div class="lee-ctx-row"><span class="lee-ctx-key">${t('ctx_deadline') || 'Deadline'}</span><span class="lee-ctx-val">${dl.status === 'missed' ? 'Deadline passed' : dl.daysLeft + ' days remaining'}</span></div>` : ''}
+      <div class="lee-ctx-row"><span class="lee-ctx-key">${t('ctx_docs') || 'Documents'}</span><span class="lee-ctx-val">${c.docCount || 0} on file</span></div>
+    </details>`);
+    wrap.appendChild(ctxEl);
+  }
+
+  // ── Screen reader live region ─────────────────────────────────
+  if (!document.getElementById('lee-live')) {
+    const lr = document.createElement('div');
+    lr.id = 'lee-live'; lr.setAttribute('aria-live','polite');
+    lr.setAttribute('aria-atomic','false'); lr.setAttribute('aria-relevant','additions');
+    lr.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+    document.body.appendChild(lr);
+  }
+
+  // ── Chat UI ───────────────────────────────────────────────────
+  const chatDiv = el(`<div class="chat-wrap">
+    <div class="chat-scroll" id="chatScroll" role="log" aria-live="off" aria-label="Conversation with Lee, your AI advisor"></div>
+    <div class="chat-input-bar">
+      <div class="chat-quota" id="chatQuota"></div>
+      <div id="voiceStatus" class="voice-status" role="status" aria-live="assertive"></div>
+      <div class="chat-input-row">
+        <textarea id="chatInput" rows="1" placeholder="Type your message to Lee\u2026" aria-label="Type your message to Lee, your AI advisor"></textarea>
+        <button class="chat-action mic" id="chatAction" aria-label="Hold to talk">${ICONS.mic}</button>
+        <button class="chat-voicemode" id="voiceModeBtn" aria-label="Voice options">${ICONS.phone}</button>
       </div>
-    </div>`;
+      <div class="voice-modes" id="voiceModes" hidden>
+        <button class="vmode-btn" data-mode="ptt">${ICONS.mic} Push to talk</button>
+        <button class="vmode-btn" data-mode="hands">${ICONS.phone} Hands-free call</button>
+      </div>
+    </div>
+  </div>`);
+  wrap.appendChild(chatDiv);
   body.appendChild(wrap);
 
   const scroll = wrap.querySelector('#chatScroll');
@@ -5281,7 +5430,7 @@ function renderMsg(m, c) {
   let inner = '';
   if (m.kind && tagMap[m.kind])
     inner += `<span class="chat-tag ${tagMap[m.kind][0]}">${tagMap[m.kind][1]}</span>`;
-  inner += `<div class="sender">MyLabourRights AI \u00b7 Labour-law attorney</div>`;
+  inner += `<div class="sender">Lee \u00b7 AI Labour-Law Advisor</div>`;
   inner += fmt(m.text);
 
   // follow-up question highlighted
@@ -6578,6 +6727,117 @@ async function buildPrintableCaseFile(c) {
     th{background:#f4f1e8;} .muted{color:#888;} .pill{display:inline-block;padding:1px 8px;border-radius:10px;background:#eee;font-size:11px;}
     .disc{margin-top:30px;padding:12px;background:#faf7ef;border:1px solid #e3d9bf;font-size:12px;color:#555;border-radius:6px;}
     @media print{body{margin:0;}}
+
+/* ── Semantic state tokens ── */
+:root {
+  --danger:#c0392b; --danger-soft:#fdecea;
+  --success:#1c7a3a; --success-soft:#eaf5ee;
+  --warning:#b7791f; --warning-soft:#fef3c7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --danger:#e57373;--danger-soft:#3d1515;
+    --success:#5fae77;--success-soft:#1a2e1f;
+    --warning:#f6ad55;--warning-soft:#2d1f00;
+    --text-mute:#b8a98f;
+  }
+}
+
+/* ── Stat row 2-col on small phones ── */
+@media (max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)!important;}}
+
+/* ── Deadline chip (always-visible state widget) ── */
+.dcb{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;margin-bottom:16px;transition:background .3s,border-color .3s;border:1.5px solid var(--line-strong);background:var(--cream);}
+.dcb[data-state="urgent"]{background:var(--danger-soft);border-color:var(--danger);}
+.dcb[data-state="warning"]{background:var(--warning-soft);border-color:var(--warning);}
+.dcb[data-state="safe"]{background:var(--success-soft);border-color:var(--success);}
+.dcb[data-state="filed"]{background:var(--paper-2);border-color:var(--line);}
+.dcb-days{font-family:var(--serif);font-size:2.25rem;font-weight:900;line-height:1;min-width:52px;text-align:center;}
+.dcb[data-state="urgent"] .dcb-days{color:var(--danger);}
+.dcb[data-state="warning"] .dcb-days{color:var(--warning);}
+.dcb[data-state="safe"] .dcb-days{color:var(--success);}
+.dcb-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.dcb-sub{font-size:12px;color:var(--text-soft);line-height:1.4;}
+.dcb-pulse{animation:pulse 1.5s ease infinite;}
+
+/* ── Deadline ring ── */
+.dlr-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
+.dlr-svg{transform:rotate(-90deg);}
+.dlr-track{fill:none;stroke:#e5e7eb;stroke-width:9;}
+.dlr-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s;}
+.dlr-inner{position:absolute;inset:11px;border-radius:50%;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 8px rgba(0,0,0,.07);}
+.dlr-num{font-family:var(--serif);font-size:1.7rem;font-weight:900;line-height:1;}
+.dlr-lbl{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mute);}
+
+/* ── WhatsApp share ── */
+.wa-btn{display:inline-flex;align-items:center;gap:7px;background:#25d366;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);min-height:44px;}
+
+/* ── Lee AI identity header ── */
+.lee-hdr{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--ink);border-bottom:1px solid rgba(255,255,255,.1);}
+.lee-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--gold-deep));display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:16px;color:var(--gold-soft);flex-shrink:0;}
+.lee-name{font-weight:700;font-size:15px;color:#fff;}
+.lee-role{font-size:11px;color:var(--sage);margin-top:1px;}
+.lee-online{margin-left:auto;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(127,168,134,.2);color:var(--sage);}
+
+/* ── Lee context panel ── */
+.lee-ctx{background:rgba(28,82,52,.12);border:1px solid rgba(28,82,52,.3);border-radius:10px;padding:10px 14px;margin:10px 10px 0;font-size:12px;}
+.lee-ctx summary{font-weight:700;color:var(--gold-soft);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;}
+.lee-ctx summary::-webkit-details-marker{display:none;}
+.lee-ctx-row{display:flex;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.lee-ctx-row:last-child{border-bottom:none;}
+.lee-ctx-key{color:var(--text-mute);min-width:90px;font-size:11px;}
+.lee-ctx-val{color:var(--paper);font-weight:500;font-size:11px;}
+
+/* ── Citation chips ── */
+.cite-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(199,154,62,.15);border:1px solid rgba(199,154,62,.4);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--gold-soft);cursor:pointer;margin:2px 3px;transition:background .15s;vertical-align:middle;}
+.cite-chip:hover{background:rgba(199,154,62,.28);}
+.cite-sheet{position:fixed;inset:auto 0 0 0;z-index:200;background:var(--ink);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.5);animation:slideUp .22s ease both;}
+.cite-bd{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.5);}
+.cite-law{font-size:13px;font-weight:700;color:var(--gold-soft);margin-bottom:8px;}
+.cite-text{font-size:14px;color:var(--paper);line-height:1.65;}
+.cite-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:12px;color:var(--moss);font-weight:600;text-decoration:underline;}
+
+/* ── Bargaining council alert ── */
+.bc-alert{background:var(--danger-soft);border:1.5px solid var(--danger);border-radius:12px;padding:16px;margin-bottom:16px;}
+.bc-alert h4{color:var(--danger);font-size:14px;margin:0 0 6px;}
+.bc-alert p{font-size:13px;color:var(--text-soft);margin:0 0 10px;line-height:1.6;}
+
+/* ── Triage wizard overlay ── */
+.triage-ov{position:fixed;inset:0;z-index:300;background:var(--paper);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,20px) + 24px) 20px 32px;overflow-y:auto;}
+.triage-ov.gone{display:none;}
+.triage-prog{display:flex;gap:6px;margin-bottom:28px;}
+.tdot{height:4px;flex:1;border-radius:2px;background:var(--line-strong);transition:background .3s;}
+.tdot.done{background:var(--forest);}.tdot.active{background:var(--gold);}
+.triage-ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);margin-bottom:6px;}
+.triage-q{font-family:var(--serif);font-size:1.35rem;font-weight:700;margin-bottom:22px;line-height:1.25;color:var(--ink);}
+.triage-opts{display:flex;flex-direction:column;gap:9px;}
+.topt{padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:12px;background:var(--cream);text-align:left;font-size:14px;font-weight:500;color:var(--ink);min-height:52px;cursor:pointer;transition:border-color .15s,background .15s;font-family:var(--sans);}
+.topt:hover{border-color:var(--forest);}.topt.on{border-color:var(--forest);background:rgba(28,82,52,.06);font-weight:600;}
+.triage-back-btn{background:none;border:none;color:var(--text-mute);font-size:13px;font-weight:600;cursor:pointer;padding:10px 0;margin-top:12px;font-family:var(--sans);min-height:44px;}
+
+/* ── Simplified mode ── */
+[data-simplified="true"]{--fs-xs:.875rem;--fs-sm:1rem;--fs-base:1.125rem;--fs-lg:1.25rem;}
+
+/* ── Semantic pills ── */
+.pill-urgent{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
+.pill-warning{background:var(--warning-soft);color:var(--warning);border:1px solid var(--warning);}
+.pill-success{background:var(--success-soft);color:var(--success);border:1px solid var(--success);}
+
+/* ── Case export bar ── */
+.case-xbar{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line);}
+.case-xbar button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--cream);font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:var(--sans);min-height:44px;}
+
+/* ── Form pre-submit checklist ── */
+.form-chk{background:var(--warning-soft);border:1.5px solid var(--warning);border-radius:12px;padding:16px;margin-top:16px;}
+.form-chk h4{color:var(--warning);font-size:13px;margin:0 0 10px;}
+.fsc-r{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid rgba(183,121,31,.2);}
+.fsc-r:last-of-type{border-bottom:none;}
+.fsc-r input[type=checkbox]{width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:var(--forest);}
+.fsc-r label{font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer;}
+
+/* ── Screen-reader live region ── */
+#lee-live{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
   </style></head><body>
   <h1>${esc2(c.name)}</h1>
   <p class="sub">Case file prepared via MyLabourRights &middot; ${today}</p>
@@ -6834,8 +7094,10 @@ function tabPrepare(body, c) {
     </div>
 
     <div class="prep-switch" role="tablist">
-      <button class="prep-tab on" data-p="grievance" role="tab">${ICONS.note} Grievance</button>
+      <button class="prep-tab on" data-p="viability" role="tab">\ud83d\udd0d Should I Proceed?</button>
+      <button class="prep-tab" data-p="grievance" role="tab">${ICONS.note} Grievance</button>
       <button class="prep-tab" data-p="ccma" role="tab">${ICONS.scale} CCMA</button>
+      <button class="prep-tab" data-p="union" role="tab">\u270a Union Rights</button>
     </div>
 
     <div id="prepPanel"></div>`;
@@ -6964,10 +7226,14 @@ function tabPrepare(body, c) {
   wrap.querySelectorAll('.prep-tab').forEach(b => b.onclick = () => {
     wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
     b.classList.add('on');
-    b.dataset.p === 'ccma' ? renderCCMA() : renderGrievance();
+    const p = b.dataset.p;
+    if (p === 'ccma') renderCCMA();
+    else if (p === 'grievance') renderGrievance();
+    else if (p === 'union') renderUnion();
+    else renderViability();
   });
 
-  renderGrievance();
+  renderViability();
 }
 
 /* generate a grievance/manager email via the AI (falls back to a template) */
@@ -7270,6 +7536,624 @@ const Backend = (() => {
 })();
 
 window.Backend = Backend;
+
+/* =================================================================
+   IMPLEMENTATION ADDITIONS — All expert recommendations
+   ================================================================= */
+
+/* ── Citation chip parser ─────────────────────────────────────────
+   Call on every AI response text. Converts <cite law="...">...</cite>
+   tags into tappable interactive chips.                           */
+function parseCitations(text) {
+  if (!text) return text;
+  return text.replace(/<cite law="([^"]+)">([^<]+)<\/cite>/g, (_, law, desc) => {
+    const l = law.replace(/'/g, '&#39;');
+    const d = desc.replace(/'/g, '&#39;');
+    return `<button class="cite-chip" onclick="MLR.showCitation('${l}','${d}')" aria-label="Legal citation: ${l}. Tap to expand." type="button">\u2696 ${law}</button>`;
+  });
+}
+
+/* ── Citation bottom sheet ────────────────────────────────────────*/
+const MLR = {
+  showCitation(law, desc) {
+    document.querySelector('.cite-bd')?.remove();
+    document.querySelector('.cite-sheet')?.remove();
+    const bd = document.createElement('div');
+    bd.className = 'cite-bd';
+    bd.onclick = () => { bd.remove(); sheet.remove(); };
+    const sheet = document.createElement('div');
+    sheet.className = 'cite-sheet';
+    sheet.innerHTML = `
+      <div class="cite-law">\u2696 ${law}</div>
+      <div class="cite-text">${desc}</div>
+      <a class="cite-link" href="https://www.saflii.org/za/legis/" target="_blank" rel="noopener">Read on SAFLII \u2197</a>
+      <button onclick="this.closest('.cite-sheet').previousSibling.click()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--sage);min-height:44px;min-width:44px;" aria-label="Close">\u00d7</button>`;
+    document.body.appendChild(bd);
+    document.body.appendChild(sheet);
+  },
+
+  /* ── WhatsApp share ─────────────────────────────────────────── */
+  shareToWhatsApp() {
+    const msg = (t('share_msg') || 'MyLabourRights \u2014 Free CCMA help \ud83c\uddff\ud83c\udde6\n') + location.origin;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  },
+
+  /* ── Case export / import ───────────────────────────────────── */
+  async exportCase() {
+    const cases = await DB.all('cases').catch(() => []);
+    const docs  = await DB.all('documents').catch(() => []);
+    const msgs  = await DB.all('messages').catch(() => []);
+    const data  = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      disclaimer: 'MyLabourRights case export. Keep this file safe.',
+      cases, docs, msgs,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'mylabourlaws-export-' + Date.now() + '.json'; a.click();
+    URL.revokeObjectURL(url);
+  },
+
+  importCasePrompt() {
+    let inp = document.getElementById('mlr-import-file');
+    if (!inp) {
+      inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = '.json'; inp.id = 'mlr-import-file';
+      inp.style.display = 'none';
+      inp.onchange = (e) => MLR.handleImport(e);
+      document.body.appendChild(inp);
+    }
+    inp.click();
+  },
+
+  async handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.version !== 1) throw new Error('Unknown version');
+        if (!confirm('Import case data from ' + file.name + '? This will merge with your existing data.')) return;
+        for (const c of (data.cases || [])) await DB.put('cases', c);
+        for (const d of (data.docs  || [])) await DB.put('documents', d).catch(() => {});
+        for (const m of (data.msgs  || [])) await DB.put('messages', m).catch(() => {});
+        toast('Case imported successfully.');
+        render();
+      } catch(err) {
+        toast('Could not read this file. Please use a MyLabourRights export file.', 'alert');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  },
+};
+
+/* ── Bargaining council detection ────────────────────────────────
+   Expert #5 critical: some workers must go to their industry council
+   not the CCMA. Detected from free-text industry description.      */
+const BARGAINING_COUNCILS = {
+  metal:    { name:'MEIBC', full:'Metal & Engineering Industries Bargaining Council',tel:'011 628 3700',kw:['metal','engineering','steel','weld','fitter','boilermaker','electrician'] },
+  building: { name:'BIBC', full:'Building Industry Bargaining Council (Cape)',tel:'021 686 3181',kw:['construction','building','plumbing','carpenter','bricklayer','civil'] },
+  motor:    { name:'MIBCO',full:'Motor Industry Bargaining Council',tel:'012 843 6800',kw:['motor','vehicle','car','panel beat','auto','mechanic','petrol','auto glass'] },
+  road:     { name:'NBCRFLI',full:'National Bargaining Council for Road Freight',tel:'011 394 3012',kw:['truck','freight','logistics','transport','driver','warehouse'] },
+  furniture:{ name:'NBCWF', full:'National Bargaining Council for Wood & Furniture',tel:'031 266 9700',kw:['furniture','wood','cabinet','upholstery','sawmill'] },
+};
+
+function detectBargainingCouncil(industryText) {
+  const lc = (industryText || '').toLowerCase();
+  for (const c of Object.values(BARGAINING_COUNCILS)) {
+    if (c.kw.some(k => lc.includes(k))) return c;
+  }
+  return null;
+}
+
+function showCouncilAlert(council, container) {
+  if (!container || container.querySelector('.bc-alert')) return;
+  const el2 = document.createElement('div');
+  el2.className = 'bc-alert';
+  el2.setAttribute('role','alert');
+  el2.innerHTML = `
+    <h4>\u26a0 Your dispute should go to ${council.name}, not the CCMA</h4>
+    <p>Workers in your industry fall under the ${council.full} (${council.tel}). Filing at the CCMA may result in your case being dismissed for lack of jurisdiction.</p>
+    <a href="tel:${council.tel.replace(/\s/g,'')}" class="btn btn-sm btn-ghost">\ud83d\udcde Call ${council.name}: ${council.tel}</a>`;
+  container.insertBefore(el2, container.firstChild);
+}
+
+/* ── Triage Wizard ────────────────────────────────────────────────
+   Expert #1 critical: 3-question intake on first open.
+   Sets disputeType, timing, and goal for the entire session.       */
+const TRIAGE_QS = [
+  {
+    q: { en:'What happened at work?', af:'Wat het by die werk gebeur?', zu:'Kwenzekani emsebenzini?', xh:'Kwenzeka ntoni emsebenzini?', st:'Ke eng e etsahaleng mosebetsing?' },
+    opts: [
+      { en:'I was dismissed / fired',              af:'Ek is ontslaan',                zu:'Ngixoshiwe',               xh:'Ndichithiwe',             st:'Ke ntshitswe mosebetsi',        val:'unfair_dismissal' },
+      { en:"I'm still employed but treated unfairly",af:'Ek werk nog maar word onbillik behandel',zu:'Ngisasebenza kodwa ngiphathwa kabi',xh:'Ndisasebenza kodwa ndiphathwa kakubi',st:'Ke sa sebetsa empa ke phethwa hampe',val:'unfair_labour_practice' },
+      { en:"I wasn't paid correctly",              af:'Ek is nie korrek betaal nie',   zu:'Angikhokhwanga kahle',     xh:'Andikhokhwanga ngokufanelekileyo',st:'Ke ne ke sa lefshwa hantle', val:'bcea_money_claim' },
+      { en:'I was harassed or discriminated against',af:"Ek is geteister of gediskrimineer",zu:'Ngihlukunyezwe noma ngacwatshelwa',xh:'Ndihlukumezwe okanye ndananduluka-candelo',st:'Ke ne ke itshitishwa kapa ke khetholwa',val:'unfair_discrimination' },
+    ],
+  },
+  {
+    q: { en:'When did this happen?', af:'Wanneer het dit gebeur?', zu:'Kwenzeka nini?', xh:'Kwenzeka nini?', st:'E ne e etsahala neng?' },
+    opts: [
+      { en:'In the last 7 days',    af:'In die afgelope 7 dae',    zu:'Emasukwini angu-7 edlule',   xh:'Kwiintsuku ezi-7 ezidlulileyo',   st:'Matsatsing a 7 a fetileng',  val:'recent' },
+      { en:'8\u201320 days ago',    af:'8\u201320 dae gelede',     zu:'Izinsuku ezingu-8-20 ezikhona',xh:'Iintsuku ezi-8-20 ezidlulileyo', st:'Matsatsi a 8-20 a fetileng', val:'mid' },
+      { en:'21\u201330 days ago',   af:'21\u201330 dae gelede',    zu:'Izinsuku ezingu-21-30',       xh:'Iintsuku ezi-21-30',              st:'Matsatsi a 21-30 a fetileng',val:'late' },
+      { en:'More than 30 days ago', af:'Meer as 30 dae gelede',    zu:'Ngaphezu kwezinsuku ezingu-30',xh:'Ngaphezulu kweentsuku ezi-30',   st:'Ho feta matsatsi a 30',       val:'overdue' },
+    ],
+  },
+  {
+    q: { en:'What do you want to achieve?', af:'Wat wil jy bereik?', zu:'Ufuna ukufezani?', xh:'Ufuna ukufezela ntoni?', st:'O batla ho fihlela eng?' },
+    opts: [
+      { en:'Get my job back',                 af:'Kry my werk terug',          zu:'Thola umsebenzi wami',          xh:'Buyisa umsebenzi wam',             st:'Buyela mosebetsing',               val:'reinstatement' },
+      { en:'Get compensation or money owed',  af:'Kry vergoeding of geld verskuldig',zu:'Thola inhlawulo noma imali',xh:'Fumana imbuyekezo okanye imali',   st:'Fumana tlhwekiso kapa tjhelete',   val:'compensation' },
+      { en:'Stop unfair treatment',           af:'Stop onbillike behandeling',  zu:'Nqanda ukuphathwa kabi',        xh:'Misa ukuphathwa kakubi',           st:'Emisa ho phethwa hampe',           val:'stop_unfair' },
+      { en:'Just understand my rights',       af:'Net my regte verstaan',       zu:'Qonda amalungelo ami',          xh:'Qonda amalungelo am',              st:'Utlwisisa ditokelo tsa ka',        val:'information' },
+    ],
+  },
+];
+
+function getLang() { return State.lang || 'en'; }
+function trQ(obj) { return obj[getLang()] || obj.en || ''; }
+
+function showTriageWizard() {
+  if (localStorage.getItem('mlr_triage_done') === '1') return;
+  let step = 0;
+  const answers = {};
+
+  const overlay = document.createElement('div');
+  overlay.className = 'triage-ov';
+  overlay.id = 'triage-wizard';
+
+  const render2 = () => {
+    const q = TRIAGE_QS[step];
+    overlay.innerHTML = `
+      <div class="triage-prog">
+        ${TRIAGE_QS.map((_,i) => `<div class="tdot ${i < step ? 'done' : i === step ? 'active' : ''}"></div>`).join('')}
+      </div>
+      <div class="triage-ey">Step ${step + 1} of 3</div>
+      <div class="triage-q">${trQ(q.q)}</div>
+      <div class="triage-opts">
+        ${q.opts.map(o => `<button class="topt" type="button" data-val="${o.val}">${trQ(o)}</button>`).join('')}
+      </div>
+      ${step > 0 ? '<button class="triage-back-btn" type="button">\u2190 Back</button>' : ''}
+    `;
+    overlay.querySelectorAll('.topt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const keys = ['disputeType','timingBand','goal'];
+        answers[keys[step]] = btn.dataset.val;
+        if (step < 2) { step++; render2(); }
+        else { completeTriage(answers, overlay); }
+      });
+    });
+    overlay.querySelector('.triage-back-btn')?.addEventListener('click', () => { step--; render2(); });
+  };
+
+  render2();
+  document.body.appendChild(overlay);
+}
+
+async function completeTriage(answers, overlay) {
+  localStorage.setItem('mlr_triage_done', '1');
+
+  // If there is an active case, apply triage to it
+  if (State.activeCaseId) {
+    const c = await DB.get('cases', State.activeCaseId);
+    if (c) {
+      if (answers.disputeType && !c.disputeKey) c.disputeKey = answers.disputeType;
+      if (answers.goal) c.triageGoal = answers.goal;
+      await DB.put('cases', c);
+    }
+  }
+
+  overlay.classList.add('gone');
+  setTimeout(() => overlay.remove(), 300);
+
+  // Show bargaining council warning if applicable
+  if (answers.disputeType) {
+    // Note: industry detection happens when user describes their job in chat
+    // The triage wizard captures dispute type only
+  }
+
+  render();
+}
+
+/* ── Boot-time additions ────────────────────────────────────────── */
+const _originalBoot = typeof boot === 'function' ? boot : null;
+document.addEventListener('DOMContentLoaded', () => {
+  // Simplified mode
+  const simplified = localStorage.getItem('mlr_simplified') === '1';
+  if (simplified) document.documentElement.dataset.simplified = 'true';
+
+  // Show triage wizard after short delay (so app renders first)
+  setTimeout(() => {
+    if (document.getElementById('app') && State.screen !== 'landing') {
+      showTriageWizard();
+    }
+  }, 800);
+});
+
+/* ── Simplified mode toggle ────────────────────────────────────── */
+function toggleSimplifiedMode(on) {
+  document.documentElement.dataset.simplified = on ? 'true' : 'false';
+  localStorage.setItem('mlr_simplified', on ? '1' : '0');
+}
+
+/* ── Form pre-submit checklist ──────────────────────────────────── */
+function showFormChecklist(downloadFn) {
+  const modalBg = document.createElement('div');
+  modalBg.style.cssText = 'position:fixed;inset:0;z-index:400;display:flex;align-items:flex-end;background:rgba(0,0,0,.5);';
+  modalBg.innerHTML = `<div class="form-chk" style="width:100%;border-radius:20px 20px 0 0;border-bottom:none;padding-bottom:calc(16px + env(safe-area-inset-bottom));">
+    <h4>Before you download this form</h4>
+    <div class="fsc-r"><input type="checkbox" id="fsc1"><label for="fsc1">I have verified this is the current official CCMA form at ccma.org.za</label></div>
+    <div class="fsc-r"><input type="checkbox" id="fsc2"><label for="fsc2">I have confirmed all dates and my employer's correct name and address</label></div>
+    <button id="fsc-dl" disabled class="btn btn-primary btn-block mt16" style="opacity:.4">Download form</button>
+    <button type="button" onclick="this.closest('[style]').remove()" style="display:block;width:100%;margin-top:8px;background:none;border:none;font-size:13px;color:var(--text-mute);cursor:pointer;min-height:44px;font-family:var(--sans);">Cancel</button>
+  </div>`;
+  const sync = () => {
+    const ok = modalBg.querySelector('#fsc1').checked && modalBg.querySelector('#fsc2').checked;
+    const btn = modalBg.querySelector('#fsc-dl');
+    btn.disabled = !ok; btn.style.opacity = ok ? '1' : '.4';
+  };
+  modalBg.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', sync));
+  modalBg.querySelector('#fsc-dl').addEventListener('click', () => { downloadFn?.(); modalBg.remove(); });
+  document.body.appendChild(modalBg);
+}
+
+/* ── Deadline chip helper — renders a chip anywhere ──────────────── */
+function renderDeadlineChip(c) {
+  if (!c || !c.disputeKey || !c.incidentDate || !window.Deadline) return null;
+  const d = window.Deadline.compute(c.disputeKey, c.incidentDate);
+  if (!d) return null;
+  const state = d.status === 'missed' ? 'filed'
+    : d.daysLeft <= 7 ? 'urgent' : d.daysLeft <= 20 ? 'warning' : 'safe';
+  const chip = document.createElement('div');
+  chip.className = 'dcb' + (state === 'urgent' ? ' dcb-pulse' : '');
+  chip.setAttribute('data-state', state);
+  chip.setAttribute('role', 'status');
+  chip.setAttribute('aria-label', `Deadline: ${d.status === 'missed' ? 'passed' : d.daysLeft + ' days remaining'}`);
+  // Ring SVG
+  const circ = 2 * Math.PI * 45;
+  const pct  = d.status === 'missed' ? 0 : Math.max(0, Math.min(1, d.daysLeft / (d.windowDays || 30)));
+  const offs = circ * (1 - pct);
+  const strokeC = state === 'urgent' ? 'var(--danger)' : state === 'warning' ? 'var(--warning)' : 'var(--success)';
+  chip.innerHTML = `
+    <div class="dlr-wrap" aria-hidden="true">
+      <svg class="dlr-svg" width="110" height="110" viewBox="0 0 110 110">
+        <circle class="dlr-track" cx="55" cy="55" r="45"/>
+        <circle class="dlr-fill" cx="55" cy="55" r="45" stroke="${strokeC}"
+          stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offs.toFixed(2)}"/>
+      </svg>
+      <div class="dlr-inner">
+        <div class="dlr-num" style="color:${strokeC}">${d.status === 'missed' ? '!' : d.daysLeft}</div>
+        <div class="dlr-lbl">${d.status === 'missed' ? 'PASSED' : 'DAYS'}</div>
+      </div>
+    </div>
+    <div>
+      <div class="dcb-label">${d.status === 'missed' ? 'Deadline passed' : t('deadline_days') || 'Days to file'}</div>
+      <div class="dcb-sub">${
+        d.status === 'missed' ? 'Apply for condonation \u2014 Lee can help draft your explanation.' :
+        d.daysLeft <= 7 ? 'Urgent \u2014 file at the CCMA as soon as possible.' :
+        'File at the CCMA within ' + d.daysLeft + ' days of your dismissal.'
+      }</div>
+    </div>`;
+  return chip;
+}
+
+/* Patch tabDashboard to add deadline chip at top ──────────────── */
+const _origTabDashboard = tabDashboard;
+tabDashboard = function(body, c) {
+  _origTabDashboard(body, c);
+  // Inject deadline chip above stat-row (after journey chip)
+  const wrap = body.querySelector('.tabview');
+  if (wrap && c) {
+    const chip = renderDeadlineChip(c);
+    if (chip) {
+      const statRow = wrap.querySelector('.stat-row');
+      if (statRow) wrap.insertBefore(chip, statRow);
+    }
+    // Add WhatsApp share + Export bar at bottom
+    const xbar = document.createElement('div');
+    xbar.className = 'case-xbar mt20';
+    xbar.innerHTML = `
+      <button class="wa-btn" onclick="MLR.shareToWhatsApp()" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.529 5.843L.057 23.928l6.235-1.635A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.002-1.368l-.358-.214-3.715.974.994-3.628-.234-.373A9.823 9.823 0 012.182 12C2.182 6.562 6.562 2.182 12 2.182S21.818 6.562 21.818 12 17.438 21.818 12 21.818z"/></svg>
+        Share
+      </button>
+      <button onclick="MLR.exportCase()" type="button">\u2b07 Export case</button>
+      <button onclick="MLR.importCasePrompt()" type="button">\u2b06 Import case</button>`;
+    wrap.appendChild(xbar);
+  }
+};
+
+/* ── Expose on window for inline handlers ──────────────────────── */
+/* ================================================================
+   PRE-GRIEVANCE VIABILITY CHECK  (Expert panel recommendation)
+   "Should I start the internal process?"
+   Runs BEFORE the grievance template — it is the gate, not step 1.
+   ================================================================ */
+function renderViabilityInPrepPanel(panel, c, wireAcc, doDont) {
+  const acc2 = (items) => items.map((it, i) => `
+    <div class="prep-acc">
+      <button class="prep-acc-head" aria-expanded="false">
+        <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
+      </button>
+      <div class="prep-acc-body" hidden>${it.a}</div>
+    </div>`).join('');
+
+  panel.innerHTML = `
+    <section class="prep-sec">
+      <h3>\ud83d\udd0d Should I start the internal grievance process?</h3>
+      <p class="prep-lead">Before you lodge a formal grievance, answer these five questions. A grievance that is premature, vague, or misdirected can give your employer a defence and damage your later CCMA case. This check takes 3 minutes and could save your case.</p>
+    </section>
+
+    <section class="prep-sec" id="viabilityQuestions">
+      <h3>${ICONS.list} The 5 pre-grievance questions</h3>
+      ${acc2([
+        {
+          q: '1. Has a specific legal right or contract term been violated?',
+          a: `<p><strong>Why this matters:</strong> A grievance about something <em>unfair</em> but not <em>illegal</em> is likely to be dismissed, and it creates a paper trail that can hurt you later.</p>
+              <p><strong>Your rights include:</strong> terms in your employment contract, your employer's own policies, the LRA (dismissal, suspension, unfair labour practice), BCEA (pay, leave, hours), the EEA (discrimination), and your s23 constitutional right to union membership.</p>
+              <p><strong>Ask yourself:</strong> Can I point to a specific rule, policy, or law that my employer broke — not just something that felt unfair?</p>`,
+        },
+        {
+          q: '2. Can you describe the violation with at least one specific incident, date, and what was said or done?',
+          a: `<p><strong>Why this matters:</strong> Vague complaints ("my manager is always unfair to me") are routinely dismissed as a difference of opinion. Specific, dated facts force a response.</p>
+              <p><strong>What you need:</strong> At least one incident with: the date, what was said or done, who was present, and what rule or right was breached.</p>
+              <p><strong>If you can't name a date yet:</strong> Build your Timeline tab first. Come back when you have specifics.</p>`,
+        },
+        {
+          q: '3. Have you given your employer a reasonable chance to correct the situation informally?',
+          a: `<p><strong>Why this matters:</strong> Grievances that skip informal resolution are often thrown back as "premature." Worse — if the matter later goes to the CCMA, commissioners look unfavourably on employees who jumped to formal process without trying to resolve it first.</p>
+              <p><strong>What counts:</strong> One clear, documented request to your manager or HR: "I am raising this issue with you informally. I would like [specific outcome]. Can we resolve this?" Keep a record of the response.</p>
+              <p><strong>Exception:</strong> If informal resolution is unsafe (harassment, intimidation) or impossible (the wrongdoer is your only option), you may proceed directly.</p>`,
+        },
+        {
+          q: '4. Do you know your employer\'s formal grievance procedure — and are you following it?',
+          a: `<p><strong>Why this matters:</strong> If you use a different process than the one in your contract or employee handbook, the company will use that as a procedural defence to avoid engaging on the merits.</p>
+              <p><strong>What to find:</strong> Check your employment contract, the employee handbook, or ask HR: "What is the formal grievance procedure?" Get it in writing.</p>
+              <p><strong>Key things to note:</strong> Who do you submit to? In what form (email, letter)? Within what timeframe? These details are usually strict.</p>`,
+        },
+        {
+          q: '5. Have you assessed the risk of retaliation — and do you have a plan?',
+          a: `<p><strong>Why this matters:</strong> Retaliation for a grievance is illegal under the LRA. But it happens — especially in small companies, or where you are on probation or have recent warnings. Knowing the risk lets you plan.</p>
+              <p><strong>Higher risk situations:</strong> You are on probation; you have a recent written warning; your workplace has a history of dismissing people who complain; the respondent is close to senior management.</p>
+              <p><strong>Protections:</strong> LRA s187 — dismissal for exercising a protected right (including lodging a grievance) is automatically unfair. Document everything before you lodge.</p>
+              <p><strong>If risk is high:</strong> Brief your shop steward or union rep before lodging. Their involvement increases protection significantly.</p>`,
+        },
+      ])}
+    </section>
+
+    <section class="prep-sec">
+      <h3>${ICONS.spark} What your answers mean</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--success-soft,#eaf5ee);border:1.5px solid var(--success,#1c7a3a);border-radius:12px;padding:14px">
+          <div style="font-weight:700;color:var(--success,#1c7a3a);margin-bottom:5px">\u2705 Green — Proceed confidently</div>
+          <div style="font-size:13px;color:var(--text-soft);line-height:1.6">You answered YES to 4 or 5 questions. Your situation involves a specific, legally recognised violation with facts you can clearly state. Lodging a grievance is appropriate. Move to the Grievance tab — but read the framing advice before you draft anything.</div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:var(--success)">→ Use the Grievance tab</span>
+            <span style="font-size:11px;font-weight:700;color:var(--success)">→ Brief your union rep</span>
+            <span style="font-size:11px;font-weight:700;color:var(--success)">→ Upload evidence first</span>
+          </div>
+        </div>
+        <div style="background:var(--warning-soft,#fef3c7);border:1.5px solid var(--warning,#b7791f);border-radius:12px;padding:14px">
+          <div style="font-weight:700;color:var(--warning,#b7791f);margin-bottom:5px">\u26a0\ufe0f Amber — Proceed with caution</div>
+          <div style="font-size:13px;color:var(--text-soft);line-height:1.6">You answered YES to 2 or 3 questions. Your situation has merit but there are gaps that could weaken your position. Address the gaps identified above before lodging — especially if informal resolution has not been tried.</div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:var(--warning)">→ Try informal resolution first</span>
+            <span style="font-size:11px;font-weight:700;color:var(--warning)">→ Find the grievance procedure</span>
+            <span style="font-size:11px;font-weight:700;color:var(--warning)">→ Brief union rep before lodging</span>
+          </div>
+        </div>
+        <div style="background:var(--danger-soft,#fdecea);border:1.5px solid var(--danger,#c0392b);border-radius:12px;padding:14px">
+          <div style="font-weight:700;color:var(--danger,#c0392b);margin-bottom:5px">\u274c Red — Do not lodge yet</div>
+          <div style="font-size:13px;color:var(--text-soft);line-height:1.6">You answered YES to 0 or 1 questions. Lodging a formal grievance now could harm your position more than it helps. Get legal or union advice before proceeding, and build your evidence base first.</div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:var(--danger)">→ Get union or legal advice first</span>
+            <span style="font-size:11px;font-weight:700;color:var(--danger)">→ Gather specific evidence</span>
+            <span style="font-size:11px;font-weight:700;color:var(--danger)">→ Consider your options carefully</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="prep-sec">
+      <h3>${ICONS.shield} Ask Lee: "Do I have enough to proceed?"</h3>
+      <p class="prep-lead">Describe your situation to Lee in the Ask Lee tab and say: <strong>"Should I lodge a formal grievance? Do I have enough to proceed, or will this hurt my case?"</strong> Lee will run a viability assessment and give you an honest answer.</p>
+      <button class="btn btn-primary" id="viabilityToLee">${ICONS.chat} Ask Lee about my viability</button>
+    </section>
+  `;
+
+  wireAcc(panel);
+  panel.querySelector('#viabilityToLee')?.addEventListener('click', () => {
+    State.tab = 'chat'; render();
+  });
+}
+
+/* ================================================================
+   UNION BRIEFING CENTRE  (Expert panel recommendation)
+   Constitutional rights + shop steward powers + SA union directory
+   ================================================================ */
+function renderUnionInPrepPanel(panel, c, acc, wireAcc) {
+  const SA_UNIONS = [
+    { name:'NUMSA',    sector:'Metal & Engineering',              members:'338,000+', tel:'011 689 1700', web:'numsa.org.za',    color:'#dc2626' },
+    { name:'NEHAWU',   sector:'Health, Education & Allied',       members:'250,000+', tel:'012 335 4400', web:'nehawu.org.za',   color:'#1a3a5c' },
+    { name:'SADTU',    sector:'Education (Teachers)',             members:'270,000+', tel:'011 522 6900', web:'sadtu.org.za',    color:'#b45309' },
+    { name:'POPCRU',   sector:'Police, Prisons & Justice',        members:'160,000+', tel:'011 442 5440', web:'popcru.org.za',   color:'#1c5234' },
+    { name:'SACCAWU',  sector:'Commercial, Catering & Allied',    members:'120,000+', tel:'031 304 9333', web:'saccawu.org.za',  color:'#065f46' },
+    { name:'SADSAWU',  sector:'Domestic Service & Allied',        members:'Domestic workers', tel:'011 838 2077', web:'sadsawu.org',color:'#7a1c1c' },
+    { name:'SACTWU',   sector:'Clothing, Textile & Footwear',     members:'100,000+', tel:'021 447 7120', web:'sactwu.org.za',   color:'#5a2d82' },
+    { name:'AMCU',     sector:'Mining (Platinum Belt)',           members:'80,000+',  tel:'018 462 4700', web:'amcu.co.za',      color:'#374151' },
+    { name:'CAWUSA',   sector:'Wholesale, Retail & Commerce',     members:'50,000+',  tel:'021 418 2800', web:null,              color:'#0e7490' },
+    { name:'SATU',     sector:'Transport (Road & Rail)',          members:'45,000+',  tel:'011 337 7373', web:null,              color:'#92400e' },
+    { name:'SACPU',    sector:'Chemical & Energy Workers',        members:'60,000+',  tel:'011 833 4280', web:null,              color:'#374151' },
+    { name:'PAWUSA',   sector:'Public Service',                   members:'40,000+',  tel:'012 315 5880', web:null,              color:'#5a2d82' },
+  ];
+
+  panel.innerHTML = `
+    <section class="prep-sec">
+      <h3>\u270a Your constitutional right to union representation</h3>
+      <div style="background:rgba(180,83,9,.1);border:1.5px solid rgba(180,83,9,.4);border-radius:12px;padding:14px;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:var(--ink)">Section 23 of the Constitution of South Africa</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text-soft)">Every worker has the right to form and join a trade union, to participate in the activities and programmes of a trade union, and to strike. This right cannot be taken away by your employer, your contract, or any workplace policy.</p>
+      </div>
+      <div style="background:rgba(28,82,52,.08);border:1px solid rgba(28,82,52,.25);border-radius:10px;padding:13px">
+        <div style="font-weight:700;font-size:13px;color:var(--forest);margin-bottom:6px">\ud83d\udea8 LRA s187 — Automatically unfair dismissal</div>
+        <p style="font-size:13px;line-height:1.6;color:var(--text-soft)">Dismissing an employee for joining, belonging to, or exercising union rights is <strong>automatically unfair</strong>. Compensation can reach 24 months' pay. Your employer knows this — and it changes the calculus when you invoke union rights.</p>
+      </div>
+    </section>
+
+    <section class="prep-sec">
+      <h3>\ud83e\udd1d Your right to a shop steward in any hearing</h3>
+      <div style="background:var(--danger-soft,#fdecea);border:1.5px solid var(--danger,#c0392b);border-radius:10px;padding:12px;margin-bottom:12px;font-weight:700;font-size:14px;color:var(--danger,#c0392b)">
+        \ud83d\udce2 You have the right to a shop steward or representative in EVERY disciplinary hearing and grievance meeting. Your employer cannot lawfully refuse this.
+      </div>
+      <p style="font-size:13px;color:var(--text-soft);line-height:1.6;margin-bottom:10px">How to invoke it — say or write this <strong>before any hearing</strong>:</p>
+      <div style="background:var(--cream);border:1px solid var(--line-strong);border-radius:8px;padding:12px;font-style:italic;font-size:13px;color:var(--ink);margin-bottom:10px">
+        "I hereby formally request that my shop steward / union representative [Name if known] be present at this [disciplinary hearing / grievance meeting]. This is my right under the LRA. I am not available to proceed without representation."
+      </div>
+      <p style="font-size:12px;color:var(--text-mute)">Put this in writing (WhatsApp, email) before you enter any meeting. If your employer refuses, that refusal is itself procedural unfairness that strengthens your case.</p>
+    </section>
+
+    <section class="prep-sec">
+      <h3>\u26a1 What your shop steward can do for you</h3>
+      ${acc([
+        { q: 'Be present and speak on your behalf',
+          a: '<p>A shop steward can attend every disciplinary hearing and grievance meeting. They can put questions to witnesses, make representations, and argue your case. They are NOT just a silent observer — they are an active participant.</p>' },
+        { q: 'File collective grievances',
+          a: '<p>If the same issue affects multiple colleagues (a manager who systematically bullies, a pay discrepancy that affects a whole team, a policy that discriminates), your shop steward can file a collective grievance. This is far more powerful than individual action and your employer cannot dismiss 50 people for it.</p>' },
+        { q: 'Negotiate settlement',
+          a: '<p>Shop stewards can negotiate on your behalf — a reinstatement, a settlement amount, a reference letter. They know your employer, they know the industry, and they know what is and isn\'t acceptable. Use this.</p>' },
+        { q: 'Identify when your case is a collective matter',
+          a: '<p>Sometimes your individual case is weak alone but the same facts support collective action that is very strong. A systematic promotion bias affecting several women is stronger as a collective discrimination complaint than as individual constructive dismissal cases. Your shop steward can see this pattern when you cannot.</p>' },
+        { q: 'Access union legal resources and attorneys',
+          a: '<p>Major unions have in-house legal teams or relationships with specialist labour attorneys. Once your case is formally backed by your union, you get access to legal resources that would otherwise cost you R300–R600 per hour. This changes the power balance entirely.</p>' },
+      ])}
+    </section>
+
+    <section class="prep-sec">
+      <h3>\ud83d\udcaa When collective action beats individual action</h3>
+      <p class="prep-lead">Before you file your individual CCMA case, ask your shop steward: <strong>"Are other colleagues in the same situation?"</strong> If yes, collective action may be your strongest path.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:rgba(28,82,52,.06);border:1px solid rgba(28,82,52,.2);border-radius:10px;padding:12px">
+          <div style="font-weight:700;font-size:12px;color:var(--forest);margin-bottom:6px">\u2705 Individual action is right when:</div>
+          <ul style="font-size:12px;color:var(--text-soft);padding-left:16px;line-height:1.7">
+            <li>Your situation is unique and affects only you</li>
+            <li>You want reinstatement (CCMA can order it)</li>
+            <li>You have already left the employer</li>
+            <li>The time limit is tight (30 days)</li>
+          </ul>
+        </div>
+        <div style="background:rgba(180,83,9,.05);border:1px solid rgba(180,83,9,.2);border-radius:10px;padding:12px">
+          <div style="font-weight:700;font-size:12px;color:#b45309;margin-bottom:6px">\u270a Collective action is stronger when:</div>
+          <ul style="font-size:12px;color:var(--text-soft);padding-left:16px;line-height:1.7">
+            <li>Multiple employees face the same problem</li>
+            <li>A policy discriminates against a group</li>
+            <li>You want the practice STOPPED (not just compensation)</li>
+            <li>Retaliation risk is high individually but low collectively</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="prep-sec">
+      <h3>\ud83d\udccb Find your union — SA union directory by sector</h3>
+      <p class="prep-lead">If you are not yet a union member, joining before a dispute gives you immediate access to representation and legal resources. Most unions allow existing disputes to be represented if the matter is ongoing.</p>
+      <div style="display:flex;flex-direction:column;gap:8px" id="unionDir">
+        ${SA_UNIONS.map(u => `
+          <div style="display:flex;align-items:center;gap:12px;background:var(--cream);border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px">
+            <div style="width:42px;height:42px;border-radius:10px;background:${u.color}22;display:grid;place-items:center;font-weight:900;font-size:12px;color:${u.color};flex-shrink:0;line-height:1.1;text-align:center">${esc(u.name)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:13px;color:var(--ink)">${esc(u.name)}</div>
+              <div style="font-size:11px;color:${u.color};font-weight:600">${esc(u.sector)}</div>
+              <div style="font-size:11px;color:var(--text-mute)">${esc(u.members)} members</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <a href="tel:${u.tel.replace(/\s/g,'')}" style="display:block;font-size:12px;font-weight:600;color:var(--forest);text-decoration:none">\ud83d\udcde ${esc(u.tel)}</a>
+              ${u.web ? `<a href="https://${u.web}" target="_blank" rel="noopener" style="font-size:11px;color:var(--moss);text-decoration:underline">${esc(u.web)}</a>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+      <p style="font-size:12px;color:var(--text-mute);margin-top:12px">\ud83d\udcde <strong>COSATU central:</strong> 011 339 4911 &nbsp;|&nbsp; <strong>FEDUSA:</strong> 012 346 5950 &nbsp;|&nbsp; <strong>Legal Aid SA:</strong> 0800 110 110 (free)</p>
+    </section>
+  `;
+  wireAcc(panel);
+}
+
+/* ── Patch tabPrepare to inject the new render functions ────────── */
+const _origTabPrepare = tabPrepare;
+tabPrepare = function(body, c) {
+  _origTabPrepare(body, c);
+  // Replace the render functions in the scope of the rendered panel
+  // by hooking into the already-rendered DOM
+  const prepBody = body.querySelector('#prepPanel');
+  const wrap     = body.querySelector('.tabview');
+  if (!prepBody || !wrap) return;
+
+  // We need access to wireAcc and doDont from the original tabPrepare closure.
+  // Since they are inner functions, we re-declare minimal versions here.
+  function wireAcc2(scope) {
+    scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
+      const b = h.nextElementSibling;
+      const open = !b.hidden;
+      b.hidden = open;
+      h.setAttribute('aria-expanded', String(!open));
+      h.classList.toggle('open', !open);
+    });
+  }
+
+  function acc2(items) {
+    return items.map(it => `
+      <div class="prep-acc">
+        <button class="prep-acc-head" aria-expanded="false">
+          <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
+        </button>
+        <div class="prep-acc-body" hidden>${it.a}</div>
+      </div>`).join('');
+  }
+
+  // Override click handlers on the tabs we added
+  wrap.querySelectorAll('.prep-tab').forEach(b => {
+    b.onclick = () => {
+      wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      const p = b.dataset.p;
+      const panel = wrap.querySelector('#prepPanel');
+      if (!panel) return;
+      if (p === 'viability') renderViabilityInPrepPanel(panel, c, wireAcc2, null);
+      else if (p === 'union') renderUnionInPrepPanel(panel, c, acc2, wireAcc2);
+      else if (p === 'ccma') {
+        // Re-call original CCMA render from the original tabPrepare logic
+        // Since we can't access the inner function, we trigger a re-render
+        // by briefly invoking the original tabPrepare approach
+        panel.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-mute)">
+          <p>Loading CCMA guide\u2026</p>
+          <button class="btn btn-primary mt12" onclick="State.tab='prepare';render()">Reload</button>
+          <p style="font-size:12px;margin-top:8px">Tip: Select the CCMA tab after the page reloads for the full CCMA guide.</p>
+        </div>`;
+        // Immediately switch state and re-render to get original tabs
+        setTimeout(() => {
+          State.tab = 'prepare';
+          render();
+          // After render, click the CCMA tab
+          setTimeout(() => {
+            document.querySelector('.prep-tab[data-p="ccma"]')?.click();
+          }, 100);
+        }, 50);
+      } else {
+        panel.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-mute)">Loading\u2026</div>`;
+        setTimeout(() => { State.tab = 'prepare'; render(); }, 50);
+      }
+    };
+  });
+
+  // Default: show viability check
+  renderViabilityInPrepPanel(prepBody, c, wireAcc2, null);
+};
+
+
 
 </script>
 </body>
