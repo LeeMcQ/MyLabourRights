@@ -3504,23 +3504,6 @@ const Voice = (() => {
     );
     return _cachedVoice;
   }
-  function pickVoice_old() {
-    const voices = synth.getVoices();
-    if (!voices.length) return null;
-    const want = State.lang === 'af' ? 'af' : 'en';
-    const za = State.lang === 'af' ? 'af-ZA' : 'en-ZA';
-    const inLang = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(want));
-    const pool = inLang.length ? inLang : voices;
-    // quality hints various platforms use for their better voices
-    const good = /natural|neural|enhanced|premium|google|siri|online|wavenet/i;
-    return (
-      pool.find(v => v.lang === za && good.test(v.name)) ||
-      pool.find(v => good.test(v.name)) ||
-      pool.find(v => v.lang === za) ||
-      pool.find(v => !/compact/i.test(v.name)) ||   // avoid low-quality "compact" voices
-      pool[0]
-    );
-  }
 
   function shutUp() { if (synth) synth.cancel(); }
   function isListening() { return listening; }
@@ -3788,7 +3771,7 @@ async function boot() {
           <button class="btn btn-gold btn-sm" id="updYes">Refresh</button></div>`);
         document.body.appendChild(bar);
         bar.querySelector('#updYes').onclick = () => location.reload();
-        setTimeout(() => bar.remove(), 12000);
+        setTimeout(() => bar.remove(), 3000);
       }
     });
   }
@@ -4425,125 +4408,560 @@ const Views = (() => {
   }
 
   /* ============================================================
-     NEW CASE MODAL
+     NEW CASE ENTRY POINT
      ============================================================ */
   function openNewCaseModal(firstCase = false) {
-    const types = [CASE_TYPES.personal, CASE_TYPES.grievance];
-    const node = el(`
-      <div class="modal modal-lg">
-        <div class="modal-head">
-          <h3>${firstCase ? 'Create your first case' : t('new_case')}</h3>
-          ${firstCase ? '' : `<button aria-label="Close" class="modal-close" id="ncClose">${ICONS.x}</button>`}
-        </div>
-        <div class="modal-body">
-          <p class="txt-muted txt-sm" style="margin-bottom:16px">
-            Each case is billed separately and runs for 6 months. Choose the matter that fits.</p>
-          <div id="ncTypes" style="display:flex;flex-direction:column;gap:12px">
-            ${types.map(c => `
-              <label class="action-card" style="cursor:pointer" data-type="${c.id}">
-                <div class="action-ico" style="background:linear-gradient(140deg,${c.accent},var(--ink))">${c.id === 'personal' ? ICONS.scale : ICONS.building}</div>
-                <div style="flex:1">
-                  <h4>${State.lang === 'af' ? c.label_af : c.label}</h4>
-                  <p>${c.scope}</p>
-                  <div class="ready">${c.trialDays}-day free trial \u00b7 then R${c.price} once-off</div>
-                </div>
-                <input type="radio" name="nctype" value="${c.id}" style="margin-top:4px">
-              </label>`).join('')}
-          </div>
-          <div class="field mt16"><label>Give your case a name</label>
-            <input id="ncName" placeholder="e.g. Dismissal from Pick n Pay Malmesbury" /></div>
-          <div class="field"><label>Briefly, what happened?</label>
-            <textarea id="ncDesc" placeholder="A sentence or two is enough \u2014 the AI will ask the rest."></textarea></div>
-
-          <div class="nc-protect">
-            <p class="nc-protect-lead">${ICONS.clock} So we can protect your deadlines \u2014 what kind of matter is this, and roughly when did it happen? <span class="nc-optional">(optional, you can set it later)</span></p>
-            <div class="nc-disputes" id="ncDisputes">
-              ${[
-                ['unfair_dismissal', 'I was dismissed'],
-                ['constructive_dismissal', 'I was forced to resign'],
-                ['unfair_labour_practice', 'Unfair treatment / benefits'],
-                ['retrenchment_operational', 'Retrenchment'],
-                ['unfair_discrimination', 'Discrimination'],
-                ['bcea_money_claim', 'Money I\u2019m owed'],
-              ].map(([k, lbl]) => `<button type="button" class="nc-dchip" data-dk="${k}">${lbl}</button>`).join('')}
-            </div>
-            <div class="field mt12"><label>Roughly when did it happen?</label>
-              <input type="date" id="ncDate" /></div>
-          </div>
-
-          <button class="btn btn-primary btn-block btn-lg" id="ncCreate">Start my case</button>
-        </div>
-      </div>`);
-
-    node.querySelectorAll('#ncTypes label').forEach(l => {
-      l.onclick = () => {
-        node.querySelectorAll('#ncTypes label').forEach(x => x.style.borderColor = 'var(--line)');
-        l.style.borderColor = 'var(--forest)';
-        l.querySelector('input').checked = true;
-      };
-    });
-    if (!firstCase) node.querySelector('#ncClose').onclick = Modal.close;
-    // B3 — dispute chip selection
-    let pickedDispute = null;
-    node.querySelectorAll('.nc-dchip').forEach(ch => ch.onclick = () => {
-      node.querySelectorAll('.nc-dchip').forEach(x => x.classList.remove('on'));
-      ch.classList.add('on'); pickedDispute = ch.dataset.dk;
-    });
-    node.querySelector('#ncCreate').onclick = async () => {
-      const type = (node.querySelector('input[name=nctype]:checked') || {}).value;
-      const name = node.querySelector('#ncName').value.trim();
-      const desc = node.querySelector('#ncDesc').value.trim();
-      const incidentDate = node.querySelector('#ncDate').value || null;
-      if (!type) { toast('Please choose a case type.', 'alert'); return; }
-      if (!name) { toast('Please name your case.', 'alert'); return; }
-      await createCase(type, name, desc, { disputeKey: pickedDispute, incidentDate });
-      Modal.close();
-    };
-    Modal.open(node);
+    State._intakeFirstCase = firstCase;
+    State._intakeStep = 0;
+    State._intakeAnswers = {};
+    go('intake');
   }
 
+  /* ============================================================
+     CREATE CASE
+     ============================================================ */
   async function createCase(type, name, desc, intake = {}) {
-    const cfg = CASE_TYPES[type];
+    const cfg = CASE_TYPES[type] || CASE_TYPES.personal;
     const now = Date.now();
     const c = {
       id: uid('case'), userId: State.user.id,
       caseType: type, name, description: desc,
       createdAt: now,
-      subscription: 'trial',
-      trialEnds: now + cfg.trialDays * 86400000,
-      paidUntil: null,
-      usage: {},
-      messageCount: 0, answeredFollowUps: 0, docCount: 0,
-      offTopicStrikes: 0,
-      status: 'Intake',
-      successRate: null,
-      // B3 — deadline-critical intake captured up front (clock starts now)
+      subscription: type === 'validity_check' ? 'paid' : 'trial',
+      trialEnds: type === 'validity_check' ? now + 99999*86400000 : now + cfg.trialDays*86400000,
+      paidUntil: null, usage: {},
+      messageCount: 0, answeredFollowUps: 0, docCount: 0, offTopicStrikes: 0,
+      status: 'Intake', successRate: null,
       disputeKey: intake.disputeKey || null,
       incidentDate: intake.incidentDate || null,
+      parentCaseId: intake.parentCaseId || null,
+      escalatedFrom: intake.escalatedFrom || null,
+      validityAnswers: intake.validityAnswers || null,
+      grievanceOutcome: null, grievanceDate: null,
+      autoFilled: intake.autoFilled || false,
     };
     await safeWrite('cases', c, 'your new case');
-    // F1 — now that the user has real data, ask the browser to keep it safe
-    DB.persist().then(okPersist => {
-      if (!okPersist && window.__installPrompt) {
-        toast('Tip: install the app to keep your case safe on this device.', 'mic');
-      }
+    DB.persist().then(ok => {
+      if (!ok && window.__installPrompt) toast('Tip: install the app to keep your case safe.', 'mic');
     });
     State.cases = await DB.byIndex('cases', 'userId', State.user.id);
     State.activeCaseId = c.id;
-    State.tab = 'chat';
-
-    // seed the opening AI message
-    const intro = {
-      id: uid('msg'), caseId: c.id, role: 'ai', ts: now,
-      kind: 'opinion',
-      text: `Thank you \u2014 I\u2019ve opened your case, **${esc(name)}**.\n\nI\u2019m going to act as your labour-law attorney here. ${desc ? 'I\u2019ve read your summary.' : ''} I\u2019ll ask focused questions so we build a precise, honest account \u2014 and I\u2019ll be straight with you about both the strengths and the pitfalls.\n\nLet\u2019s begin: walk me through what happened, in the order it happened. Start from the first thing that felt wrong.`,
-    };
+    let introText;
+    if (type === 'validity_check') {
+      introText = 'Hi \u2014 I\u2019m Lee, your AI labour-law advisor.\n\nTell me what happened at work and I\u2019ll give you an honest read on whether you have a valid case, what type it is, and what to do next.\n\nStart anywhere \u2014 there\u2019s no wrong place to begin.';
+    } else if (intake.escalatedFrom === 'grievance') {
+      introText = 'I can see your internal grievance has concluded. Let\u2019s build the strongest CCMA referral from everything you\u2019ve already gathered.\n\nBriefly \u2014 how did the hearing end, and what was the employer\u2019s stated reason for rejecting it?';
+    } else if (intake.escalatedFrom === 'validity_check') {
+      introText = 'Based on your situation check, you have grounds to pursue a formal ' + (intake.disputeKey ? intake.disputeKey.replace(/_/g,' ') : 'workplace dispute') + '.\n\nI\u2019ve carried over what you told me. Walk me through what happened from the very first incident.';
+    } else {
+      introText = 'Thank you \u2014 I\u2019ve opened your case, **' + esc(name) + '**.\n\nI\u2019m going to act as your labour-law attorney here. ' + (desc ? 'I\u2019ve read your summary.' : '') + ' I\u2019ll ask focused questions so we build a precise, honest account.\n\nLet\u2019s begin: walk me through what happened in the order it happened. Start from the first thing that felt wrong.';
+    }
+    const intro = { id: uid('msg'), caseId: c.id, role: 'ai', ts: now, kind: 'opinion', text: introText };
     await DB.put('messages', intro);
-    render();
-    toast('Case created \u2014 your free trial has started.');
+    if (type === 'validity_check') {
+      State.tab = 'chat'; render();
+      toast('Situation check started \u2014 completely free.');
+    } else {
+      State.screen = 'docprompt'; render();
+      toast('Case created \u2014 your free trial has started.');
+    }
+    return c;
   }
 
   /* ============================================================
+     ESCALATE CASE
+     ============================================================ */
+  async function escalateCase(parentCase, targetType) {
+    await createCase(targetType, parentCase.name || 'My case', parentCase.description || '', {
+      disputeKey: parentCase.disputeKey,
+      incidentDate: parentCase.incidentDate,
+      parentCaseId: parentCase.id,
+      escalatedFrom: parentCase.caseType,
+      validityAnswers: parentCase.validityAnswers,
+      autoFilled: true,
+    });
+  }
+
+  /* ============================================================
+     INTAKE SCREEN
+     ============================================================ */
+  const INTAKE_MAP = {
+    dismissed:      { disputeKey:'unfair_dismissal',        caseType:'personal',  name:'Unfair dismissal case' },
+    resigned:       { disputeKey:'constructive_dismissal',  caseType:'personal',  name:'Constructive dismissal case' },
+    retrenched:     { disputeKey:'retrenchment_operational',caseType:'personal',  name:'Retrenchment case' },
+    not_paid:       { disputeKey:'bcea_money_claim',        caseType:'personal',  name:'Unpaid wages claim' },
+    unfair_treat:   { disputeKey:'unfair_labour_practice',  caseType:'grievance', name:'Unfair treatment \u2014 workplace dispute' },
+    discrimination: { disputeKey:'unfair_discrimination',   caseType:'personal',  name:'Discrimination case' },
+    harassment:     { disputeKey:'unfair_labour_practice',  caseType:'grievance', name:'Workplace harassment case' },
+    other:          { disputeKey:null,                      caseType:'personal',  name:'Workplace dispute' },
+  };
+
+  function intakeParseAnswers(a) {
+    const m = INTAKE_MAP[a.situation] || INTAKE_MAP.other;
+    return { caseType:m.caseType, disputeKey:m.disputeKey, name:m.name,
+             description:a.freeText||'', incidentDate:a.when||null, autoFilled:true };
+  }
+
+  function screenIntake() {
+    const root = el('<div class="screen active"></div>');
+    const step = State._intakeStep || 0;
+    const answers = State._intakeAnswers || {};
+    const dots = [0,1,2].map(i =>
+      `<div class="intake-dot ${i<step?'done':i===step?'active':''}"></div>`).join('');
+    root.innerHTML = `
+      <div class="intake-screen">
+        <div class="intake-header">
+          <div class="intake-brand">${brandMark}<span>MyLabourRights</span></div>
+          <button class="intake-skip" id="intakeSkip">Fill in manually</button>
+        </div>
+        <div class="intake-card">
+          <div class="intake-progress">${dots}</div>
+          <div id="ib"></div>
+        </div>
+      </div>`;
+    root.querySelector('#intakeSkip').onclick = () => showManualModal();
+    const body = root.querySelector('#ib');
+
+    function showManualModal() {
+      const types = [CASE_TYPES.personal, CASE_TYPES.grievance];
+      const node = el(`
+        <div class="modal modal-lg">
+          <div class="modal-head"><h3>Start a new case</h3>
+            <button aria-label="Close" class="modal-close" id="mcX">${ICONS.x}</button></div>
+          <div class="modal-body">
+            <p class="txt-muted txt-sm" style="margin-bottom:16px">Choose the matter that fits your situation.</p>
+            <div id="mcT" style="display:flex;flex-direction:column;gap:12px">
+              ${types.map(ct => `
+                <label class="action-card" style="cursor:pointer" data-type="${ct.id}">
+                  <div class="action-ico" style="background:linear-gradient(140deg,${ct.accent},var(--ink))">${ct.id==='personal'?ICONS.scale:ICONS.building}</div>
+                  <div style="flex:1"><h4>${ct.label}</h4><p>${ct.scope}</p>
+                    <div class="ready">${ct.trialDays}-day free trial &middot; then R${ct.price} once-off</div></div>
+                  <input type="radio" name="mct" value="${ct.id}" style="margin-top:4px">
+                </label>`).join('')}
+              <div class="validity-tile" id="mcV">
+                <div class="validity-tile-icon">&#x1F50D;</div>
+                <div class="validity-tile-body">
+                  <h4>Not sure if you have a case?</h4>
+                  <p>Answer 5 quick questions and get an honest read.</p>
+                  <span class="validity-tile-badge">Free &middot; No commitment</span>
+                </div>
+              </div>
+            </div>
+            <div class="field mt16"><label>Give your case a name</label>
+              <input id="mcN" placeholder="e.g. Dismissal from Pick n Pay Malmesbury" /></div>
+            <div class="field"><label>Briefly, what happened?</label>
+              <textarea id="mcD" placeholder="A sentence or two is enough \u2014 the AI will ask the rest."></textarea></div>
+            <div class="nc-protect">
+              <p class="nc-protect-lead">${ICONS.clock} Roughly what kind of matter, and when? <span class="nc-optional">(optional)</span></p>
+              <div class="nc-disputes" id="mcDK">
+                ${[['unfair_dismissal','I was dismissed'],['constructive_dismissal','I was forced to resign'],
+                   ['unfair_labour_practice','Unfair treatment'],['retrenchment_operational','Retrenchment'],
+                   ['unfair_discrimination','Discrimination'],['bcea_money_claim','Money I\u2019m owed']]
+                  .map(([k,l]) => `<button type="button" class="nc-dchip" data-dk="${k}">${l}</button>`).join('')}
+              </div>
+              <div class="field mt12"><label>Roughly when did it happen?</label>
+                <input type="date" id="mcDate" /></div>
+            </div>
+            <button class="btn btn-primary btn-block btn-lg" id="mcGo">Start my case</button>
+          </div>
+        </div>`);
+      node.querySelectorAll('#mcT label').forEach(l => {
+        l.onclick = () => {
+          node.querySelectorAll('#mcT label').forEach(x => x.style.borderColor='var(--line)');
+          l.style.borderColor='var(--forest)'; l.querySelector('input').checked=true;
+        };
+      });
+      node.querySelector('#mcV').onclick = () => { Modal.close(); State._checkerStep=0; State._checkerAnswers={}; go('checker'); };
+      node.querySelector('#mcX').onclick = () => { Modal.close(); go('app'); };
+      let dk = null;
+      node.querySelectorAll('.nc-dchip').forEach(ch => ch.onclick = () => {
+        node.querySelectorAll('.nc-dchip').forEach(x => x.classList.remove('on'));
+        ch.classList.add('on'); dk = ch.dataset.dk;
+      });
+      node.querySelector('#mcGo').onclick = async () => {
+        const type = (node.querySelector('input[name=mct]:checked')||{}).value;
+        const name = node.querySelector('#mcN').value.trim();
+        const desc = node.querySelector('#mcD').value.trim();
+        const incidentDate = node.querySelector('#mcDate').value || null;
+        if (!type) { toast('Please choose a case type.','alert'); return; }
+        if (!name) { toast('Please name your case.','alert'); return; }
+        Modal.close();
+        await createCase(type, name, desc, { disputeKey:dk, incidentDate });
+      };
+      Modal.open(node);
+    }
+
+    const situationLabel = {
+      dismissed:'dismissed', resigned:'forced to resign', retrenched:'retrenched',
+      not_paid:'having pay issues', unfair_treat:'experiencing unfair treatment',
+      harassment:'experiencing harassment', discrimination:'facing discrimination', other:'dealing with a workplace issue',
+    };
+
+    if (step === 0) {
+      body.innerHTML = `
+        <div class="intake-lee-row">
+          <div class="intake-avatar">L</div>
+          <div class="intake-bubble">Hi, I\u2019m <strong>Lee</strong> \u2014 your AI labour-law advisor.<br>
+            3 quick questions and I\u2019ll set up your case automatically.
+            <span class="example">Takes about 60 seconds. Skip any time.</span></div>
+        </div>
+        <p style="font-size:var(--fs-sm);font-weight:700;color:var(--text-mute);margin:16px 0 10px">What best describes what happened?</p>
+        <div class="intake-choices">
+          ${[['dismissed','&#x1F6AA;','I was dismissed / fired'],
+             ['resigned','&#x1F624;','I was forced to resign'],
+             ['retrenched','&#x1F4E6;','I was retrenched'],
+             ['not_paid','&#x1F4B8;','I\u2019m not being paid correctly'],
+             ['unfair_treat','&#x26A1;','I\u2019m being treated unfairly'],
+             ['harassment','&#x1F6D1;','I\u2019m being harassed or bullied'],
+             ['discrimination','&#x2696;&#xFE0F;','I\u2019m being discriminated against'],
+             ['other','&#x1F4CB;','Something else']
+           ].map(([v,ic,l]) => `<button class="intake-choice" data-v="${v}"><span class="choice-icon">${ic}</span>${l}</button>`).join('')}
+        </div>`;
+      body.querySelectorAll('.intake-choice').forEach(b => {
+        b.onclick = () => {
+          body.querySelectorAll('.intake-choice').forEach(x => x.classList.remove('selected'));
+          b.classList.add('selected'); answers.situation = b.dataset.v;
+          setTimeout(() => { State._intakeStep=1; State._intakeAnswers=answers; render(); }, 250);
+        };
+      });
+    } else if (step === 1) {
+      const sl = situationLabel[answers.situation] || 'dealing with a workplace issue';
+      body.innerHTML = `
+        <div class="intake-lee-row">
+          <div class="intake-avatar">L</div>
+          <div class="intake-bubble">Got it \u2014 you were <strong>${sl}</strong>.<br>
+            Roughly when did this happen?
+            <span class="example">Even an approximate month helps me check your legal deadline.</span></div>
+        </div>
+        <div class="intake-text-row" style="margin-top:16px">
+          <input type="month" id="iWhen" style="min-height:44px"
+            max="${new Date().toISOString().substring(0,7)}"
+            value="${answers.when ? answers.when.substring(0,7) : ''}" />
+        </div>
+        <div class="intake-actions">
+          <button class="btn btn-ghost" id="iBack">\u2190 Back</button>
+          <button class="btn btn-primary" id="iNext">Next \u2192</button>
+        </div>`;
+      body.querySelector('#iBack').onclick = () => { State._intakeStep=0; render(); };
+      body.querySelector('#iNext').onclick = () => {
+        const v = body.querySelector('#iWhen').value;
+        answers.when = v ? v+'-01' : null;
+        State._intakeStep=2; State._intakeAnswers=answers; render();
+      };
+    } else if (step === 2) {
+      body.innerHTML = `
+        <div class="intake-lee-row">
+          <div class="intake-avatar">L</div>
+          <div class="intake-bubble">Almost done. Briefly describe what happened.
+            <span class="example">One or two sentences is fine \u2014 enough to set the scene.</span></div>
+        </div>
+        <div class="intake-text-row" style="margin-top:16px">
+          <textarea id="iFree" placeholder="e.g. My manager told me I was dismissed for poor performance, but I had no prior warnings\u2026">${answers.freeText||''}</textarea>
+        </div>
+        <div class="intake-actions">
+          <button class="btn btn-ghost" id="iBack">\u2190 Back</button>
+          <button class="btn btn-primary" id="iNext">See my case \u2192</button>
+        </div>`;
+      body.querySelector('#iBack').onclick = () => { State._intakeStep=1; render(); };
+      body.querySelector('#iNext').onclick = () => {
+        answers.freeText = body.querySelector('#iFree').value.trim();
+        State._intakeStep=3; State._intakeAnswers=answers; render();
+      };
+    } else {
+      const parsed = intakeParseAnswers(answers);
+      body.innerHTML = `
+        <div class="intake-lee-row">
+          <div class="intake-avatar">L</div>
+          <div class="intake-bubble">Here\u2019s what I understood \u2014 does this look right?
+            <span class="example">Tap any field to edit before we create your case.</span></div>
+        </div>
+        <div class="intake-confirm-fields">
+          <div class="confirm-field"><label>Case name</label>
+            <input id="cfN" value="${esc(parsed.name)}" /></div>
+          <div class="confirm-field"><label>Case type</label>
+            <select id="cfT">
+              <option value="personal" ${parsed.caseType==='personal'?'selected':''}>Personal Legal Case (CCMA / dismissal)</option>
+              <option value="grievance" ${parsed.caseType==='grievance'?'selected':''}>Company Grievance Labour Dispute</option>
+            </select></div>
+          ${parsed.description ? `<div class="confirm-field"><label>Summary</label>
+            <div class="cf-val">${esc(parsed.description.substring(0,120))}${parsed.description.length>120?'\u2026':''}</div></div>` : ''}
+          ${parsed.incidentDate ? `<div class="confirm-field"><label>Incident date</label>
+            <div class="cf-val">${new Date(parsed.incidentDate).toLocaleDateString('en-ZA',{year:'numeric',month:'long'})}</div></div>` : ''}
+        </div>
+        <div class="intake-actions">
+          <button class="btn btn-ghost" id="iBack">\u2190 Edit</button>
+          <button class="btn btn-primary" id="iConfirm">${ICONS.check} Create my case</button>
+        </div>`;
+      body.querySelector('#iBack').onclick = () => { State._intakeStep=2; render(); };
+      body.querySelector('#iConfirm').onclick = async () => {
+        const name = body.querySelector('#cfN').value.trim() || parsed.name;
+        const type = body.querySelector('#cfT').value;
+        const btn = body.querySelector('#iConfirm');
+        btn.disabled=true; btn.textContent='Creating\u2026';
+        await createCase(type, name, parsed.description, {
+          disputeKey:parsed.disputeKey, incidentDate:parsed.incidentDate, autoFilled:true
+        });
+      };
+    }
+    return root;
+  }
+
+  /* ============================================================
+     VALIDITY CHECKER
+     ============================================================ */
+  const CQ = [
+    { q:'What did your employer do?',
+      ex:'e.g. "They dismissed me without a hearing" / "They haven\u2019t paid me" / "My manager is bullying me"',
+      choices:[
+        {ic:'&#x1F6AA;',l:'Dismissed me (fired)',v:'dismissed'},
+        {ic:'&#x1F624;',l:'Forced me to resign',v:'resigned'},
+        {ic:'&#x1F4E6;',l:'Retrenched me',v:'retrenched'},
+        {ic:'&#x1F4B8;',l:'Not paying me correctly',v:'not_paid'},
+        {ic:'&#x26A1;',l:'Demoted or changed my job',v:'demoted'},
+        {ic:'&#x1F6D1;',l:'Harassing or bullying me',v:'harassment'},
+        {ic:'&#x2696;&#xFE0F;',l:'Discriminating against me',v:'discrimination'},
+        {ic:'&#x1F4CB;',l:'Something else unfair',v:'other'},
+      ]},
+    { q:'When did this start?',
+      ex:'Even an approximate date helps \u2014 it lets me check whether you\u2019re still within the legal time limit.',
+      type:'month'},
+    { q:'Have you already raised this with your employer?',
+      ex:'e.g. Did you speak to HR, send an email, or have a meeting about it?',
+      choices:[
+        {ic:'&#x2705;',l:'Yes \u2014 formally in writing',v:'formal'},
+        {ic:'&#x1F5E3;&#xFE0F;',l:'Yes \u2014 verbally',v:'verbal'},
+        {ic:'&#x274C;',l:'No \u2014 not yet',v:'none'},
+      ]},
+    { q:'Do you have any proof?',
+      ex:'e.g. Emails, payslips, letters, WhatsApp messages, witnesses, or your contract',
+      choices:[
+        {ic:'&#x1F4C2;',l:'Yes \u2014 several documents',v:'strong'},
+        {ic:'&#x1F4C4;',l:'Yes \u2014 a few things',v:'some'},
+        {ic:'&#x1F914;',l:'Not yet \u2014 but I know what to get',v:'possible'},
+        {ic:'&#x2753;',l:'Nothing yet',v:'none'},
+      ]},
+    { q:'What do you want to happen?',
+      ex:'Think about the best realistic outcome for you.',
+      choices:[
+        {ic:'&#x1F3E2;',l:'Get my job back',v:'reinstatement'},
+        {ic:'&#x1F4B0;',l:'Get money I\u2019m owed',v:'compensation'},
+        {ic:'&#x1F6D1;',l:'Stop the unfair treatment',v:'stop'},
+        {ic:'&#x1F4C4;',l:'Get a settlement and move on',v:'settlement'},
+        {ic:'&#x1F4AC;',l:'Just understand my rights first',v:'understand'},
+      ]},
+  ];
+
+  function validityVerdict(a) {
+    const act=a[0], when=a[1], raised=a[2], proof=a[3];
+    let score=0, caseType='personal', disputeKey=null;
+    const strengths=[], risks=[];
+    if (['dismissed','resigned','retrenched'].includes(act)) {
+      score+=3; caseType='personal';
+      disputeKey=act==='dismissed'?'unfair_dismissal':act==='resigned'?'constructive_dismissal':'retrenchment_operational';
+      strengths.push('Clear legal grounds under the LRA for dismissal or forced resignation');
+    } else if (act==='not_paid') {
+      score+=3; caseType='personal'; disputeKey='bcea_money_claim';
+      strengths.push('Unpaid wages are strongly enforceable under the BCEA');
+    } else if (act==='discrimination') {
+      score+=2; caseType='personal'; disputeKey='unfair_discrimination';
+      strengths.push('Discrimination is a protected ground under the EEA');
+    } else if (['harassment','demoted'].includes(act)) {
+      score+=2; caseType='grievance'; disputeKey='unfair_labour_practice';
+      strengths.push('Harassment and demotion are recognised unfair labour practices');
+    } else {
+      score+=1; risks.push('The specific conduct needs further analysis to classify correctly');
+    }
+    if (when) {
+      const months = Math.round((Date.now()-new Date(when).getTime())/(1000*60*60*24*30));
+      if (['dismissed','resigned','retrenched'].includes(act) && months>3) {
+        score-=2; risks.push('Warning: CCMA deadline is 30 days for dismissal \u2014 you may need condonation. Act now.');
+      } else if (months<=1) { score+=1; strengths.push('Well within the legal time limits'); }
+      else if (months<=3) { score+=1; strengths.push('Still within typical deadlines'); }
+    }
+    if (proof==='strong'){score+=2;strengths.push('Multiple documents \u2014 strong evidence base');}
+    else if (proof==='some'){score+=1;strengths.push('Some supporting documents \u2014 a solid starting point');}
+    else if (proof==='none'){score-=1;risks.push('No evidence yet \u2014 gather documents before proceeding');}
+    if (raised==='formal'){score+=1;strengths.push('Formal complaint raised \u2014 shows you followed process');}
+    else if (raised==='none'&&['dismissed','resigned'].includes(act)) {
+      risks.push('For ongoing disputes, raising it internally first strengthens your position');
+    }
+    let verdict,title,desc,primaryCta,secondaryCta;
+    if (score>=5) {
+      verdict='green'; title='You likely have a valid case';
+      desc='Based on what you\u2019ve told me, your situation shows clear legal grounds. The next step is to start building your case properly.';
+      primaryCta=caseType==='personal'?{label:'Start my personal case (CCMA)',type:'personal'}:{label:'Start my grievance process',type:'grievance'};
+      secondaryCta={label:'Talk to Lee first',type:'chat'};
+    } else if (score>=2) {
+      verdict='amber'; title='Possible case \u2014 needs more information';
+      desc='There are grounds here, but some gaps make it hard to be certain. Talk to Lee to fill in the missing pieces.';
+      primaryCta={label:'Talk to Lee about my situation',type:'chat'};
+      secondaryCta={label:'Start a case anyway',type:caseType};
+    } else {
+      verdict='red'; title='Difficult to pursue right now';
+      desc='Based on what you\u2019ve shared, this may be hard to win as things stand. You may need more evidence or legal advice first.';
+      primaryCta={label:'Talk to Lee to explore options',type:'chat'};
+      secondaryCta={label:'See matched law firms',type:'firms'};
+    }
+    return {verdict,title,desc,strengths,risks,primaryCta,secondaryCta,caseType,disputeKey};
+  }
+
+  function screenChecker() {
+    const root = el('<div class="screen active"></div>');
+    const step = State._checkerStep || 0;
+    const answers = State._checkerAnswers || {};
+    const dots = CQ.map((_,i) =>
+      `<div class="intake-dot ${i<step?'done':i===step?'active':''}"></div>`).join('');
+    root.innerHTML = `
+      <div class="checker-screen">
+        <div class="intake-header">
+          <div class="intake-brand">${brandMark}<span>MyLabourRights</span></div>
+          <button class="intake-skip" id="cBack">\u2190 Back</button>
+        </div>
+        <div class="checker-card">
+          <div class="intake-progress">${dots}</div>
+          <div id="cb"></div>
+        </div>
+      </div>`;
+    root.querySelector('#cBack').onclick = () => {
+      if (step===0) go('intake'); else { State._checkerStep=step-1; render(); }
+    };
+    const body = root.querySelector('#cb');
+    if (step < CQ.length) {
+      const q = CQ[step];
+      body.innerHTML = `
+        <div class="checker-q-label">Question ${step+1} of ${CQ.length}</div>
+        <div class="checker-q-text">${q.q}</div>
+        <div class="checker-q-example">${q.ex}</div>
+        ${q.type==='month'
+          ? `<div class="intake-text-row"><input type="month" id="cM" style="min-height:44px"
+               max="${new Date().toISOString().substring(0,7)}"
+               value="${answers[step]?answers[step].substring(0,7):''}"/></div>
+             <div class="checker-nav">
+               ${step>0?'<button class="btn btn-ghost" id="cqB">\u2190 Back</button>':''}
+               <button class="btn btn-primary" id="cqN">Next \u2192</button>
+             </div>`
+          : `<div class="checker-choices">
+               ${q.choices.map(c => `<button class="checker-choice ${answers[step]===c.v?'selected':''}" data-v="${c.v}">
+                 <span class="cq-icon">${c.ic}</span>${c.l}</button>`).join('')}
+             </div>`}`;
+      if (q.type==='month') {
+        const nb=body.querySelector('#cqN'), bb=body.querySelector('#cqB');
+        if(bb) bb.onclick = ()=>{State._checkerStep=step-1;render();};
+        nb.onclick = ()=>{
+          const v=body.querySelector('#cM').value;
+          State._checkerAnswers={...answers,[step]:v?v+'-01':null};
+          State._checkerStep=step+1; render();
+        };
+      } else {
+        body.querySelectorAll('.checker-choice').forEach(b=>{
+          b.onclick=()=>{
+            body.querySelectorAll('.checker-choice').forEach(x=>x.classList.remove('selected'));
+            b.classList.add('selected');
+            State._checkerAnswers={...answers,[step]:b.dataset.v};
+            setTimeout(()=>{State._checkerStep=step+1;render();},220);
+          };
+        });
+      }
+    } else {
+      const R = validityVerdict(answers);
+      const em = {green:'&#x2705;',amber:'&#x26A0;&#xFE0F;',red:'&#x274C;'};
+      body.innerHTML = `
+        <div class="verdict-card ${R.verdict}">
+          <div class="verdict-emoji">${em[R.verdict]}</div>
+          <div class="verdict-title">${R.title}</div>
+          <div class="verdict-desc">${R.desc}</div>
+          <div class="verdict-points">
+            ${R.strengths.map(s=>`<div class="verdict-point"><span>&#x1F4AA;</span><span>${s}</span></div>`).join('')}
+            ${R.risks.map(r=>`<div class="verdict-point"><span>&#x26A0;&#xFE0F;</span><span>${r}</span></div>`).join('')}
+          </div>
+          <div class="verdict-ctas">
+            <button class="btn btn-primary btn-block" id="vP">${R.primaryCta.label}</button>
+            <button class="btn btn-ghost btn-block" id="vS">${R.secondaryCta.label}</button>
+          </div>
+        </div>`;
+      async function doCta(cta) {
+        if (cta.type==='chat') {
+          await createCase('validity_check','Situation check','',{
+            disputeKey:R.disputeKey, incidentDate:answers[1]||null, validityAnswers:answers});
+        } else if (cta.type==='firms') {
+          go('app',{tab:'firms'});
+        } else {
+          const nameMap={personal:'Workplace dispute',grievance:'Workplace grievance'};
+          await createCase(cta.type,nameMap[cta.type]||'My case','',{
+            disputeKey:R.disputeKey, incidentDate:answers[1]||null,
+            validityAnswers:answers, escalatedFrom:'validity_check', autoFilled:true});
+        }
+      }
+      body.querySelector('#vP').onclick = ()=>doCta(R.primaryCta);
+      body.querySelector('#vS').onclick = ()=>doCta(R.secondaryCta);
+    }
+    return root;
+  }
+
+  /* ============================================================
+     DOC PROMPT SCREEN
+     ============================================================ */
+  function screenDocPrompt() {
+    const root = el('<div class="screen active"></div>');
+    const c = State.cases.find(x=>x.id===State.activeCaseId);
+    if (!c) { go('app'); return root; }
+    const hints = {
+      unfair_dismissal:        {first:'your dismissal letter',           why:'It proves dismissal happened and shifts the fairness onus to your employer.'},
+      constructive_dismissal:  {first:'your resignation letter',         why:'"Due to intolerable conditions" in your own words carries real legal weight.'},
+      retrenchment_operational:{first:'the retrenchment notice',         why:'It must state the reason, effective date, and severance offered.'},
+      unfair_labour_practice:  {first:'the email or letter showing the change', why:'The employer\u2019s own words are your strongest evidence.'},
+      unfair_discrimination:   {first:'your internal complaint',         why:'Proves you gave the employer a chance to correct it first.'},
+      bcea_money_claim:        {first:'payslips for the affected months',why:'They directly prove the shortfall between agreed and paid amounts.'},
+    };
+    const h = hints[c.disputeKey] || {first:'your most important document',why:'The right evidence at the start builds the strongest foundation.'};
+    root.innerHTML = `
+      <div class="docprompt-screen">
+        <div class="intake-header" style="max-width:520px;width:100%">
+          <div class="intake-brand">${brandMark}<span>MyLabourRights</span></div>
+          <button class="intake-skip" id="dpSkip">Skip for now</button>
+        </div>
+        <div class="docprompt-card">
+          <div class="docprompt-header">
+            <div class="docprompt-icon">${ICONS.doc}</div>
+            <div><div class="docprompt-title">Now, let\u2019s add your evidence</div>
+              <div class="docprompt-sub">${esc(c.name)}</div></div>
+          </div>
+          <div class="docprompt-tip"><strong>Start with ${h.first}.</strong><br>${h.why}</div>
+          <div class="dropzone" id="dpDZ">
+            ${ICONS.upload}
+            <h4>Upload your first document</h4>
+            <p>Photos (JPG, PNG) or files (PDF, DOCX). Tap to choose \u2014 camera supported on mobile.</p>
+          </div>
+          <input type="file" id="dpF" multiple accept="image/*,.pdf,.doc,.docx,.txt" style="display:none">
+          <div id="dpUL" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;"></div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+            <button class="btn btn-primary btn-block" id="dpGo">Continue to my case &#x2192;</button>
+          </div>
+          <p style="font-size:var(--fs-xs);color:var(--text-mute);text-align:center;margin-top:10px">
+            You can add more documents any time from the Evidence tab.</p>
+        </div>
+      </div>`;
+    const dz=root.querySelector('#dpDZ'), fi=root.querySelector('#dpF'), ul=root.querySelector('#dpUL');
+    async function handleFile(file) {
+      const row = el(`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;
+        background:var(--success-soft,#eaf5ee);border-radius:var(--r-sm);font-size:var(--fs-sm)">
+        ${ICONS.check}<span>${esc(file.name)}</span></div>`);
+      ul.appendChild(row);
+      if (typeof addDoc==='function') await addDoc(c, file);
+    }
+    dz.onclick=()=>fi.click();
+    fi.onchange=async()=>{for(const f of fi.files)await handleFile(f);fi.value='';};
+    dz.ondragover=e=>{e.preventDefault();dz.style.borderColor='var(--moss)';};
+    dz.ondragleave=()=>dz.style.borderColor='';
+    dz.ondrop=async e=>{e.preventDefault();dz.style.borderColor='';for(const f of e.dataTransfer.files)await handleFile(f);};
+    const goApp=()=>{State.tab='chat';go('app');};
+    root.querySelector('#dpSkip').onclick=goApp;
+    root.querySelector('#dpGo').onclick=goApp;
+    return root;
+  }
+
+  /* ============================================================
+     APP SHELL  /* ============================================================
      APP SHELL — sidebar + tabs + mobile nav
      ============================================================ */
   const TABS = [
@@ -4885,7 +5303,82 @@ function tabDashboard(body, c) {
   if (expired) wrap.querySelector('#dashUpgrade').onclick = () => openPaywall(c);
   renderDeadlinePanel(wrap.querySelector('#deadlineBody'), c);
   renderStrengthPanel(wrap.querySelector('#strengthPanel'), c);
+  if (c.caseType === 'grievance') renderGrievanceOutcomeSection(wrap, c);
+  if (c.escalatedFrom) renderEscalationBanner(wrap, c);
   body.appendChild(wrap);
+}
+
+function renderGrievanceOutcomeSection(wrap, c) {
+  const panel = document.createElement('div');
+  panel.className = 'panel mt20';
+  const outcome = c.grievanceOutcome;
+  const pill = outcome
+    ? `<span class="pill pill-line">${outcome==='resolved'?'&#x2705; Resolved':outcome==='failed'?'&#x274C; Failed':'&#x23F3; Pending'}</span>`
+    : '';
+  let bodyHtml = '';
+  if (!outcome) {
+    bodyHtml = `<p class="txt-sm txt-muted" style="margin-bottom:12px">Record the outcome of your grievance hearing so we know what to do next.</p>
+      <div class="grievance-outcome-row" id="goChips">
+        <button class="go-chip" data-o="resolved">&#x2705; Resolved in my favour</button>
+        <button class="go-chip" data-o="failed">&#x274C; Employer rejected my grievance</button>
+        <button class="go-chip" data-o="pending">&#x23F3; Still pending</button>
+      </div>`;
+  } else if (outcome === 'failed') {
+    bodyHtml = `<p class="txt-sm txt-muted" style="margin-bottom:12px">Your grievance was unsuccessful. You can now escalate to the CCMA — all your data carries over.</p>
+      <div class="escalate-banner" style="margin:0">
+        <div class="escalate-banner-icon">&#x2696;&#xFE0F;</div>
+        <div class="escalate-banner-body">
+          <h4>Ready to escalate to the CCMA?</h4>
+          <p>Your data, documents, and timeline carry into a new personal CCMA case.</p>
+          <button class="btn btn-primary btn-sm" id="escalateToCCMA">${ICONS.scale} Escalate to CCMA case</button>
+        </div>
+      </div>`;
+  } else if (outcome === 'resolved') {
+    bodyHtml = `<p class="txt-sm txt-muted">Your grievance was resolved. No further action needed unless the employer doesn’t follow through.</p>`;
+  } else {
+    bodyHtml = `<p class="txt-sm txt-muted">Grievance still pending. Record the outcome once the hearing concludes.</p>`;
+  }
+  panel.innerHTML = `
+    <div class="panel-head"><h3>${ICONS.building} Grievance outcome</h3>${pill}</div>
+    <div class="panel-body">${bodyHtml}</div>`;
+  wrap.appendChild(panel);
+  panel.querySelectorAll('.go-chip').forEach(chip => {
+    chip.onclick = async () => {
+      const fc = State.cases.find(x => x.id === c.id);
+      if (!fc) return;
+      fc.grievanceOutcome = chip.dataset.o;
+      fc.grievanceDate = new Date().toISOString().split('T')[0];
+      await DB.put('cases', fc);
+      State.cases = await DB.byIndex('cases', 'userId', State.user.id);
+      render();
+    };
+  });
+  const eb = panel.querySelector('#escalateToCCMA');
+  if (eb) eb.onclick = async () => {
+    eb.disabled=true; eb.textContent='Creating…';
+    const fc = State.cases.find(x => x.id === c.id);
+    if (fc) await escalateCase(fc, 'personal');
+  };
+}
+
+function renderEscalationBanner(wrap, c) {
+  const parentCase = State.cases.find(x => x.id === c.parentCaseId);
+  const fromLabel = { validity_check:'situation check', grievance:'internal grievance' };
+  const banner = document.createElement('div');
+  banner.className = 'escalate-banner';
+  banner.style.marginTop = '18px';
+  const linkBtn = parentCase ? '<button class="btn btn-ghost btn-sm" id="viewParent">View source case</button>' : '';
+  banner.innerHTML = `
+    <div class="escalate-banner-icon">&#x1F517;</div>
+    <div class="escalate-banner-body">
+      <h4>Escalated from your ${fromLabel[c.escalatedFrom] || 'previous case'}</h4>
+      <p>Your previous information, dispute details, and documents have been carried over.</p>
+      ${linkBtn}
+    </div>`;
+  wrap.appendChild(banner);
+  if (parentCase) {
+    banner.querySelector('#viewParent').onclick = () => { State.activeCaseId=parentCase.id; render(); };
+  }
 }
 
 /* ---- S1/S2: deadline badge + panel ---- */
@@ -8364,29 +8857,9 @@ function renderUnionInPrepPanel(panel, c, acc, wireAcc) {
   wireAcc(panel);
 }
 
-/* ── Patch tabPrepare to inject the new render functions ────────── */
-const _origTabPrepare = tabPrepare;
-tabPrepare = function(body, c) {
-  _origTabPrepare(body, c);
-  // Replace the render functions in the scope of the rendered panel
-  // by hooking into the already-rendered DOM
-  const prepBody = body.querySelector('#prepPanel');
-  const wrap     = body.querySelector('.tabview');
-  if (!prepBody || !wrap) return;
-
-  // We need access to wireAcc and doDont from the original tabPrepare closure.
-  // Since they are inner functions, we re-declare minimal versions here.
-  function wireAcc2(scope) {
-    scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
-      const b = h.nextElementSibling;
-      const open = !b.hidden;
-      b.hidden = open;
-      h.setAttribute('aria-expanded', String(!open));
-      h.classList.toggle('open', !open);
-    });
-  }
-
-  function acc2(items) {
+/* ── Standalone Grievance panel renderer ─────────────────────────── */
+function renderGrievanceInPrepPanel(panel, c, wireAcc) {
+  function acc(items) {
     return items.map(it => `
       <div class="prep-acc">
         <button class="prep-acc-head" aria-expanded="false">
@@ -8395,45 +8868,185 @@ tabPrepare = function(body, c) {
         <div class="prep-acc-body" hidden>${it.a}</div>
       </div>`).join('');
   }
+  function doDont(dos, donts) {
+    return `<div class="prep-dd">
+      <div class="prep-dd-col do"><h5>${ICONS.check} Do</h5>
+        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+      <div class="prep-dd-col dont"><h5>${ICONS.x} Don\u2019t</h5>
+        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+    </div>`;
+  }
+  panel.innerHTML = `
+    <section class="prep-sec">
+      <h3>${ICONS.spark} What a grievance is \u2014 and why it matters</h3>
+      <p class="prep-lead">A grievance is your formal, written complaint to your employer <em>before</em> things escalate. Done well, it builds your record, forces a response, and can resolve the issue without the CCMA. Done badly, it can hand your employer a defence. This is where you quietly win or lose later.</p>
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.list} Everything to do before you lodge</h3>
+      ${acc([
+        { q: 'Get your facts and dates straight first', a: '<p>Write a simple timeline: what happened, when, who was there, and what was said. Vague complaints get dismissed. Specific, dated facts get taken seriously. Use the <strong>Timeline</strong> tab to build this.</p>' },
+        { q: 'Gather your evidence quietly', a: '<p>Save emails, WhatsApps, payslips, your contract, and any policy that was breached \u2014 <em>before</em> you complain, in case access is cut. Upload them in the <strong>Documents</strong> tab. Never delete anything, even things that look bad.</p>' },
+        { q: 'Read your employer\u2019s grievance policy', a: '<p>Most workplaces have a grievance procedure (often in the contract or handbook). Follow it exactly \u2014 to whom, in what form, and in what timeframe. Following their own process removes their easiest defence.</p>' },
+        { q: 'Decide what outcome you actually want', a: '<p>Be clear: an apology, a reversal, back-pay, a transfer, a stop to the behaviour? A grievance with a clear ask is far stronger than a general complaint. Set this in your case so the AI can help frame it.</p>' },
+      ])}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.check} What to say \u2014 and what not to</h3>
+      ${doDont(
+        ['Stick to facts, dates, and what was said or done','Reference the specific policy or contract term breached','State the outcome you want, clearly','Keep a calm, professional tone throughout','Keep copies of everything you send and receive','Put it in writing, even if you also raise it verbally'],
+        ['Don\u2019t exaggerate, guess, or add things you can\u2019t prove','Don\u2019t insult, threaten, or make it personal','Don\u2019t resign in anger before getting advice','Don\u2019t lie or hide facts \u2014 it destroys your credibility','Don\u2019t delay past your policy\u2019s time limit','Don\u2019t sign anything you don\u2019t understand']
+      )}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.mail} Grievance email generator</h3>
+      <p class="prep-lead">Generate a professional grievance email from your case details. Always read it, edit it, and check the facts before sending.</p>
+      <div class="prep-acc" style="margin-bottom:14px">
+        <button class="prep-acc-head" aria-expanded="false" style="background:var(--warning-soft,#fef3c7);border-color:var(--warning,#b7791f)">
+          <span style="color:var(--warning,#b7791f);font-weight:700">\u26a0 Before you draft \u2014 the scope problem</span>
+          <span class="prep-acc-caret">${ICONS.arrow}</span>
+        </button>
+        <div class="prep-acc-body" hidden>
+          <p><strong>Your grievance letter defines the boundaries of your complaint.</strong> If you describe only one incident, you may inadvertently exclude earlier events from your case. Employer attorneys use your grievance letter to narrow their liability.</p>
+          <ul>
+            <li>List ALL incidents in your Timeline tab first \u2014 then draft the grievance</li>
+            <li>Include the date range: \u201cincidents occurring from [first date] to present\u201d</li>
+            <li>Use \u201cincluding but not limited to\u201d before specific examples</li>
+            <li>Never write \u201cthe only incident was\u201d \u2014 this limits your evidence scope</li>
+            <li>Avoid accidental admissions: don\u2019t say \u201cI was late that day\u201d or \u201cI understand the policy changed\u201d</li>
+          </ul>
+          <p><strong>The employer\u2019s attorney will hold you to exactly what you wrote. So will the CCMA commissioner.</strong></p>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="prepGrievEmail">${ICONS.mail} Generate my grievance email</button>
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.clock} What to do after the grievance hearing</h3>
+      ${acc([
+        { q: 'Get the outcome in writing', a: '<p>Ask for the decision and reasons in writing. If they only tell you verbally, send a polite email summarising what you were told and asking them to confirm \u2014 this creates a record.</p>' },
+        { q: 'If you win: confirm and follow up', a: '<p>Make sure the agreed action actually happens. Diarise it. If they don\u2019t follow through, that itself becomes new evidence.</p>' },
+        { q: 'If you lose: check for an internal appeal', a: '<p>Most procedures allow an appeal within a set number of days. Use it \u2014 it shows you exhausted internal remedies, which strengthens any later CCMA referral.</p>' },
+        { q: 'Watch the CCMA clock', a: '<p>If the issue is dismissal or an unfair labour practice and it isn\u2019t resolved, strict CCMA deadlines apply (often 30 or 90 days). Check your <strong>Home</strong> tab \u2014 the deadline clock is running.</p>' },
+      ])}
+    </section>`;
+  wireAcc(panel);
+  panel.querySelector('#prepGrievEmail')?.addEventListener('click', () => generatePrepEmail(c, 'grievance'));
+}
 
-  // Override click handlers on the tabs we added
-  wrap.querySelectorAll('.prep-tab').forEach(b => {
-    b.onclick = () => {
-      wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
-      b.classList.add('on');
-      const p = b.dataset.p;
-      const panel = wrap.querySelector('#prepPanel');
-      if (!panel) return;
-      if (p === 'viability') renderViabilityInPrepPanel(panel, c, wireAcc2, null);
-      else if (p === 'union') renderUnionInPrepPanel(panel, c, acc2, wireAcc2);
-      else if (p === 'ccma') {
-        // Re-call original CCMA render from the original tabPrepare logic
-        // Since we can't access the inner function, we trigger a re-render
-        // by briefly invoking the original tabPrepare approach
-        panel.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-mute)">
-          <p>Loading CCMA guide\u2026</p>
-          <button class="btn btn-primary mt12" onclick="State.tab='prepare';render()">Reload</button>
-          <p style="font-size:12px;margin-top:8px">Tip: Select the CCMA tab after the page reloads for the full CCMA guide.</p>
-        </div>`;
-        // Immediately switch state and re-render to get original tabs
-        setTimeout(() => {
-          State.tab = 'prepare';
-          render();
-          // After render, click the CCMA tab
-          setTimeout(() => {
-            document.querySelector('.prep-tab[data-p="ccma"]')?.click();
-          }, 100);
-        }, 50);
-      } else {
-        panel.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-mute)">Loading\u2026</div>`;
-        setTimeout(() => { State.tab = 'prepare'; render(); }, 50);
-      }
-    };
+/* ── Standalone CCMA panel renderer ─────────────────────────────── */
+function renderCCMAInPrepPanel(panel, c, wireAcc, acc) {
+  function doDont(dos, donts) {
+    return `<div class="prep-dd">
+      <div class="prep-dd-col do"><h5>${ICONS.check} Do</h5>
+        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+      <div class="prep-dd-col dont"><h5>${ICONS.x} Don\u2019t</h5>
+        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+    </div>`;
+  }
+  panel.innerHTML = `
+    <section class="prep-sec">
+      <h3>${ICONS.scale} How the CCMA works (in plain language)</h3>
+      <p class="prep-lead">The CCMA is a free, informal dispute-resolution body. Most matters go to <strong>conciliation</strong> first (an attempt to settle), and if that fails, to <strong>arbitration</strong> (a commissioner hears both sides and decides). You don\u2019t need a lawyer, but you do need to be prepared.</p>
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.clock} How to log (refer) a case with the CCMA</h3>
+      ${acc([
+        { q: 'Check you\u2019re in time', a: '<p>Unfair dismissal: refer within <strong>30 days</strong>. Unfair labour practice: <strong>90 days</strong>. Discrimination: <strong>6 months</strong>. Late? You can ask for condonation, but it\u2019s not guaranteed. Your <strong>Home</strong> tab tracks this.</p>' },
+        { q: 'Complete the LRA 7.11 referral form', a: '<p>This is the form that starts your case. Use the <strong>AI Actions \u2192 CCMA forms</strong> tool to pre-fill it from your case details. State the dispute type and what you want clearly.</p>' },
+        { q: 'Serve it on your employer and keep proof', a: '<p>You must give a copy to your employer and prove you did (email read-receipt, registered post slip, or signed acknowledgement). No proof of service = a jurisdiction attack on day one.</p>' },
+        { q: 'Wait for the set-down notice', a: '<p>The CCMA will notify you of the date and venue. Diarise it. Missing it can end your case.</p>' },
+      ])}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.doc} What to put in your case (and what to leave out)</h3>
+      ${doDont(
+        ['A clear, dated account of what happened','Your strongest documents, organised (use Evidence \u2192 bundle)','The specific right or term that was breached','A realistic remedy and how you calculated it','Witnesses who actually saw or heard the events'],
+        ['Don\u2019t dump every document \u2014 lead with the strongest','Don\u2019t include hearsay or unverified screenshots as your main proof','Don\u2019t overclaim the remedy \u2014 it damages credibility','Don\u2019t bring irrelevant personal grievances','Don\u2019t rely on memory alone \u2014 back it with documents']
+      )}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.spark} How to use evidence (and how not to)</h3>
+      ${acc([
+        { q: 'Organise it so it tells the story', a: '<p>A commissioner should grasp your case from the first few documents. Use <strong>AI Actions \u2192 Organise evidence bundle</strong> to sort, number, and index everything.</p>' },
+        { q: 'Authenticate it', a: '<p>For screenshots and messages, be ready to say where they came from and when. The employer\u2019s own emails are your strongest evidence \u2014 they\u2019re admissions, not hearsay.</p>' },
+        { q: 'Don\u2019t ambush or fabricate', a: '<p>Never alter a document or invent a date. One fabrication destroys your whole case. Disclose your bundle properly.</p>' },
+      ])}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.chat} What to say at the CCMA \u2014 and what not to</h3>
+      ${doDont(
+        ['Answer the question asked, calmly and briefly','Refer to your bundle by page/number','Stick to facts you can prove','Admit what you genuinely don\u2019t know','Let the documents carry the emotion'],
+        ['Don\u2019t argue, interrupt, or get personal','Don\u2019t guess or exaggerate under pressure','Don\u2019t volunteer weaknesses you weren\u2019t asked about','Don\u2019t lose your temper \u2014 it\u2019s used against you','Don\u2019t accept a bad settlement out of fear']
+      )}
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.shield} Practice a mock CCMA cross-examination</h3>
+      <p class="prep-lead">The best preparation is rehearsing tough questions in private, at your own pace. The mock drill simulates an employer\u2019s representative questioning you.</p>
+      <button class="btn btn-primary" id="prepMock">${ICONS.shield} Start mock CCMA practice</button>
+    </section>
+    <section class="prep-sec">
+      <h3>${ICONS.spark} See your case through the employer\u2019s eyes</h3>
+      <p class="prep-lead">Know every attack before the day. The employer-attack analysis shows their likely arguments and your answer to each.</p>
+      <button class="btn btn-ghost" id="prepAttack">${ICONS.scale} Run employer attack analysis</button>
+    </section>`;
+  wireAcc(panel);
+  panel.querySelector('#prepMock')?.addEventListener('click', () => {
+    if (typeof openCrossExam === 'function') openCrossExam(c); else { State.tab = 'actions'; render(); }
   });
+  panel.querySelector('#prepAttack')?.addEventListener('click', () => {
+    if (typeof openEmployerAttack === 'function') openEmployerAttack(c); else { State.tab = 'actions'; render(); }
+  });
+}
 
-  // Default: show viability check
-  renderViabilityInPrepPanel(prepBody, c, wireAcc2, null);
-};
+/* ── Wire up Grievance and Union panels into tabPrepare ─────────── */
+(function() {
+  const _orig = tabPrepare;
+  tabPrepare = function(body, c) {
+    _orig(body, c);
+    const wrap  = body.querySelector('.tabview');
+    const panel = body.querySelector('#prepPanel');
+    if (!wrap || !panel) return;
+
+    function wireAcc(scope) {
+      scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
+        const b = h.nextElementSibling;
+        const open = !b.hidden;
+        b.hidden = open;
+        h.setAttribute('aria-expanded', String(!open));
+        h.classList.toggle('open', !open);
+      });
+    }
+    function acc(items) {
+      return items.map(it =>
+        `<div class="prep-acc">
+          <button class="prep-acc-head" aria-expanded="false">
+            <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
+          </button>
+          <div class="prep-acc-body" hidden>${it.a}</div>
+        </div>`
+      ).join('');
+    }
+
+    function switchTo(p) {
+      if (p === 'viability')  renderViabilityInPrepPanel(panel, c, wireAcc, null);
+      else if (p === 'union') renderUnionInPrepPanel(panel, c, acc, wireAcc);
+      else if (p === 'ccma')  renderCCMAInPrepPanel(panel, c, wireAcc, acc);
+      else if (p === 'grievance') renderGrievanceInPrepPanel(panel, c, wireAcc);
+    }
+
+    // Re-wire all sub-tab buttons
+    wrap.querySelectorAll('.prep-tab').forEach(b => {
+      b.onclick = () => {
+        wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        switchTo(b.dataset.p);
+      };
+    });
+
+    // Default: viability check
+    switchTo('viability');
+  };
+})();
+
 
 
 /* ================================================================
