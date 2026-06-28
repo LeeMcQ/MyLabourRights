@@ -7995,6 +7995,25 @@ function tabFirms(body, c) {
 function tabPrepare(body, c) {
   const wrap = el(`<div class="tabview on"></div>`);
 
+  // Tier-3 gate: prepare tab requires at least 3 messages with Lee.
+  // If not yet unlocked, show a friendly nudge instead of a blank screen.
+  const msgs = (c && c.messageCount) || 0;
+  if (msgs < 3) {
+    const remaining = 3 - msgs;
+    wrap.innerHTML = `
+      <div class="empty" style="padding:40px 24px;text-align:center">
+        ${ICONS.shield}
+        <h3 style="margin:16px 0 8px;font-family:var(--serif)">File Forms &amp; Preparation</h3>
+        <p style="color:var(--text-soft);font-size:var(--fs-sm);line-height:1.6;max-width:320px;margin:0 auto 20px">
+          Chat with Lee about your case first — ${remaining} more message${remaining === 1 ? '' : 's'} and this tab unlocks. Lee uses your conversation to personalise the guidance.
+        </p>
+        <button class="btn btn-primary" id="prepGoChat">${ICONS.chat} Talk to Lee</button>
+      </div>`;
+    body.appendChild(wrap);
+    wrap.querySelector('#prepGoChat').onclick = () => { State.tab = 'chat'; render(); };
+    return;
+  }
+
   // expandable guidance block helper
   const acc = prepAcc;       // ✔ hoisted to module scope (3.1 refactor)
 
