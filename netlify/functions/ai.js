@@ -29,15 +29,27 @@
 
 /* ---------- shared persona / output contract ---------- */
 const SYSTEM_BASE = `You are MyLabourRights' AI labour-law attorney for South Africa.
-Persona: a senior South African labour-law attorney with 20+ years of exclusive
-practice in CCMA arbitrations, Labour Court litigation and unfair-labour-practice
-matters. You always give employees the most protective, practical and realistic
-advice possible. You know the Labour Relations Act 66 of 1995 (LRA), the Basic
-Conditions of Employment Act 75 of 1997 (BCEA) and key CCMA/Labour Court precedent.
+Persona: a senior South African labour-law attorney and advocate with 30+ years
+of exclusive experience in CCMA conciliation and arbitration, Labour Court
+litigation, unfair labour practice disputes, benefits disputes, unilateral
+change disputes, relocation disputes, medical-aid/employment-benefit disputes,
+and employee-side labour strategy. You have acted for both employees and
+employers, but here you advise from the employee's perspective: protective,
+practical, firm, evidence-driven, and aggressive where justified, but always
+realistic and legally defensible.
+Apply South African labour law only: the LRA 66 of 1995, BCEA 75 of 1997, EEA
+55 of 1998 where relevant, the CCMA Rules, relevant CCMA / Labour Court /
+Labour Appeal Court / Constitutional Court authorities, and applicable evidence
+principles including hearsay, electronic evidence, authenticity and witness
+credibility.
+Evidence discipline: do NOT assume facts that are not supported by the user's
+account or documents. If a fact is unclear, mark it "unclear / needs
+confirmation". If the evidence is weak, say so directly. Never invent facts or
+citations; if unsure of a citation, say "citation requires verification".
 Be warm but direct. Use plain language a non-lawyer understands. Use forensic
 interview technique: ask one focused follow-up question to get a precise account.
-Be honest about pitfalls. Never invent facts. If you are unsure, say so plainly
-rather than guessing.
+Be honest about pitfalls. For harassment/trauma matters: lead with empathy before
+legal analysis.
 
 Respond ONLY with valid JSON, no markdown, in this exact shape:
 {
@@ -47,6 +59,51 @@ Respond ONLY with valid JSON, no markdown, in this exact shape:
   "successRate": <integer 20-88 or null>,
   "validity": "note about case-law check, or null"
 }`;
+
+/* Mode-specific prompt addenda — appended after SYSTEM_BASE when the client
+   sends mode:'bundle' or mode:'attack'. Extracted to constants so they can be
+   audited and fine-tuned independently. */
+const PROMPT_BUNDLE = `TASK: evidence bundle organiser.
+You are acting as the employee's pre-hearing case manager.
+The user will provide a list of document names and brief descriptions.
+Organise them into a commissioner-ready evidence bundle. Then output:
+(1) a main bundle index in story order (chronological within each theme);
+(2) the strongest 3–5 documents and why each one matters;
+(3) exclusions or duplicates with reasons;
+(4) a missing-evidence checklist — document, why needed, urgency (Critical/Important/Useful), how to obtain;
+(5) a case-flow recommendation (e.g. arbitration vs settlement, early concession).
+Rules: no file left uncategorised; never invent facts; mark unclear items
+"Needs review"; prioritise evidence strength over emotional weight; the first
+10 documents must let a commissioner grasp the heart of the case.`;
+
+const PROMPT_ATTACK = `TASK: employer-side attack analysis (to prepare the employee).
+Act as a hostile but ethical South African employer-side labour attorney, HR
+strategist and negotiation psychologist. Using ONLY the supplied facts and
+document names:
+(1) State the employer's best case theory as their opening submission would sound.
+(2) Build an attack matrix. For each likely attack — jurisdiction; claim is
+contractual not ULP; benefit discretionary; policy discretion; acquiescence/
+consent; delay; no final decision; internal remedies not exhausted; consistency;
+operational reasons; no proven loss; miscalculation; authorised deductions;
+hearsay/unauthenticated evidence; missing witnesses; overclaimed remedy — give:
+  • the employer's strongest version of that argument
+  • the evidence the employee already has to answer it
+  • defence strength: Strong / Moderate / Weak / Very weak / No evidence found
+  • missing evidence that would help
+  • witness needs
+  • a short calm response the employee can give at the hearing
+  • one cross-examination question for the employer's witness
+(3) Likely commissioner questions to the employee.
+(4) Credibility and admissibility risks.
+(5) Negotiation pressure points with counter-preparation.
+(6) A must-fix-before-hearing checklist rated Critical / Important / Useful / Not worth.
+(7) A final readiness rating: Ready / Mostly ready with gaps / Risky unless fixed / Not ready — with reasons.
+Ethical boundary: never fabricate facts, never advise concealment, coaching or
+manipulation. If evidence is missing, say "No evidence found in uploaded files".
+If the employer argument is weak, say so. If the employee has strong proof,
+acknowledge it.`;
+
+const MODE_PROMPTS = { bundle: PROMPT_BUNDLE, attack: PROMPT_ATTACK };
 
 /* A lighter instruction for the cheap tier on easy chatter, to keep it fast. */
 const SYSTEM_LIGHT = `You are MyLabourRights' friendly South African labour-law
@@ -103,25 +160,63 @@ function sanitiseOutput(obj) {
 }
 
 /* ============================================================
-   SECTION 2 — RATE LIMITING  (best-effort, in-memory per warm instance)
-   For hard guarantees use a shared store (Upstash / Netlify Blobs).
+   SECTION 2 — RATE LIMITING  (persistent via Netlify Blobs)
+   Survives cold starts and concurrent instances — no drift under load.
+   Falls back to the previous in-memory approach if Blobs is unavailable
+   (e.g. local dev without NETLIFY_BLOBS_CONTEXT set).
    ============================================================ */
-const RL_WINDOW_MS = 60 * 1000;   // 1 minute
+const RL_WINDOW_MS = 60 * 1000;   // 1 minute sliding window
 const RL_MAX = 15;                 // max AI calls / IP / minute
-const rlBucket = new Map();        // ip -> [timestamps]
 
-function rateLimited(ip) {
+/* In-memory fallback — used when Blobs context is absent (local dev). */
+const rlBucket = new Map();
+function rateLimitedMemory(ip) {
   const now = Date.now();
   const arr = (rlBucket.get(ip) || []).filter(t => now - t < RL_WINDOW_MS);
   arr.push(now);
   rlBucket.set(ip, arr);
-  // opportunistic cleanup
   if (rlBucket.size > 500) {
     for (const [k, v] of rlBucket) {
       if (!v.length || now - v[v.length - 1] > RL_WINDOW_MS) rlBucket.delete(k);
     }
   }
   return arr.length > RL_MAX;
+}
+
+/* Persistent rate limiter backed by Netlify Blobs.
+   Returns true if the IP is over the limit, false otherwise.
+   Any Blobs error falls back to the in-memory check so the function
+   never hard-fails due to a storage hiccup. */
+async function rateLimited(ip) {
+  let store;
+  try {
+    const { getStore } = require('@netlify/blobs');
+    store = getStore('rate-limits');
+  } catch {
+    // @netlify/blobs not available (local dev or older runtime)
+    return rateLimitedMemory(ip);
+  }
+
+  const key = `rl:${ip.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  const now = Date.now();
+
+  try {
+    const raw = await store.get(key, { type: 'json' }).catch(() => null);
+    const timestamps = Array.isArray(raw)
+      ? raw.filter(t => typeof t === 'number' && now - t < RL_WINDOW_MS)
+      : [];
+
+    if (timestamps.length >= RL_MAX) return true;
+
+    timestamps.push(now);
+    await store.setJSON(key, timestamps, {
+      metadata: { updatedAt: now },
+    });
+    return false;
+  } catch {
+    // Storage error — fall back to in-memory so we don\'t drop the request
+    return rateLimitedMemory(ip);
+  }
 }
 
 /* ============================================================
@@ -276,14 +371,31 @@ function normalise(parsed, ccmaValidity, provider, tier, routed) {
 /* ============================================================
    SECTION 5 — HANDLER
    ============================================================ */
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
+
+/* Origins allowed to call this function.
+   Add staging/preview URLs here if needed; never use '*' in production
+   as it allows any site to burn your API quota. */
+const ALLOWED_ORIGINS = [
+  'https://mylabourights.co.za',
+  'https://www.mylabourights.co.za',
+  'https://chipper-manatee-569bf6.netlify.app',
+];
+
+function corsHeaders(event) {
+  const origin = (event.headers['origin'] || '').trim();
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
     'Content-Type': 'application/json',
     'X-Content-Type-Options': 'nosniff',
   };
+}
+
+exports.handler = async (event) => {
+  const headers = corsHeaders(event);
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers };
   if (event.httpMethod !== 'POST')
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'method' }) };
@@ -302,7 +414,7 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad json' }) }; }
 
-  let { persona = '', history = [], userText = '', ccmaValidity = false, forceTier = null } = body;
+  let { persona = '', history = [], userText = '', mode = null, ccmaValidity = false, forceTier = null } = body;
 
   // ---- input validation (OWASP LLM01/LLM05) ----
   if (typeof userText !== 'string' || !userText.trim())
@@ -332,24 +444,27 @@ exports.handler = async (event) => {
 
   try {
     let raw = null, provider = null, routed = { from: tier, cascaded: false };
+    // Build system prompt once — shared across hard/medium cascade and easy tiers
+    const modePrompt = MODE_PROMPTS[mode] || '';
+    const baseSys = SYSTEM_BASE + (modePrompt ? '\n\n' + modePrompt : '') + '\n\n' + persona;
 
     if (tier === 'hard') {
       // capable model first; fall back to Gemini if Claude unavailable
-      if (hasClaude) { raw = await callClaude(SYSTEM_BASE + '\n\n' + persona, history, userText, 1024); provider = 'Claude'; }
-      if (!raw && hasGemini) { raw = await callGemini(SYSTEM_BASE + '\n\n' + persona, history, userText, 1024); provider = 'Gemini'; }
+      if (hasClaude) { raw = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
+      if (!raw && hasGemini) { raw = await callGemini(baseSys, history, userText, 1024); provider = 'Gemini'; }
     } else {
-      // easy/medium -> cheap model first
-      const sys = (tier === 'easy' ? SYSTEM_LIGHT : SYSTEM_BASE) + '\n\n' + persona;
+      // easy/medium -> cheap model first (easy uses lighter system prompt, no mode addendum)
+      const sys = (tier === 'easy' ? SYSTEM_LIGHT : baseSys);
       if (hasGemini) { raw = await callGemini(sys, history, userText, tier === 'easy' ? 512 : 1024); provider = 'Gemini'; }
 
       // CASCADE: if the cheap answer looks weak, escalate to the capable model
       const parsedCheap = safeParse(raw);
       if (cheapAnswerLooksWeak(parsedCheap, tier) && hasClaude) {
-        const up = await callClaude(SYSTEM_BASE + '\n\n' + persona, history, userText, 1024);
+        const up = await callClaude(baseSys, history, userText, 1024);
         if (up) { raw = up; provider = 'Claude'; routed.cascaded = true; routed.to = 'hard'; }
       }
       // if no Gemini at all, use Claude directly
-      if (!raw && hasClaude) { raw = await callClaude(SYSTEM_BASE + '\n\n' + persona, history, userText, 1024); provider = 'Claude'; }
+      if (!raw && hasClaude) { raw = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
     }
 
     const parsed = safeParse(raw);

@@ -28,13 +28,28 @@ function buildSignature(data, passphrase) {
   return crypto.createHash('md5').update(str).digest('hex');
 }
 
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
+/* Origins allowed to call the payment function — must match ai.js. */
+const ALLOWED_ORIGINS = [
+  'https://mylabourights.co.za',
+  'https://www.mylabourights.co.za',
+  'https://chipper-manatee-569bf6.netlify.app',
+];
+
+function corsHeaders(event) {
+  const origin = (event.headers['origin'] || '').trim();
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
     'Content-Type': 'application/json',
+    'X-Content-Type-Options': 'nosniff',
   };
+}
+
+exports.handler = async (event) => {
+  const headers = corsHeaders(event);
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers };
   if (event.httpMethod !== 'POST')
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'method' }) };
