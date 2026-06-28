@@ -3761,12 +3761,7 @@ function render() {
   else if (State.screen === 'auth') app.appendChild(Views.auth());
   else if (State.screen === 'app') {
     app.appendChild(Views.appShell());
-    // Show triage wizard once per new user — only when fully in the app,
-    // only when a case exists, only when the flag is not already set.
-    if (State.activeCaseId && !localStorage.getItem('mlr_triage_done') &&
-        !document.getElementById('triage-wizard')) {
-      showTriageWizard();
-    }
+
   }
   window.scrollTo(0, 0);
   // restore scroll for the tab we're now on
@@ -7677,17 +7672,7 @@ async function buildPrintableCaseFile(c) {
 .bc-alert p{font-size:13px;color:var(--text-soft);margin:0 0 10px;line-height:1.6;}
 
 /* ── Triage wizard overlay ── */
-.triage-ov{position:fixed;inset:0;z-index:300;background:var(--paper);display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,20px) + 24px) 20px 32px;overflow-y:auto;}
-.triage-ov.gone{display:none;}
-.triage-prog{display:flex;gap:6px;margin-bottom:28px;}
-.tdot{height:4px;flex:1;border-radius:2px;background:var(--line-strong);transition:background .3s;}
-.tdot.done{background:var(--forest);}.tdot.active{background:var(--gold);}
-.triage-ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--moss);margin-bottom:6px;}
-.triage-q{font-family:var(--serif);font-size:1.35rem;font-weight:700;margin-bottom:22px;line-height:1.25;color:var(--ink);}
-.triage-opts{display:flex;flex-direction:column;gap:9px;}
-.topt{padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:12px;background:var(--cream);text-align:left;font-size:14px;font-weight:500;color:var(--ink);min-height:52px;cursor:pointer;transition:border-color .15s,background .15s;font-family:var(--sans);}
-.topt:hover{border-color:var(--forest);}.topt.on{border-color:var(--forest);background:rgba(28,82,52,.06);font-weight:600;}
-.triage-back-btn{background:none;border:none;color:var(--text-mute);font-size:13px;font-weight:600;cursor:pointer;padding:10px 0;margin-top:12px;font-family:var(--sans);min-height:44px;}
+
 
 /* ── Simplified mode ── */
 [data-simplified="true"]{--fs-xs:.875rem;--fs-sm:1rem;--fs-base:1.125rem;--fs-lg:1.25rem;}
@@ -8655,19 +8640,6 @@ function showCouncilAlert(council, container) {
   container.insertBefore(el2, container.firstChild);
 }
 
-/* ── Triage Wizard ────────────────────────────────────────────────
-   Expert #1 critical: 3-question intake on first open.
-   Sets disputeType, timing, and goal for the entire session.       */
-const TRIAGE_QS = [
-  {
-    q: { en:'What happened at work?', af:'Wat het by die werk gebeur?', zu:'Kwenzekani emsebenzini?', xh:'Kwenzeka ntoni emsebenzini?', st:'Ke eng e etsahaleng mosebetsing?' },
-    opts: [
-      { en:'I was dismissed / fired',              af:'Ek is ontslaan',                zu:'Ngixoshiwe',               xh:'Ndichithiwe',             st:'Ke ntshitswe mosebetsi',        val:'unfair_dismissal' },
-      { en:"I'm still employed but treated unfairly",af:'Ek werk nog maar word onbillik behandel',zu:'Ngisasebenza kodwa ngiphathwa kabi',xh:'Ndisasebenza kodwa ndiphathwa kakubi',st:'Ke sa sebetsa empa ke phethwa hampe',val:'unfair_labour_practice' },
-      { en:"I wasn't paid correctly",              af:'Ek is nie korrek betaal nie',   zu:'Angikhokhwanga kahle',     xh:'Andikhokhwanga ngokufanelekileyo',st:'Ke ne ke sa lefshwa hantle', val:'bcea_money_claim' },
-      { en:'I was harassed or discriminated against',af:"Ek is geteister of gediskrimineer",zu:'Ngihlukunyezwe noma ngacwatshelwa',xh:'Ndihlukumezwe okanye ndananduluka-candelo',st:'Ke ne ke itshitishwa kapa ke khetholwa',val:'unfair_discrimination' },
-    ],
-  },
   {
     q: { en:'When did this happen?', af:'Wanneer het dit gebeur?', zu:'Kwenzeka nini?', xh:'Kwenzeka nini?', st:'E ne e etsahala neng?' },
     opts: [
@@ -8691,67 +8663,6 @@ const TRIAGE_QS = [
 function getLang() { return State.lang || 'en'; }
 function trQ(obj) { return obj[getLang()] || obj.en || ''; }
 
-function showTriageWizard() {
-  if (localStorage.getItem('mlr_triage_done') === '1') return;
-  let step = 0;
-  const answers = {};
-
-  const overlay = document.createElement('div');
-  overlay.className = 'triage-ov';
-  overlay.id = 'triage-wizard';
-
-  const render2 = () => {
-    const q = TRIAGE_QS[step];
-    overlay.innerHTML = `
-      <div class="triage-prog">
-        ${TRIAGE_QS.map((_,i) => `<div class="tdot ${i < step ? 'done' : i === step ? 'active' : ''}"></div>`).join('')}
-      </div>
-      <div class="triage-ey">Step ${step + 1} of 3</div>
-      <div class="triage-q">${trQ(q.q)}</div>
-      <div class="triage-opts">
-        ${q.opts.map(o => `<button class="topt" type="button" data-val="${o.val}">${trQ(o)}</button>`).join('')}
-      </div>
-      ${step > 0 ? '<button class="triage-back-btn" type="button">\u2190 Back</button>' : ''}
-    `;
-    overlay.querySelectorAll('.topt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const keys = ['disputeType','timingBand','goal'];
-        answers[keys[step]] = btn.dataset.val;
-        if (step < 2) { step++; render2(); }
-        else { completeTriage(answers, overlay); }
-      });
-    });
-    overlay.querySelector('.triage-back-btn')?.addEventListener('click', () => { step--; render2(); });
-  };
-
-  render2();
-  document.body.appendChild(overlay);
-}
-
-async function completeTriage(answers, overlay) {
-  localStorage.setItem('mlr_triage_done', '1');
-
-  // If there is an active case, apply triage to it
-  if (State.activeCaseId) {
-    const c = await DB.get('cases', State.activeCaseId);
-    if (c) {
-      if (answers.disputeType && !c.disputeKey) c.disputeKey = answers.disputeType;
-      if (answers.goal) c.triageGoal = answers.goal;
-      await DB.put('cases', c);
-    }
-  }
-
-  overlay.classList.add('gone');
-  setTimeout(() => overlay.remove(), 300);
-
-  // Show bargaining council warning if applicable
-  if (answers.disputeType) {
-    // Note: industry detection happens when user describes their job in chat
-    // The triage wizard captures dispute type only
-  }
-
-  render();
-}
 
 /* ── Boot-time additions ────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
