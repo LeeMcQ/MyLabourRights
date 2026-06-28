@@ -15,14 +15,46 @@
 <meta name="description" content="AI-powered CCMA and labour dispute case management for South Africans. Chat with Lee, our AI labour-law advisor." />
 <meta property="og:title" content="MyLabourRights — Free CCMA Help" />
 <meta property="og:description" content="Unfairly dismissed? You have 30 days to act. Chat with Lee — our free AI labour-law advisor. No lawyer needed to start." />
-<meta property="og:image" content="https://chipper-manatee-569bf6.netlify.app/icons/icon-512.png" />
+<meta property="og:image" content="https://mylabourights.co.za/icons/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="MyLabourRights — AI-powered CCMA case help for South Africans" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://chipper-manatee-569bf6.netlify.app" />
+<meta property="og:url" content="https://mylabourights.co.za" />
+<meta property="og:locale" content="en_ZA" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@MyLabourRights" />
+<meta name="twitter:image" content="https://mylabourights.co.za/icons/og-image.png" />
+<meta name="twitter:image:alt" content="MyLabourRights — AI-powered CCMA case help for South Africans" />
+<link rel="canonical" href="https://mylabourights.co.za" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LegalService",
+  "name": "MyLabourRights",
+  "description": "AI-powered CCMA and labour dispute case management for South African employees. Chat with Lee, our free AI labour-law advisor.",
+  "url": "https://mylabourights.co.za",
+  "logo": "https://mylabourights.co.za/icons/icon-512.png",
+  "areaServed": { "@type": "Country", "name": "South Africa" },
+  "serviceType": ["Labour law advice", "CCMA case preparation", "Unfair dismissal guidance", "Grievance process support"],
+  "availableLanguage": ["English", "Afrikaans", "Zulu", "Xhosa", "Sesotho"],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "ZAR",
+    "description": "Free AI labour-law consultation and case validity check"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://mylabourights.co.za?action=chat",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Outfit:wght@400;500;600;700&display=swap" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 /* ============ DESIGN TOKENS ============ */
 :root{
@@ -148,6 +180,7 @@ body{
   color:var(--ink);
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
   overflow-x:hidden;
 }
 img{max-width:100%;display:block;}
@@ -164,15 +197,28 @@ a{color:inherit;text-decoration:none;}
 
 /* ============ APP SHELL ============ */
 .app{min-height:100dvh;display:flex;flex-direction:column;}
-.screen{display:none;animation:fadeUp .45s ease both;}
+.screen{display:none;animation:fadeUp .5s var(--ease-out) both;}
 .screen.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px) scale(.99);}to{opacity:1;transform:none;}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:none;}}
 @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 @keyframes shimmer{0%{background-position:-460px 0;}100%{background-position:460px 0;}}
+
+/* ── Stagger utility: add .stagger-children to any list container ── */
+.stagger-children>*{animation:fadeUp .4s var(--ease-out) both;}
+.stagger-children>*:nth-child(1){animation-delay:0ms;}
+.stagger-children>*:nth-child(2){animation-delay:50ms;}
+.stagger-children>*:nth-child(3){animation-delay:100ms;}
+.stagger-children>*:nth-child(4){animation-delay:150ms;}
+.stagger-children>*:nth-child(5){animation-delay:200ms;}
+.stagger-children>*:nth-child(n+6){animation-delay:250ms;}
+
+/* ── Skeleton shimmer for loading states ── */
+.skel{background:linear-gradient(90deg,var(--paper-2) 25%,var(--paper) 50%,var(--paper-2) 75%);
+  background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--r-sm);}
 
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;width:100%;}
 
@@ -181,14 +227,14 @@ a{color:inherit;text-decoration:none;}
   display:inline-flex;align-items:center;justify-content:center;gap:9px;
   font-weight:600;font-size:var(--fs-base);letter-spacing:.01em;
   padding:14px 26px;border-radius:var(--r-md);
-  transition:transform .16s ease,box-shadow .2s ease,background .2s ease,color .2s ease;
+  transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur) var(--ease-out),background var(--dur) var(--ease-out),color var(--dur) var(--ease-out);will-change:transform;
   white-space:nowrap;
 }
-.btn:active{transform:scale(.97);}
+.btn:active{transform:scale(.95) translateY(1px);transition-duration:60ms;}
 .btn-primary{background:var(--ink);color:var(--cream);box-shadow:var(--shadow-md);}
 .btn-primary:hover{background:var(--ink-2);box-shadow:var(--shadow-lg);}
 .btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#b3852f 100%);color:#241a06;box-shadow:0 6px 20px rgba(199,154,62,.4);}
-.btn-gold:hover{box-shadow:0 10px 30px rgba(199,154,62,.55);}
+.btn-gold:hover{box-shadow:0 12px 34px rgba(199,154,62,.6);transform:translateY(-1px) scale(1.01);}
 .btn-ghost{background:transparent;color:var(--ink);border:1.6px solid var(--line-strong);}
 .btn-ghost:hover{background:var(--ink);color:var(--cream);border-color:var(--ink);}
 .btn-sm{padding:9px 16px;font-size:var(--fs-sm);border-radius:var(--r-sm);}
@@ -260,8 +306,9 @@ a{color:inherit;text-decoration:none;}
 .hero-eyebrow::before{content:"";width:30px;height:1.5px;background:var(--gold);}
 .hero h1{
   font-family:var(--serif);font-weight:900;
-  font-size:clamp(2.6rem,5.2vw,4.1rem);line-height:1.03;
-  letter-spacing:-.02em;margin-bottom:22px;
+  font-size:clamp(2.5rem,4.8vw+.5rem,4.4rem);line-height:1.05;
+  letter-spacing:-.025em;margin-bottom:24px;
+  text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;
 }
 .hero h1 em{font-style:italic;color:var(--forest);position:relative;}
 .hero h1 em::after{
@@ -284,7 +331,7 @@ a{color:inherit;text-decoration:none;}
   border:1px solid var(--line);transform:rotate(1.3deg);
 }
 @media(min-width:860px){ .hero-card{ display:block; } }
-.hero-card:hover{transform:rotate(0);transition:transform .4s ease;}
+.hero-card:hover{transform:rotate(0) scale(1.01);transition:transform var(--dur-slow) var(--ease-spring);}
 .hcard-top{
   background:linear-gradient(140deg,var(--ink),var(--forest));
   padding:20px 22px;color:var(--cream);
@@ -331,9 +378,9 @@ a{color:inherit;text-decoration:none;}
 .feat-card{
   background:var(--cream);border-radius:var(--r-lg);padding:28px 24px;
   border:1px solid var(--line);box-shadow:var(--shadow-sm);
-  transition:transform .22s ease,box-shadow .22s ease;
+  transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);
 }
-.feat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);}
+.feat-card:hover{transform:translateY(-6px) scale(1.01);box-shadow:var(--shadow-md);}
 .feat-ico{
   width:50px;height:50px;border-radius:13px;
   background:var(--paper-2);display:grid;place-items:center;margin-bottom:16px;
@@ -357,9 +404,9 @@ a{color:inherit;text-decoration:none;}
 .price-card{
   background:var(--cream);border-radius:var(--r-lg);padding:32px 28px;
   border:1.5px solid var(--line);box-shadow:var(--shadow-sm);position:relative;
-  transition:transform .2s ease,box-shadow .2s ease;
+  transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);
 }
-.price-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.price-card:hover{transform:translateY(-5px) scale(1.01);box-shadow:var(--shadow-md);}
 .price-card.featured{border-color:var(--gold);box-shadow:0 14px 40px rgba(199,154,62,.22);}
 .price-flag{
   position:absolute;top:-13px;left:50%;transform:translateX(-50%);
@@ -421,7 +468,7 @@ a{color:inherit;text-decoration:none;}
   border-radius:var(--r-md);background:var(--cream);transition:border .16s,box-shadow .16s;
 }
 .field input:focus,.field select:focus,.field textarea:focus{
-  outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(28,82,52,.12);
+  outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(28,82,52,.14);transition:border-color var(--dur-fast) var(--ease-out),box-shadow var(--dur) var(--ease-out);
 }
 .field textarea{resize:vertical;min-height:90px;}
 .auth-divider{
@@ -544,7 +591,8 @@ a{color:inherit;text-decoration:none;}
 .subnav button{flex:1;white-space:nowrap;padding:9px 14px;border-radius:100px;
   font-size:var(--fs-sm);font-weight:600;color:var(--text-mute);min-height:40px;
   transition:background var(--dur),color var(--dur);}
-.subnav button.on{background:var(--cream);color:var(--ink);box-shadow:var(--shadow-sm);}
+.subnav button{transition:color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out);}
+.subnav button.on{background:var(--cream);color:var(--ink);box-shadow:var(--shadow-sm);transition:color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out),box-shadow var(--dur) var(--ease-out);}
 .subnav button:active{transform:scale(.97);}
 .mobnav button{
   flex:1;padding:9px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;
@@ -553,13 +601,17 @@ a{color:inherit;text-decoration:none;}
 }
 .mobnav button svg{width:21px;height:21px;}
 .mobnav button.on{color:var(--gold);}
-.mobnav button:active{transform:scale(.94);}
+.mobnav button.on svg{filter:drop-shadow(0 0 4px rgba(199,154,62,.5));}
+.mobnav button:active{transform:scale(.88);transition-duration:80ms;}
+.mobnav button{transition:color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-spring);}
 
 /* ============ CARDS / PANELS ============ */
 .panel{
   background:var(--cream);border-radius:var(--r-lg);border:1px solid var(--line);
   box-shadow:var(--shadow-sm);overflow:hidden;
+  transition:box-shadow var(--dur) var(--ease-out),transform var(--dur) var(--ease-spring);
 }
+.panel:focus-within{box-shadow:var(--shadow-md);}
 .panel-head{
   padding:17px 20px;border-bottom:1px solid var(--line);
   display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -573,7 +625,9 @@ a{color:inherit;text-decoration:none;}
 .stat{
   background:var(--cream);border:1px solid var(--line);border-radius:var(--r-md);
   padding:16px 17px;box-shadow:var(--shadow-sm);
+  transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);
 }
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
 .stat .lbl{font-size:var(--fs-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin-bottom:6px;}
 .stat .val{font-family:var(--serif);font-size:var(--fs-xl);font-weight:700;line-height:1;}
 .stat .sub{font-size:var(--fs-sm);color:var(--text-mute);margin-top:4px;}
@@ -600,8 +654,9 @@ a{color:inherit;text-decoration:none;}
   border-radius:var(--r-md);background:var(--cream);font-size:var(--fs-base);color:var(--ink);
   transition:border-color .15s,background .15s;min-height:48px;
 }
-.dl-opt:hover{border-color:var(--moss);}
-.dl-opt.on{border-color:var(--forest);background:var(--paper-2);font-weight:600;}
+.dl-opt:hover{border-color:var(--moss);background:var(--paper-2);transform:translateX(2px);}
+.dl-opt.on{border-color:var(--forest);background:var(--paper-2);font-weight:600;box-shadow:0 0 0 3px rgba(28,82,52,.08);}
+.dl-opt{transition:border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur) var(--ease-out);}
 .dl-date{
   width:100%;padding:12px 14px;border:1.5px solid var(--line-strong);
   border-radius:var(--r-md);font-family:var(--sans);font-size:var(--fs-base);background:var(--cream);
@@ -646,8 +701,9 @@ a{color:inherit;text-decoration:none;}
 .oc-opt{text-align:left;padding:11px 14px;border:1.5px solid var(--line-strong);
   border-radius:var(--r-md);background:var(--cream);font-size:var(--fs-base);color:var(--ink);
   min-height:44px;transition:border-color .15s,background .15s;}
-.oc-opt:hover{border-color:var(--gold);}
-.oc-opt.on{border-color:var(--gold-deep);background:var(--paper-2);font-weight:600;}
+.oc-opt:hover{border-color:var(--gold);background:var(--paper-2);transform:translateX(2px);}
+.oc-opt.on{border-color:var(--gold-deep);background:var(--paper-2);font-weight:600;box-shadow:0 0 0 3px rgba(199,154,62,.12);}
+.oc-opt{transition:border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur) var(--ease-out);}
 .oc-floor-lbl{display:block;font-size:var(--fs-sm);color:var(--text-soft);margin:14px 0 8px;}
 .oc-floor-row{display:flex;align-items:center;gap:8px;}
 .oc-cur{font-weight:600;color:var(--moss);}
@@ -1103,8 +1159,8 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .chat-av.me{background:var(--moss);color:var(--cream);}
 @media (max-width:480px){
   .chat-av{display:none;}
-  .chat-msg.me .chat-bubble{border-radius:0 14px 14px 0;border-left:3px solid var(--forest);max-width:100%;font-size:var(--fs-md,1rem);line-height:1.7;}
-  .chat-msg.ai .chat-bubble{border-radius:0 14px 14px 0;border-left:3px solid var(--gold);max-width:100%;font-size:var(--fs-md,1rem);line-height:1.7;}
+  .chat-msg.me .chat-bubble{border-radius:4px 14px 14px 4px;border-left:3px solid var(--forest);max-width:100%;font-size:var(--fs-md,1rem);line-height:1.75;}
+  .chat-msg.ai .chat-bubble{border-radius:4px 14px 14px 4px;border-left:3px solid var(--gold);max-width:100%;font-size:var(--fs-md,1rem);line-height:1.75;}
   .chat-msg.me .sender{display:none;}
   .chat-msg.ai .sender{font-size:10px;font-weight:700;color:var(--gold-deep,#a07a28);padding-left:6px;}
 }
@@ -1151,6 +1207,7 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .mini-btn.na:hover{background:var(--paper-2);}
 .mini-btn.done{background:var(--sage);color:var(--ink);}
 
+.chat-msg{animation:fadeUp .3s var(--ease-out) both;}
 .chat-typing{display:flex;gap:5px;padding:4px 0;}
 .chat-typing span{width:8px;height:8px;border-radius:50%;background:var(--moss);animation:pulse 1s infinite;}
 .chat-typing span:nth-child(2){animation-delay:.18s;}
@@ -1703,10 +1760,15 @@ function toast(msg, icon = 'check') {
   const zone = $('#toastZone');
   const el = document.createElement('div');
   el.className = 'toast';
+  el.setAttribute('role', 'status');
   el.innerHTML = `${ICONS[icon] || ICONS.check}<span>${esc(msg)}</span>`;
   zone.appendChild(el);
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, 3200);
   setTimeout(() => el.remove(), 3600);
+  /* Also announce to screen readers via the persistent aria-live region.
+     The rAF double-tick forces a new mutation even if text is unchanged. */
+  const live = document.getElementById('lee-live');
+  if (live) { live.textContent = ''; requestAnimationFrame(() => { live.textContent = msg; }); }
 }
 
 /* ============================================================
@@ -1770,6 +1832,14 @@ const I18N = {
     empty_timeline: 'Awekho amahlelo \u2014 faka izikhathi ezibalulekile.',
     share_msg: 'MyLabourRights \u2014 Usizo lwamahhala le-CCMA \ud83c\uddff\ud83c\udde6\nBuza uLee, umeluleki we-AI wamahhala.\n\ud83d\udc49 ',
     continue_lee: 'Qhubeka noLee',
+  
+    cta_start: 'Qala icala lakho lamahhala',
+    cta_have: 'Senginawo i-akhawunti',
+    nav_how: 'Ukusebenza Kwaleli',
+    nav_login: 'Ngena',
+    nav_pricing: 'Intengo',
+    nav_resources: 'Izinsiza',
+    nav_start: 'Qala Manje',
   },
   xh: {
     tab_dashboard: 'Ikhaya', tab_chat: 'Buza uLee', tab_docs: 'Amaxwebhu',
@@ -1787,6 +1857,14 @@ const I18N = {
     empty_timeline: 'Akukho mxholo \u2014 faka iimini ezibalulekileyo.',
     share_msg: 'MyLabourRights \u2014 Uncedo lwamahhala le-CCMA \ud83c\uddff\ud83c\udde6\nBuza uLee, icebisa le-AI lamahhala.\n\ud83d\udc49 ',
     continue_lee: 'Qhubeka noLee',
+  
+    cta_start: 'Qala ityala lakho lamahhala',
+    cta_have: 'Sele ndinalo i-akhawunti',
+    nav_how: 'Indlela Esebenza Ngayo',
+    nav_login: 'Ngena',
+    nav_pricing: 'Amaxabiso',
+    nav_resources: 'Izixhobo',
+    nav_start: 'Qala Ngoku',
   },
   st: {
     tab_dashboard: 'Lapeng', tab_chat: 'Botsa Lee', tab_docs: 'Mantswe',
@@ -1804,6 +1882,14 @@ const I18N = {
     empty_timeline: 'Ha ho na diketsahalo \u2014 kenya matsatsi a bohlokwa.',
     share_msg: 'MyLabourRights \u2014 Thuso e mahala ya CCMA \ud83c\uddff\ud83c\udde6\nBotsa Lee, moeletsi wa AI wa mahala.\n\ud83d\udc49 ',
     continue_lee: 'Tswela pele le Lee',
+  
+    cta_start: 'Qala nyeoe ya hao ya mahala',
+    cta_have: 'Ke setse ke na le ak\u2019aonte',
+    nav_how: 'Ho Sebetsa Jwang',
+    nav_login: 'Kena',
+    nav_pricing: 'Ditefo',
+    nav_resources: 'Disebediswa',
+    nav_start: 'Qala Joale',
   },
 };
 const t = (key) => (I18N[State.lang] && I18N[State.lang][key]) || I18N.en[key] || key;
@@ -3072,38 +3158,46 @@ const Quota = {
    ============================================================ */
 const CaseEngine = (() => {
 
-  /* The senior SA labour-law attorney persona — drives tone */
-  const PERSONA = `You are Lee, MyLabourRights' AI labour-law advisor for South Africa.
-
-IDENTITY: You are Lee — a knowledgeable, warm, and direct AI labour-law advisor. You have deep expertise in CCMA arbitrations, Labour Court litigation, and unfair-labour-practice matters. You always give employees the most protective, practical and realistic advice possible. You apply South African labour law only: the LRA 66/1995, BCEA 75/1997, EEA 55/1998, CCMA Rules, and key authorities.
-
-TONE: Plain language a non-lawyer immediately understands. One focused follow-up question per turn. Honest about pitfalls — never false reassurance. For harassment/trauma: lead with empathy before analysis.
-
-FORMAT EVERY RESPONSE:
-1. ANSWER — 2–3 sentences direct. No preamble. Do not start with "I understand", "Of course", "Certainly", "Great question", or any affirmation.
+  /* Case-context addendum sent with every AI call.
+     Identity + jurisdiction live in SYSTEM_BASE (ai.js) — not duplicated here.
+     Lean payload saves ~540 tokens per call vs the old full-persona approach.  */
+  const PERSONA_RULES = `FORMAT EVERY RESPONSE:
+1. ANSWER — 2–3 sentences direct. No preamble. Never start with "I understand", "Of course", "Certainly", or "Great question".
 2. LAW ANCHOR — one <cite> tag maximum. Omit if no specific section applies.
-3. FOLLOW-UP — one focused question on a new line. Do not embed it inside the answer paragraph.
-4. EVIDENCE — only when a document would materially change the strength rating. Maximum 2 items: "• [Document name] — [one-line reason]"
+3. FOLLOW-UP — one focused question on a new line. Never embed inside the answer paragraph.
+4. EVIDENCE — only when a document would materially change the strength rating. Max 2 items: "• [Doc name] — [one-line reason]"
 
-LENGTH: 80–120 words in the text field for standard turns. Max 160 for complex legal questions. Max 100 for sensitive/trauma matters. Never exceed 200 words regardless of complexity.
+LENGTH: 80–120 words for standard turns. Max 160 for complex legal questions. Max 100 for sensitive/trauma matters. Hard cap: 200 words.
 
-DO NOT: Start with "I understand" / "I can see" / "Of course" / "Certainly" / "Great". End with "I hope this helps" or any variation. Repeat the user's words back to them before answering.
+DO NOT: Start with "I understand"/"Of course"/"Certainly"/"Great". End with "I hope this helps". Repeat the user’s words before answering.
 
-CITATION FORMAT: When you reference a law section, wrap it: <cite law="LRA s188">plain-language summary</cite>
+CITATION FORMAT: <cite law="LRA s188">plain-language summary</cite>
 
-LANGUAGE: If the conversation is not in English, respond in the same language. Supported: English, Afrikaans, isiZulu, isiXhosa, Sesotho. State legal terms in the target language then explain plainly.
+LANGUAGE: Respond in the same language as the user. Supported: English, Afrikaans, isiZulu, isiXhosa, Sesotho.
 
-PROHIBITED — never say any of the following regardless of context:
-- "You will win" or any guarantee of outcome
-- "Your employer is definitely liable"  
-- Any specific compensation amount as guaranteed — say "up to X months' pay"
-- "The deadline has not passed" without calculating from the user's actual date
-- "You do not need a lawyer" — always acknowledge complex matters benefit from legal advice
-- "This contract is invalid"
-- "Ignore" any official correspondence
-- "I cannot help" — always give what you can and explain the limit
+PROHIBITED: "You will win" | "Your employer is definitely liable" | specific compensation guarantees | "The deadline has not passed" without calculating from the user’s actual date | "You do not need a lawyer" | "This contract is invalid" | "Ignore" correspondence | "I cannot help".
 
 Do not assume facts not in the documents. If unclear, mark as "unclear / needs confirmation".`;
+
+  /* Build the lean per-call persona: rules + live case context.
+     Replaces the old monolithic PERSONA that duplicated SYSTEM_BASE identity. */
+  function buildPersona(caseObj) {
+    const ctx = [];
+    if (caseObj) {
+      if (caseObj.disputeKey)     ctx.push('Dispute: ' + caseObj.disputeKey);
+      if (caseObj.caseType)       ctx.push('Category: ' + caseObj.caseType);
+      if (caseObj.desiredOutcome) ctx.push('Desired outcome: ' + caseObj.desiredOutcome);
+      const dl = caseObj._deadline;
+      if (dl) ctx.push('Deadline: ' + (dl.daysLeft >= 0
+        ? dl.daysLeft + ' days remaining'
+        : Math.abs(dl.daysLeft) + ' days overdue — condonation likely needed'));
+      const docs = (caseObj.docs || []).length;
+      if (docs > 0) ctx.push('Documents uploaded: ' + docs);
+    }
+    return PERSONA_RULES + (ctx.length ? '\nCASE CONTEXT: ' + ctx.join(' | ') : '');
+  }
+  /* Backward-compat: callers that pass no case object get rules only */
+  const PERSONA = PERSONA_RULES;
 
   /* Keyword sets used to classify the user's message */
   const TOPIC = {
@@ -3380,7 +3474,7 @@ Do not assume facts not in the documents. If unclear, mark as "unclear / needs c
     return null;
   }
 
-  function persona() { return PERSONA; }
+  function persona(caseObj) { return buildPersona(caseObj); }
 
   return { respond, persona, detectEscalation };
 })();
@@ -5166,11 +5260,15 @@ const Views = (() => {
       n.querySelector('#cpNew').onclick = () => openNewCaseModal(false);
       return n;
     }
-    const n = el(`<div class="empty">${ICONS.scale}
-      <h3>No case open yet</h3>
-      <p>Create your first case to start building your file with Lee, your AI advisor.</p>
-      <button class="btn btn-primary" id="emptyNew">${ICONS.plus} ${t('new_case')}</button></div>`);
-    n.querySelector('#emptyNew').onclick = () => openNewCaseModal(false);
+    const n = el(`<div class="empty-state-ctx">
+      <div class="empty-ico-lg">\u2696</div>
+      <h3>Start your first case</h3>
+      <p>Tell Lee what happened and find out exactly where you stand \u2014 free, in 2 minutes.</p>
+      <button class="btn btn-primary" id="esChecker">${ICONS.arrow} Check my situation</button>
+      <button class="btn btn-ghost" id="esNewCase" style="margin-top:6px;font-size:var(--fs-sm)">${ICONS.plus} ${t('new_case')}</button>
+    </div>`);
+    n.querySelector('#esChecker').onclick = () => { State._checkerStep = 0; State._checkerAnswers = {}; go('checker'); };
+    n.querySelector('#esNewCase').onclick = () => openNewCaseModal(false);
     return n;
   }
 
@@ -5194,6 +5292,38 @@ const Views = (() => {
    within its IIFE, we instead expose builders globally here and
    views.js calls them through the window — see wiring note.
    ============================================================ */
+/* ── Shared Prepare-tab helpers (extracted to module scope — 3.1 refactor) ──
+   acc()       — builds an accordion item list
+   doDont()    — builds a Do / Don't two-column block
+   wireAcc()   — attaches open/close handlers to all .prep-acc-head buttons
+   Previously copy-pasted in three separate function scopes; now single source. */
+function prepAcc(items) {
+  return items.map(it => `
+    <div class="prep-acc">
+      <button class="prep-acc-head" aria-expanded="false">
+        <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
+      </button>
+      <div class="prep-acc-body" hidden>${it.a}</div>
+    </div>`).join('');
+}
+function prepDoDont(dos, donts) {
+  return `<div class="prep-dd">
+    <div class="prep-dd-col do"><h5>${ICONS.check} Do</h5>
+      <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+    <div class="prep-dd-col dont"><h5>${ICONS.x} Don’t</h5>
+      <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+  </div>`;
+}
+function prepWireAcc(scope) {
+  scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
+    const b = h.nextElementSibling;
+    const open = !b.hidden;
+    b.hidden = open;
+    h.setAttribute('aria-expanded', String(!open));
+    h.classList.toggle('open', !open);
+  });
+}
+
 
 /* The tab builder functions below are declared globally so
    views.js (appShell) can call tabDashboard(body, c) etc.
@@ -6543,6 +6673,7 @@ async function paintDocs(list, c) {
   }
   docs.sort((a, b) => b.score - a.score);
   list.innerHTML = '';
+  list.classList.add('stagger-children');
   docs.forEach((d, i) => {
     const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-x';
     const aiNote = d.score >= 85 ? 'Critical' : d.score >= 65 ? 'High value' : d.score >= 45 ? 'Useful' : 'Supporting';
@@ -7600,7 +7731,48 @@ async function buildPrintableCaseFile(c) {
 .empty-state-ctx h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: 0; }
 .empty-state-ctx p  { font-size: 13px; color: var(--text-soft); max-width: 30ch; line-height: 1.6; margin: 0; }
 
-  </style></head><body>
+  
+/* ── Taste-skill improvements: checker & verdict ────────────────── */
+.intake-dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong);
+  transition:background var(--dur) var(--ease-out),transform var(--dur) var(--ease-spring);}
+.intake-dot.active{background:var(--forest);transform:scale(1.3);}
+.intake-dot.done{background:var(--moss);}
+
+.verdict-card{animation:scaleIn .4s var(--ease-spring) both;}
+.verdict-card.green{border-left:4px solid var(--success);}
+.verdict-card.amber{border-left:4px solid var(--warning);}
+.verdict-card.red{border-left:4px solid var(--danger);}
+
+.checker-choice{transition:border-color var(--dur-fast) var(--ease-out),
+  background var(--dur-fast) var(--ease-out),
+  transform var(--dur-fast) var(--ease-spring);}
+.checker-choice:hover{transform:translateX(3px);}
+.checker-choice.selected{transform:translateX(3px);}
+
+/* ── Taste-skill improvements: next-move card ───────────────────── */
+.nm-card{transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);}
+.nm-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+
+/* ── Taste-skill improvements: timeline & doc list ──────────────── */
+#tlTrack>.tl-ev{animation:fadeUp .35s var(--ease-out) both;}
+#tlTrack>.tl-ev:nth-child(1){animation-delay:0ms;}
+#tlTrack>.tl-ev:nth-child(2){animation-delay:60ms;}
+#tlTrack>.tl-ev:nth-child(3){animation-delay:120ms;}
+#tlTrack>.tl-ev:nth-child(n+4){animation-delay:180ms;}
+
+/* ── Taste-skill improvements: focus-visible outline ────────────── */
+:focus-visible{outline:2px solid var(--forest);outline-offset:3px;border-radius:4px;}
+button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
+
+/* ── Taste-skill improvements: selection colour ─────────────────── */
+::selection{background:rgba(199,154,62,.28);color:var(--ink);}
+
+/* ── Taste-skill improvements: scrollbar (Webkit) ───────────────── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:100px;}
+::-webkit-scrollbar-thumb:hover{background:var(--sage);}
+</style></head><body>
   <h1>${esc2(c.name)}</h1>
   <p class="sub">Case file prepared via MyLabourRights &middot; ${today}</p>
 
@@ -7784,7 +7956,18 @@ function tabFirms(body, c) {
   body.appendChild(wrap);
   const grid = wrap.querySelector('#firmGrid');
   if (!firms.length) {
-    grid.innerHTML = `<div class="txt-muted txt-sm">Firm directory loading\u2026</div>`;
+    grid.innerHTML = Array(4).fill(`
+      <div class="firm-card" style="pointer-events:none;opacity:.7" aria-hidden="true">
+        <div class="firm-top">
+          <div class="skel" style="width:44px;height:44px;border-radius:50%;flex-shrink:0"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+            <div class="skel" style="height:13px;width:68%"></div>
+            <div class="skel" style="height:11px;width:42%"></div>
+          </div>
+        </div>
+        <div class="skel" style="height:11px;width:92%;margin-bottom:6px"></div>
+        <div class="skel" style="height:11px;width:60%"></div>
+      </div>`).join('');
     return;
   }
   firms.forEach(f => {
@@ -7828,25 +8011,9 @@ function tabPrepare(body, c) {
   const wrap = el(`<div class="tabview on"></div>`);
 
   // expandable guidance block helper
-  const acc = (items) => items.map((it, i) => `
-    <div class="prep-acc">
-      <button class="prep-acc-head" aria-expanded="false">
-        <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
-      </button>
-      <div class="prep-acc-body" hidden>${it.a}</div>
-    </div>`).join('');
+  const acc = prepAcc;       // ✔ hoisted to module scope (3.1 refactor)
 
-  const doDont = (dos, donts) => `
-    <div class="prep-dd">
-      <div class="prep-dd-col do">
-        <h5>${ICONS.check} Do</h5>
-        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
-      </div>
-      <div class="prep-dd-col dont">
-        <h5>${ICONS.x} Don\u2019t</h5>
-        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
-      </div>
-    </div>`;
+  const doDont = prepDoDont; // ✔ hoisted to module scope (3.1 refactor)
 
   wrap.innerHTML = `
     <div class="prep-intro">
@@ -7868,14 +8035,7 @@ function tabPrepare(body, c) {
 
   const panel = wrap.querySelector('#prepPanel');
 
-  function wireAcc(scope) {
-    scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
-      const b = h.nextElementSibling;
-      const open = !b.hidden;
-      b.hidden = open; h.setAttribute('aria-expanded', String(!open));
-      h.classList.toggle('open', !open);
-    });
-  }
+  const wireAcc = prepWireAcc; // ✔ hoisted to module scope (3.1 refactor)
 
   /* ---------- GRIEVANCE PANEL ---------- */
   function renderGrievance() {
@@ -8005,6 +8165,11 @@ function tabPrepare(body, c) {
     if (ab) ab.onclick = () => { if (typeof openEmployerAttack === 'function') openEmployerAttack(c); else { State.tab = 'actions'; render(); } };
   }
 
+  /* renderViability and renderUnion delegate to the module-level renderers
+     so all four sub-tabs work without inner-function scope issues. */
+  function renderViability() { renderViabilityInPrepPanel(panel, c, wireAcc, doDont); }
+  function renderUnion()     { renderUnionInPrepPanel(panel, c, acc, wireAcc); }
+
   // switch tabs
   wrap.querySelectorAll('.prep-tab').forEach(b => b.onclick = () => {
     wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
@@ -8080,8 +8245,17 @@ function tabResources(body, c) {
 
   const gg = wrap.querySelector('#guideGrid');
   const bg = wrap.querySelector('#blogGrid');
-  if (!guides.length) gg.innerHTML = `<div class="txt-muted txt-sm">Guides loading\u2026</div>`;
-  if (!posts.length) bg.innerHTML = `<div class="txt-muted txt-sm">Articles loading\u2026</div>`;
+  const _blogSkel = (n) => Array(n).fill(`
+    <div class="blog-card" style="pointer-events:none;opacity:.7" aria-hidden="true">
+      <div class="blog-img skel" style="min-height:80px"></div>
+      <div class="blog-body" style="display:flex;flex-direction:column;gap:8px">
+        <div class="skel" style="height:10px;width:38%"></div>
+        <div class="skel" style="height:14px;width:85%"></div>
+        <div class="skel" style="height:11px;width:60%"></div>
+      </div>
+    </div>`).join('');
+  if (!guides.length) gg.innerHTML = _blogSkel(3);
+  if (!posts.length) bg.innerHTML = _blogSkel(3);
 
   guides.forEach(g => {
     const card = el(`<div class="blog-card">
@@ -8148,7 +8322,24 @@ function openPaywall(c) {
     // Try real PayFast; fall back to instant unlock if not configured
     if (window.Backend) {
       const r = await Backend.pay(c);
-      if (r.mode === 'redirect') { location.href = r.url; return; }
+      if (r.mode === 'redirect') {
+        // ✅ Validate redirect URL before following it.
+        // Only allow PayFast sandbox and production hosts — never follow
+        // arbitrary URLs returned from the backend (open redirect defence).
+        const PAYFAST_HOSTS = ['www.payfast.co.za', 'sandbox.payfast.co.za'];
+        try {
+          const dest = new URL(r.url);
+          if (dest.protocol !== 'https:' || !PAYFAST_HOSTS.includes(dest.hostname)) {
+            toast('Payment redirect blocked — unexpected destination.', 'alert');
+            return;
+          }
+        } catch {
+          toast('Payment redirect blocked — invalid URL.', 'alert');
+          return;
+        }
+        location.href = r.url;
+        return;
+      }
     }
     // simulated / fallback unlock
     c.subscription = 'paid';
@@ -8248,7 +8439,7 @@ const Backend = (() => {
     } catch {}
     try {
       const data = await post('ai', {
-        persona: window.CaseEngine.persona(),
+        persona: window.CaseEngine.persona(c),
         caseType: caseObj.caseType,
         ccmaValidity: !!cfg.ccmaValidity,
         caseContext,
@@ -8324,19 +8515,22 @@ window.Backend = Backend;
    IMPLEMENTATION ADDITIONS — All expert recommendations
    ================================================================= */
 
-/* ── Citation chip parser ─────────────────────────────────────────
-   Call on every AI response text. Converts <cite law="...">...</cite>
-   tags into tappable interactive chips.                           */
+/* ── Citation chip parser (✅ XSS-safe) ─────────────────────────────────────
+   Converts <cite law="...">...</cite> tags from AI responses into
+   tappable chips. Uses data attributes + event delegation instead of
+   inline onclick strings so AI-supplied content never executes as JS.
+   Previously used only single-quote escaping (✗ XSS risk); now uses
+   the existing esc() helper which encodes &, <, >, and ".            */
 function parseCitations(text) {
   if (!text) return text;
   return text.replace(/<cite law="([^"]+)">([^<]+)<\/cite>/g, (_, law, desc) => {
-    const l = law.replace(/'/g, '&#39;');
-    const d = desc.replace(/'/g, '&#39;');
-    return `<button class="cite-chip" onclick="MLR.showCitation('${l}','${d}')" aria-label="Legal citation: ${l}. Tap to expand." type="button">\u2696 ${law}</button>`;
+    const l = esc(law);
+    const d = esc(desc);
+    return `<button class="cite-chip" data-cite-law="${l}" data-cite-desc="${d}" aria-label="Legal citation: ${l}. Tap to expand." type="button">\u2696 ${law}</button>`;
   });
 }
 
-/* ── Citation bottom sheet ────────────────────────────────────────*/
+/* ── Citation bottom sheet (✅ XSS-safe via DOM API, no innerHTML interpolation) ─ */
 const MLR = {
   showCitation(law, desc) {
     document.querySelector('.cite-bd')?.remove();
@@ -8346,11 +8540,27 @@ const MLR = {
     bd.onclick = () => { bd.remove(); sheet.remove(); };
     const sheet = document.createElement('div');
     sheet.className = 'cite-sheet';
-    sheet.innerHTML = `
-      <div class="cite-law">\u2696 ${law}</div>
-      <div class="cite-text">${desc}</div>
-      <a class="cite-link" href="https://www.saflii.org/za/legis/" target="_blank" rel="noopener">Read on SAFLII \u2197</a>
-      <button onclick="this.closest('.cite-sheet').previousSibling.click()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--sage);min-height:44px;min-width:44px;" aria-label="Close">\u00d7</button>`;
+    const lawEl = document.createElement('div');
+    lawEl.className = 'cite-law';
+    lawEl.textContent = '\u2696 ' + law;
+    const descEl = document.createElement('div');
+    descEl.className = 'cite-text';
+    descEl.textContent = desc;
+    const link = document.createElement('a');
+    link.className = 'cite-link';
+    link.href = 'https://www.saflii.org/za/legis/';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Read on SAFLII \u2197';
+    const closeBtn = document.createElement('button');
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.style.cssText = 'position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--sage);min-height:44px;min-width:44px;';
+    closeBtn.textContent = '\u00d7';
+    closeBtn.onclick = () => { bd.remove(); sheet.remove(); };
+    sheet.appendChild(lawEl);
+    sheet.appendChild(descEl);
+    sheet.appendChild(link);
+    sheet.appendChild(closeBtn);
     document.body.appendChild(bd);
     document.body.appendChild(sheet);
   },
@@ -8859,23 +9069,7 @@ function renderUnionInPrepPanel(panel, c, acc, wireAcc) {
 
 /* ── Standalone Grievance panel renderer ─────────────────────────── */
 function renderGrievanceInPrepPanel(panel, c, wireAcc) {
-  function acc(items) {
-    return items.map(it => `
-      <div class="prep-acc">
-        <button class="prep-acc-head" aria-expanded="false">
-          <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
-        </button>
-        <div class="prep-acc-body" hidden>${it.a}</div>
-      </div>`).join('');
-  }
-  function doDont(dos, donts) {
-    return `<div class="prep-dd">
-      <div class="prep-dd-col do"><h5>${ICONS.check} Do</h5>
-        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
-      <div class="prep-dd-col dont"><h5>${ICONS.x} Don\u2019t</h5>
-        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
-    </div>`;
-  }
+  const acc = prepAcc, doDont = prepDoDont; // ✔ 3.1 refactor
   panel.innerHTML = `
     <section class="prep-sec">
       <h3>${ICONS.spark} What a grievance is \u2014 and why it matters</h3>
@@ -8934,14 +9128,7 @@ function renderGrievanceInPrepPanel(panel, c, wireAcc) {
 
 /* ── Standalone CCMA panel renderer ─────────────────────────────── */
 function renderCCMAInPrepPanel(panel, c, wireAcc, acc) {
-  function doDont(dos, donts) {
-    return `<div class="prep-dd">
-      <div class="prep-dd-col do"><h5>${ICONS.check} Do</h5>
-        <ul>${dos.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
-      <div class="prep-dd-col dont"><h5>${ICONS.x} Don\u2019t</h5>
-        <ul>${donts.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
-    </div>`;
-  }
+  const doDont = prepDoDont; // ✔ 3.1 refactor
   panel.innerHTML = `
     <section class="prep-sec">
       <h3>${ICONS.scale} How the CCMA works (in plain language)</h3>
@@ -8997,55 +9184,8 @@ function renderCCMAInPrepPanel(panel, c, wireAcc, acc) {
   });
 }
 
-/* ── Wire up Grievance and Union panels into tabPrepare ─────────── */
-(function() {
-  const _orig = tabPrepare;
-  tabPrepare = function(body, c) {
-    _orig(body, c);
-    const wrap  = body.querySelector('.tabview');
-    const panel = body.querySelector('#prepPanel');
-    if (!wrap || !panel) return;
-
-    function wireAcc(scope) {
-      scope.querySelectorAll('.prep-acc-head').forEach(h => h.onclick = () => {
-        const b = h.nextElementSibling;
-        const open = !b.hidden;
-        b.hidden = open;
-        h.setAttribute('aria-expanded', String(!open));
-        h.classList.toggle('open', !open);
-      });
-    }
-    function acc(items) {
-      return items.map(it =>
-        `<div class="prep-acc">
-          <button class="prep-acc-head" aria-expanded="false">
-            <span>${esc(it.q)}</span><span class="prep-acc-caret">${ICONS.arrow}</span>
-          </button>
-          <div class="prep-acc-body" hidden>${it.a}</div>
-        </div>`
-      ).join('');
-    }
-
-    function switchTo(p) {
-      if (p === 'viability')  renderViabilityInPrepPanel(panel, c, wireAcc, null);
-      else if (p === 'union') renderUnionInPrepPanel(panel, c, acc, wireAcc);
-      else if (p === 'ccma')  renderCCMAInPrepPanel(panel, c, wireAcc, acc);
-      else if (p === 'grievance') renderGrievanceInPrepPanel(panel, c, wireAcc);
-    }
-
-    // Re-wire all sub-tab buttons
-    wrap.querySelectorAll('.prep-tab').forEach(b => {
-      b.onclick = () => {
-        wrap.querySelectorAll('.prep-tab').forEach(x => x.classList.remove('on'));
-        b.classList.add('on');
-        switchTo(b.dataset.p);
-      };
-    });
-
-    // Default: viability check
-    switchTo('viability');
-  };
-})();
+/* tabPrepare is self-contained — renderViability and renderUnion shims
+   delegate to module-level renderers. No patch wrapper needed. */
 
 
 
@@ -9299,6 +9439,15 @@ function renderCondonationGuidance(container) {
     }, 600);
   });
 }
+
+/* ── Citation event delegation (✅ replaces inline onclick on cite-chips) ─ */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cite-chip');
+  if (!btn) return;
+  // dataset automatically decodes HTML entities, so showCitation()
+  // receives plain text which it sets via textContent (no innerHTML).
+  MLR.showCitation(btn.dataset.citeLaw || '', btn.dataset.citeDesc || '');
+});
 
 /* ── Expose new utilities ──────────────────────────────────────── */
 window.MLR                    = MLR;
