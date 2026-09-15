@@ -173,7 +173,7 @@
     transition-duration:.001ms!important;scroll-behavior:auto!important;
   }
 }
-html,body{height:100%;}
+html,body{height:100%;overflow-x:clip;max-width:100%;}
 body{
   font-family:var(--sans);
   background:var(--paper);
@@ -181,7 +181,7 @@ body{
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  overflow-x:hidden;
+  overflow-x:clip;
 }
 img{max-width:100%;display:block;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
@@ -405,6 +405,7 @@ a{color:inherit;text-decoration:none;}
   background:var(--cream);border-radius:var(--r-lg);padding:32px 28px;
   border:1.5px solid var(--line);box-shadow:var(--shadow-sm);position:relative;
   transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);
+  color:var(--ink);max-width:100%;
 }
 .price-card:hover{transform:translateY(-5px) scale(1.01);box-shadow:var(--shadow-md);}
 .price-card.featured{border-color:var(--gold);box-shadow:0 14px 40px rgba(199,154,62,.22);}
@@ -413,11 +414,11 @@ a{color:inherit;text-decoration:none;}
   background:var(--gold);color:#241a06;font-size:var(--fs-xs);font-weight:700;
   letter-spacing:.07em;text-transform:uppercase;padding:5px 14px;border-radius:100px;
 }
-.price-card h3{font-family:var(--serif);font-size:var(--fs-lg);font-weight:600;margin-bottom:5px;}
+.price-card h3{font-family:var(--serif);font-size:var(--fs-lg);font-weight:600;margin-bottom:5px;color:var(--ink);}
 .price-card .ptype{font-size:var(--fs-sm);color:var(--moss);margin-bottom:18px;}
 .price-amt{display:flex;align-items:baseline;gap:5px;margin-bottom:4px;}
 .price-amt .cur{font-size:var(--fs-md);font-weight:600;color:var(--moss);}
-.price-amt .num{font-family:var(--serif);font-size:3rem;font-weight:900;line-height:1;}
+.price-amt .num{font-family:var(--serif);font-size:3rem;font-weight:900;line-height:1;color:var(--forest);}
 .price-amt .per{font-size:var(--fs-sm);color:var(--text-mute);}
 .price-trial{
   font-size:var(--fs-sm);color:var(--forest);background:var(--sage);
@@ -1561,6 +1562,89 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .txt-sm{font-size:var(--fs-sm);}.txt-muted{color:var(--text-mute);}
 .hide{display:none!important;}
 
+
+/* ============ MOBILE OVERFLOW GUARDS ============ */
+.wrap,.hero-inner,.price-grid,.footer-grid,.feat-grid,.blog-grid,.steps,.app-shell,.main-area,.topbar-inner{
+  max-width:100%;
+}
+.topbar-inner{flex-wrap:wrap;height:auto;min-height:66px;padding:8px 0;gap:8px;}
+.nav-actions{flex-wrap:wrap;max-width:100%;gap:8px;}
+.lang-toggle{
+  max-width:min(100%,220px);overflow-x:auto;-webkit-overflow-scrolling:touch;
+  flex-shrink:1;scrollbar-width:thin;
+}
+.lang-toggle button{flex-shrink:0;padding:6px 10px;}
+.footer-grid{max-width:100%;}
+.footer .wrap{overflow-x:clip;}
+.price-grid{max-width:100%;}
+img,svg,table,pre,video,iframe{max-width:100%;}
+#app{max-width:100%;overflow-x:clip;}
+
+/* Minimal intake / checker / docprompt layout (screens were unstyled after CSS trap) */
+.intake-screen,.checker-screen,.docprompt-screen{
+  min-height:100dvh;background:var(--paper);display:flex;flex-direction:column;
+  align-items:center;padding:20px 16px calc(24px + var(--safe-bottom));
+  box-sizing:border-box;width:100%;max-width:100%;
+}
+.intake-header{
+  width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:18px;
+}
+.intake-brand{display:flex;align-items:center;gap:8px;font-family:var(--serif);font-weight:700;}
+.intake-skip{font-size:var(--fs-sm);font-weight:600;color:var(--forest);text-decoration:underline;min-height:44px;}
+.intake-card,.checker-card{
+  width:100%;max-width:520px;background:var(--cream);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:22px 20px;box-shadow:var(--shadow-sm);box-sizing:border-box;
+}
+.intake-progress{display:flex;gap:8px;justify-content:center;margin-bottom:18px;}
+.intake-lee-row{display:flex;gap:12px;align-items:flex-start;}
+.intake-avatar{
+  width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--gold-deep));
+  color:var(--gold-soft);display:grid;place-items:center;font-weight:800;flex-shrink:0;
+}
+.intake-bubble{
+  background:var(--paper-2);border-radius:12px;padding:12px 14px;font-size:var(--fs-base);line-height:1.5;flex:1;
+}
+.intake-bubble .example{display:block;margin-top:6px;font-size:var(--fs-sm);color:var(--text-mute);}
+.intake-choices,.checker-choices{display:flex;flex-direction:column;gap:8px;}
+.intake-choice,.checker-choice{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:12px 14px;border:1.5px solid var(--line-strong);border-radius:var(--r-md);
+  background:var(--cream);font-size:var(--fs-base);min-height:48px;box-sizing:border-box;
+}
+.intake-choice.selected,.checker-choice.selected{border-color:var(--forest);background:var(--paper-2);}
+.choice-icon,.cq-icon{font-size:1.1rem;width:1.5em;text-align:center;}
+.intake-actions,.checker-nav{display:flex;gap:10px;justify-content:space-between;margin-top:18px;flex-wrap:wrap;}
+.intake-text-row input,.intake-text-row textarea,.confirm-field input,.confirm-field select{
+  width:100%;padding:12px 14px;border:1.5px solid var(--line-strong);border-radius:var(--r-md);
+  background:var(--cream);box-sizing:border-box;
+}
+.intake-text-row textarea{min-height:100px;resize:vertical;}
+.intake-confirm-fields{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+.confirm-field label{display:block;font-size:var(--fs-sm);font-weight:600;margin-bottom:6px;}
+.cf-val{font-size:var(--fs-base);color:var(--text-soft);padding:8px 0;}
+.checker-q-label{font-size:var(--fs-sm);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin-bottom:8px;}
+.checker-q-text{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;margin-bottom:8px;color:var(--ink);}
+.checker-q-example{font-size:var(--fs-sm);color:var(--text-mute);margin-bottom:16px;line-height:1.5;}
+.verdict-card{background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 18px;}
+.verdict-emoji{font-size:2rem;margin-bottom:8px;}
+.verdict-title{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink);margin-bottom:8px;}
+.verdict-desc{font-size:var(--fs-base);color:var(--text-soft);margin-bottom:14px;line-height:1.55;}
+.verdict-points{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.verdict-point{display:flex;gap:8px;font-size:var(--fs-sm);color:var(--text-soft);}
+.verdict-ctas{display:flex;flex-direction:column;gap:8px;}
+.screen-error{
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 20px;text-align:center;background:var(--paper);color:var(--ink);gap:12px;
+}
+.screen-error h2{font-family:var(--serif);font-size:var(--fs-xl);margin:0;}
+.screen-error p{color:var(--text-soft);max-width:36ch;margin:0;}
+.plan-chip{
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;
+  background:var(--sage);color:var(--ink);font-size:var(--fs-sm);font-weight:600;
+  padding:6px 12px;border-radius:100px;
+}
+
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
   .hero-inner{grid-template-columns:1fr;gap:38px;}
@@ -1577,7 +1661,7 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
   .grid-2{grid-template-columns:1fr;}
   .stat-row{grid-template-columns:repeat(2,1fr);}
   .section{padding:52px 0;}
-  .footer-grid{grid-template-columns:1fr 1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:22px;}
   .sidebar{display:none;}
   .main-tabs{display:none;}
   .mobnav{display:block;}
@@ -1586,12 +1670,180 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
   .chat-msg{max-width:92%;}
   .modal{border-radius:var(--r-lg);}
   .nav-actions .btn:not(.btn-gold){display:none;}
+  .lang-toggle{max-width:min(100%,180px);}
+  .brand span{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }
 @media(max-width:420px){
   .stat-row{grid-template-columns:1fr;}
   .hero-cta{flex-direction:column;}
   .hero-cta .btn{width:100%;}
+  .footer-grid{grid-template-columns:1fr;}
+  .lang-toggle{max-width:100%;width:100%;order:3;}
+  .nav-actions{width:100%;justify-content:flex-end;}
+  .topbar-inner{align-items:flex-start;}
 }
+
+/* ── Rescued app CSS (was trapped in printable case-file template) ── */
+/* ── Semantic state tokens ── */
+:root {
+  --danger:#c0392b; --danger-soft:#fdecea;
+  --success:#1c7a3a; --success-soft:#eaf5ee;
+  --warning:#b7791f; --warning-soft:#fef3c7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --danger:#e57373;--danger-soft:#3d1515;
+    --success:#5fae77;--success-soft:#1a2e1f;
+    --warning:#f6ad55;--warning-soft:#2d1f00;
+    --text-mute:#b8a98f;
+  }
+}
+
+/* ── Stat row 2-col on small phones ── */
+@media (max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)!important;}}
+
+/* ── Deadline chip (always-visible state widget) ── */
+.dcb{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;margin-bottom:16px;transition:background .3s,border-color .3s;border:1.5px solid var(--line-strong);background:var(--cream);}
+.dcb[data-state="urgent"]{background:var(--danger-soft);border-color:var(--danger);}
+.dcb[data-state="warning"]{background:var(--warning-soft);border-color:var(--warning);}
+.dcb[data-state="safe"]{background:var(--success-soft);border-color:var(--success);}
+.dcb[data-state="filed"]{background:var(--paper-2);border-color:var(--line);}
+.dcb-days{font-family:var(--serif);font-size:2.25rem;font-weight:900;line-height:1;min-width:52px;text-align:center;}
+.dcb[data-state="urgent"] .dcb-days{color:var(--danger);}
+.dcb[data-state="warning"] .dcb-days{color:var(--warning);}
+.dcb[data-state="safe"] .dcb-days{color:var(--success);}
+.dcb-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.dcb-sub{font-size:12px;color:var(--text-soft);line-height:1.4;}
+.dcb-pulse{animation:pulse 1.5s ease infinite;}
+
+/* ── Deadline ring ── */
+.dlr-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
+.dlr-svg{transform:rotate(-90deg);}
+.dlr-track{fill:none;stroke:#e5e7eb;stroke-width:9;}
+.dlr-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s;}
+.dlr-inner{position:absolute;inset:11px;border-radius:50%;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 8px rgba(0,0,0,.07);}
+.dlr-num{font-family:var(--serif);font-size:1.7rem;font-weight:900;line-height:1;}
+.dlr-lbl{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mute);}
+
+/* ── WhatsApp share ── */
+.wa-btn{display:inline-flex;align-items:center;gap:7px;background:#25d366;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);min-height:44px;}
+
+/* ── Lee AI identity header ── */
+.lee-hdr{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--ink);border-bottom:1px solid rgba(255,255,255,.1);}
+.lee-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--gold-deep));display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:16px;color:var(--gold-soft);flex-shrink:0;}
+.lee-name{font-weight:700;font-size:15px;color:#fff;}
+.lee-role{font-size:11px;color:var(--sage);margin-top:1px;}
+.lee-online{margin-left:auto;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(127,168,134,.2);color:var(--sage);}
+
+/* ── Lee context panel ── */
+.lee-ctx{background:rgba(28,82,52,.12);border:1px solid rgba(28,82,52,.3);border-radius:10px;padding:10px 14px;margin:10px 10px 0;font-size:12px;}
+.lee-ctx summary{font-weight:700;color:var(--gold-soft);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;}
+.lee-ctx summary::-webkit-details-marker{display:none;}
+.lee-ctx-row{display:flex;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.lee-ctx-row:last-child{border-bottom:none;}
+.lee-ctx-key{color:var(--text-mute);min-width:90px;font-size:11px;}
+.lee-ctx-val{color:var(--paper);font-weight:500;font-size:11px;}
+
+/* ── Citation chips ── */
+.cite-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(199,154,62,.15);border:1px solid rgba(199,154,62,.4);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--gold-soft);cursor:pointer;margin:2px 3px;transition:background .15s;vertical-align:middle;}
+.cite-chip:hover{background:rgba(199,154,62,.28);}
+.cite-sheet{position:fixed;inset:auto 0 0 0;z-index:200;background:var(--ink);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.5);animation:slideUp .22s ease both;}
+.cite-bd{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.5);}
+.cite-law{font-size:13px;font-weight:700;color:var(--gold-soft);margin-bottom:8px;}
+.cite-text{font-size:14px;color:var(--paper);line-height:1.65;}
+.cite-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:12px;color:var(--moss);font-weight:600;text-decoration:underline;}
+
+/* ── Bargaining council alert ── */
+.bc-alert{background:var(--danger-soft);border:1.5px solid var(--danger);border-radius:12px;padding:16px;margin-bottom:16px;}
+.bc-alert h4{color:var(--danger);font-size:14px;margin:0 0 6px;}
+.bc-alert p{font-size:13px;color:var(--text-soft);margin:0 0 10px;line-height:1.6;}
+
+/* ── Triage wizard overlay ── */
+
+
+/* ── Simplified mode ── */
+[data-simplified="true"]{--fs-xs:.875rem;--fs-sm:1rem;--fs-base:1.125rem;--fs-lg:1.25rem;}
+
+/* ── Semantic pills ── */
+.pill-urgent{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
+.pill-warning{background:var(--warning-soft);color:var(--warning);border:1px solid var(--warning);}
+.pill-success{background:var(--success-soft);color:var(--success);border:1px solid var(--success);}
+
+/* ── Case export bar ── */
+.case-xbar{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line);}
+.case-xbar button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--cream);font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:var(--sans);min-height:44px;}
+
+/* ── Form pre-submit checklist ── */
+.form-chk{background:var(--warning-soft);border:1.5px solid var(--warning);border-radius:12px;padding:16px;margin-top:16px;}
+.form-chk h4{color:var(--warning);font-size:13px;margin:0 0 10px;}
+.fsc-r{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid rgba(183,121,31,.2);}
+.fsc-r:last-of-type{border-bottom:none;}
+.fsc-r input[type=checkbox]{width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:var(--forest);}
+.fsc-r label{font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer;}
+
+/* ── Screen-reader live region ── */
+#lee-live{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+/* ── Action groups (Strategy tab restructure — UX Expert) ──────── */
+.action-group { margin-bottom: 26px; }
+.action-group-hdr {
+  display: flex; align-items: center; gap: 8px;
+  font-size: var(--fs-sm); font-weight: 700; color: var(--text-mute);
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 12px 0 8px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
+}
+.action-group-hdr .action-group-icon { width: 16px; height: 16px; color: var(--forest); flex-shrink: 0; }
+.action-group-label { color: var(--ink); }
+.action-group-desc { font-weight: 400; text-transform: none; letter-spacing: 0;
+  color: var(--text-mute); font-size: 12px; margin-left: auto; }
+
+/* ── Context-aware empty states ────────────────────────────────── */
+.empty-state-ctx { text-align: center; padding: 44px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.empty-state-ctx .empty-ico-lg { font-size: 36px; width: 64px; height: 64px; border-radius: 50%; background: var(--paper-2, #f0ede4); display: grid; place-items: center; }
+.empty-state-ctx h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: 0; }
+.empty-state-ctx p  { font-size: 13px; color: var(--text-soft); max-width: 30ch; line-height: 1.6; margin: 0; }
+
+  
+/* ── Taste-skill improvements: checker & verdict ────────────────── */
+.intake-dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong);
+  transition:background var(--dur) var(--ease-out),transform var(--dur) var(--ease-spring);}
+.intake-dot.active{background:var(--forest);transform:scale(1.3);}
+.intake-dot.done{background:var(--moss);}
+
+.verdict-card{animation:scaleIn .4s var(--ease-spring) both;}
+.verdict-card.green{border-left:4px solid var(--success);}
+.verdict-card.amber{border-left:4px solid var(--warning);}
+.verdict-card.red{border-left:4px solid var(--danger);}
+
+.checker-choice{transition:border-color var(--dur-fast) var(--ease-out),
+  background var(--dur-fast) var(--ease-out),
+  transform var(--dur-fast) var(--ease-spring);}
+.checker-choice:hover{transform:translateX(3px);}
+.checker-choice.selected{transform:translateX(3px);}
+
+/* ── Taste-skill improvements: next-move card ───────────────────── */
+.nm-card{transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);}
+.nm-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+
+/* ── Taste-skill improvements: timeline & doc list ──────────────── */
+#tlTrack>.tl-ev{animation:fadeUp .35s var(--ease-out) both;}
+#tlTrack>.tl-ev:nth-child(1){animation-delay:0ms;}
+#tlTrack>.tl-ev:nth-child(2){animation-delay:60ms;}
+#tlTrack>.tl-ev:nth-child(3){animation-delay:120ms;}
+#tlTrack>.tl-ev:nth-child(n+4){animation-delay:180ms;}
+
+/* ── Taste-skill improvements: focus-visible outline ────────────── */
+:focus-visible{outline:2px solid var(--forest);outline-offset:3px;border-radius:4px;}
+button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
+
+/* ── Taste-skill improvements: selection colour ─────────────────── */
+::selection{background:rgba(199,154,62,.28);color:var(--ink);}
+
+/* ── Taste-skill improvements: scrollbar (Webkit) ───────────────── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:100px;}
+::-webkit-scrollbar-thumb:hover{background:var(--sage);}
 </style>
 </head>
 <body>
@@ -1729,6 +1981,8 @@ const State = {
   lang: 'en',
   screen: 'landing',
   tab: 'dashboard',
+  pendingPlan: null,
+  authMode: 'signup',
 };
 
 const uid = (p = 'id') => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -3757,11 +4011,55 @@ function render() {
   if (prevBody && State._scrollTab) State._scroll = State._scroll || {};
   if (prevBody && State._scrollTab) State._scroll[State._scrollTab] = prevBody.scrollTop;
   app.innerHTML = '';
-  if (State.screen === 'landing') app.appendChild(Views.landing());
-  else if (State.screen === 'auth') app.appendChild(Views.auth());
-  else if (State.screen === 'app') {
-    app.appendChild(Views.appShell());
-
+  try {
+    if (State.screen === 'landing') app.appendChild(Views.landing());
+    else if (State.screen === 'auth') app.appendChild(Views.auth());
+    else if (State.screen === 'intake') app.appendChild(Views.screenIntake());
+    else if (State.screen === 'checker') app.appendChild(Views.screenChecker());
+    else if (State.screen === 'docprompt') app.appendChild(Views.screenDocPrompt());
+    else if (State.screen === 'app') app.appendChild(Views.appShell());
+    else {
+      // Never leave #app empty (blank beige) — recover to a known screen
+      console.warn('Unknown screen:', State.screen);
+      if (State.user) {
+        State.screen = 'app';
+        app.appendChild(Views.appShell());
+        toast('Something went wrong loading that screen. Back on your dashboard.', 'alert');
+      } else {
+        State.screen = 'landing';
+        app.appendChild(Views.landing());
+      }
+    }
+  } catch (err) {
+    console.error('render failed', err);
+    app.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'screen-error';
+    box.innerHTML = '<h2>Couldn\u2019t load this screen</h2>'
+      + '<p>Your progress is still saved on this device. Tap retry to continue.</p>'
+      + '<button class="btn btn-primary" id="renderRetry">Retry</button>'
+      + '<button class="btn btn-ghost" id="renderHome" style="margin-top:8px">Go to home</button>';
+    app.appendChild(box);
+    box.querySelector('#renderRetry').onclick = () => {
+      try { render(); } catch (e2) {
+        State.screen = State.user ? 'app' : 'landing';
+        render();
+      }
+    };
+    box.querySelector('#renderHome').onclick = () => {
+      State.screen = State.user ? 'app' : 'landing';
+      render();
+    };
+    toast('Something went wrong. Use Retry to continue.', 'alert');
+  }
+  if (!app.firstChild) {
+    // Hard safety net — never blank beige root
+    State.screen = State.user ? 'app' : 'landing';
+    try {
+      app.appendChild(State.user ? Views.appShell() : Views.landing());
+    } catch (e3) {
+      app.innerHTML = '<div class="screen-error"><h2>MyLabourRights</h2><p>Please refresh the page.</p></div>';
+    }
   }
   window.scrollTo(0, 0);
   // restore scroll for the tab we're now on
@@ -3865,8 +4163,13 @@ async function boot() {
     });
   }
 
-  // handle PayFast return: ?paid=1 unlocks the most recent trial case
   const params = new URLSearchParams(location.search);
+  const planParam = (params.get('plan') || '').trim();
+  if (planParam && (CASE_TYPES[planParam] || planParam === 'personal' || planParam === 'grievance')) {
+    State.pendingPlan = CASE_TYPES[planParam] ? planParam : 'personal';
+  }
+
+  // handle PayFast return: ?paid=1 unlocks the most recent trial case
   if (params.get('paid') === '1') {
     const meta = await DB.get('meta', 'session');
     if (meta && meta.userId) {
@@ -3896,6 +4199,11 @@ async function boot() {
       State.activeCaseId = State.cases.length ? State.cases[0].id : null;
       State.screen = State.cases.length ? 'app' : 'auth';
     }
+  }
+  // Pricing CTA deep-link: open signup with plan after session restore
+  if (State.pendingPlan && !State.user) {
+    State.authMode = 'signup';
+    State.screen = 'auth';
   }
   render();
 }
@@ -4229,11 +4537,25 @@ const Views = (() => {
     // wire landing
     root.querySelectorAll('#langToggle button').forEach(b =>
       b.onclick = () => { State.lang = b.dataset.l; render(); });
-    root.querySelector('#navLogin').onclick = () => { authMode = 'login'; go('auth'); };
-    root.querySelector('#navStart').onclick = () => { authMode = 'signup'; go('auth'); };
-    root.querySelector('#heroStart').onclick = () => { authMode = 'signup'; go('auth'); };
+    root.querySelector('#navLogin').onclick = () => { State.authMode = 'login'; go('auth'); };
+    root.querySelector('#navStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
+    root.querySelector('#heroStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
     root.querySelector('#heroPricing').onclick = () =>
       root.querySelector('#pricingSec').scrollIntoView({ behavior: 'smooth' });
+    root.querySelectorAll('.price-pick').forEach(btn => {
+      btn.onclick = () => {
+        const plan = btn.dataset.type || 'personal';
+        State.pendingPlan = plan;
+        try {
+          const url = new URL(location.href);
+          url.searchParams.set('plan', plan);
+          history.replaceState({}, '', url.pathname + '?' + url.searchParams.toString() + url.hash);
+        } catch {}
+        State.authMode = 'signup';
+        go('auth');
+        toast('Starting your ' + (CASE_TYPES[plan]?.trialDays || 7) + '-day trial — create your account to continue.');
+      };
+    });
 
     // B5 — install-app hint (uses the captured beforeinstallprompt event)
     if (window.__installPrompt && !sessionStorage.getItem('mlr-install-hidden')) {
@@ -4315,11 +4637,9 @@ const Views = (() => {
   /* ============================================================
      AUTH SCREEN
      ============================================================ */
-  let authMode = 'signup';
-
   function auth() {
     const root = el(`<div class="screen active"></div>`);
-    const isSignup = authMode === 'signup';
+    const isSignup = State.authMode === 'signup';
     root.innerHTML = `
       <div class="auth-screen">
         <div class="auth-art">
@@ -4340,6 +4660,7 @@ const Views = (() => {
         <div class="auth-form-side">
           <div class="auth-box">
             <h1>${isSignup ? 'Create your account' : 'Log in'}</h1>
+            ${isSignup && State.pendingPlan ? `<div class="plan-chip">${ICONS.spark} ${(CASE_TYPES[State.pendingPlan]||{}).label || 'Selected plan'} · ${(CASE_TYPES[State.pendingPlan]||{}).trialDays || 7}-day free trial</div>` : ''}
             <p class="sub">${isSignup ? 'Email login \u2014 free to start, no card needed.' : 'Use the email you signed up with.'}</p>
             <button class="google-btn" id="googleBtn">${ICONS.google}
               <span>Continue with Google</span></button>
@@ -4368,7 +4689,7 @@ const Views = (() => {
         </div>
       </div>`;
 
-    root.querySelector('#auSwitch').onclick = () => { authMode = isSignup ? 'login' : 'signup'; render(); };
+    root.querySelector('#auSwitch').onclick = () => { State.authMode = isSignup ? 'login' : 'signup'; render(); };
     root.querySelector('#auBack').onclick = () => go('landing');
     root.querySelector('#googleBtn').onclick = () => doAuth(true);
     root.querySelector('#auSubmit').onclick = () => doAuth(false);
@@ -4376,7 +4697,7 @@ const Views = (() => {
   }
 
   async function doAuth(viaGoogle) {
-    const isSignup = authMode === 'signup';
+    const isSignup = State.authMode === 'signup';
     let name, email, lang = State.lang, pass;
 
     if (viaGoogle) {
@@ -4500,16 +4821,24 @@ const Views = (() => {
      NEW CASE ENTRY POINT
      ============================================================ */
   function openNewCaseModal(firstCase = false) {
-    State._intakeFirstCase = firstCase;
-    State._intakeStep = 0;
-    State._intakeAnswers = {};
-    go('intake');
+    try {
+      State._intakeFirstCase = firstCase;
+      State._intakeStep = 0;
+      State._intakeAnswers = {};
+      go('intake');
+    } catch (err) {
+      console.error('openNewCaseModal failed', err);
+      toast('Could not open case setup. Tap retry or start from the dashboard.', 'alert');
+      State.screen = 'app';
+      try { render(); } catch {}
+    }
   }
 
   /* ============================================================
      CREATE CASE
      ============================================================ */
   async function createCase(type, name, desc, intake = {}) {
+    try {
     const cfg = CASE_TYPES[type] || CASE_TYPES.personal;
     const now = Date.now();
     const c = {
@@ -4548,13 +4877,23 @@ const Views = (() => {
     const intro = { id: uid('msg'), caseId: c.id, role: 'ai', ts: now, kind: 'opinion', text: introText };
     await DB.put('messages', intro);
     if (type === 'validity_check') {
-      State.tab = 'chat'; render();
+      State.screen = 'app';
+      State.tab = 'chat';
+      render();
       toast('Situation check started \u2014 completely free.');
     } else {
-      State.screen = 'docprompt'; render();
+      State.screen = 'docprompt';
+      render();
       toast('Case created \u2014 your free trial has started.');
     }
     return c;
+    } catch (err) {
+      console.error('createCase failed', err);
+      toast('Could not create your case. Please try again.', 'alert');
+      State.screen = 'app';
+      try { render(); } catch {}
+      return null;
+    }
   }
 
   /* ============================================================
@@ -5270,6 +5609,7 @@ const Views = (() => {
   /* ====== expose ====== */
   return {
     landing, auth, appShell,
+    screenIntake, screenChecker, screenDocPrompt,
     openNewCaseModal, _activeCase: activeCase, _fmt: fmt, _el: el,
   };
 
@@ -7597,166 +7937,6 @@ async function buildPrintableCaseFile(c) {
     .disc{margin-top:30px;padding:12px;background:#faf7ef;border:1px solid #e3d9bf;font-size:12px;color:#555;border-radius:6px;}
     @media print{body{margin:0;}}
 
-/* ── Semantic state tokens ── */
-:root {
-  --danger:#c0392b; --danger-soft:#fdecea;
-  --success:#1c7a3a; --success-soft:#eaf5ee;
-  --warning:#b7791f; --warning-soft:#fef3c7;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --danger:#e57373;--danger-soft:#3d1515;
-    --success:#5fae77;--success-soft:#1a2e1f;
-    --warning:#f6ad55;--warning-soft:#2d1f00;
-    --text-mute:#b8a98f;
-  }
-}
-
-/* ── Stat row 2-col on small phones ── */
-@media (max-width:480px){.stat-row{grid-template-columns:repeat(2,1fr)!important;}}
-
-/* ── Deadline chip (always-visible state widget) ── */
-.dcb{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;margin-bottom:16px;transition:background .3s,border-color .3s;border:1.5px solid var(--line-strong);background:var(--cream);}
-.dcb[data-state="urgent"]{background:var(--danger-soft);border-color:var(--danger);}
-.dcb[data-state="warning"]{background:var(--warning-soft);border-color:var(--warning);}
-.dcb[data-state="safe"]{background:var(--success-soft);border-color:var(--success);}
-.dcb[data-state="filed"]{background:var(--paper-2);border-color:var(--line);}
-.dcb-days{font-family:var(--serif);font-size:2.25rem;font-weight:900;line-height:1;min-width:52px;text-align:center;}
-.dcb[data-state="urgent"] .dcb-days{color:var(--danger);}
-.dcb[data-state="warning"] .dcb-days{color:var(--warning);}
-.dcb[data-state="safe"] .dcb-days{color:var(--success);}
-.dcb-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
-.dcb-sub{font-size:12px;color:var(--text-soft);line-height:1.4;}
-.dcb-pulse{animation:pulse 1.5s ease infinite;}
-
-/* ── Deadline ring ── */
-.dlr-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
-.dlr-svg{transform:rotate(-90deg);}
-.dlr-track{fill:none;stroke:#e5e7eb;stroke-width:9;}
-.dlr-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s;}
-.dlr-inner{position:absolute;inset:11px;border-radius:50%;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 8px rgba(0,0,0,.07);}
-.dlr-num{font-family:var(--serif);font-size:1.7rem;font-weight:900;line-height:1;}
-.dlr-lbl{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-mute);}
-
-/* ── WhatsApp share ── */
-.wa-btn{display:inline-flex;align-items:center;gap:7px;background:#25d366;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);min-height:44px;}
-
-/* ── Lee AI identity header ── */
-.lee-hdr{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--ink);border-bottom:1px solid rgba(255,255,255,.1);}
-.lee-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--forest),var(--gold-deep));display:grid;place-items:center;font-family:var(--serif);font-weight:900;font-size:16px;color:var(--gold-soft);flex-shrink:0;}
-.lee-name{font-weight:700;font-size:15px;color:#fff;}
-.lee-role{font-size:11px;color:var(--sage);margin-top:1px;}
-.lee-online{margin-left:auto;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px;background:rgba(127,168,134,.2);color:var(--sage);}
-
-/* ── Lee context panel ── */
-.lee-ctx{background:rgba(28,82,52,.12);border:1px solid rgba(28,82,52,.3);border-radius:10px;padding:10px 14px;margin:10px 10px 0;font-size:12px;}
-.lee-ctx summary{font-weight:700;color:var(--gold-soft);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;}
-.lee-ctx summary::-webkit-details-marker{display:none;}
-.lee-ctx-row{display:flex;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);}
-.lee-ctx-row:last-child{border-bottom:none;}
-.lee-ctx-key{color:var(--text-mute);min-width:90px;font-size:11px;}
-.lee-ctx-val{color:var(--paper);font-weight:500;font-size:11px;}
-
-/* ── Citation chips ── */
-.cite-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(199,154,62,.15);border:1px solid rgba(199,154,62,.4);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--gold-soft);cursor:pointer;margin:2px 3px;transition:background .15s;vertical-align:middle;}
-.cite-chip:hover{background:rgba(199,154,62,.28);}
-.cite-sheet{position:fixed;inset:auto 0 0 0;z-index:200;background:var(--ink);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.5);animation:slideUp .22s ease both;}
-.cite-bd{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.5);}
-.cite-law{font-size:13px;font-weight:700;color:var(--gold-soft);margin-bottom:8px;}
-.cite-text{font-size:14px;color:var(--paper);line-height:1.65;}
-.cite-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:12px;color:var(--moss);font-weight:600;text-decoration:underline;}
-
-/* ── Bargaining council alert ── */
-.bc-alert{background:var(--danger-soft);border:1.5px solid var(--danger);border-radius:12px;padding:16px;margin-bottom:16px;}
-.bc-alert h4{color:var(--danger);font-size:14px;margin:0 0 6px;}
-.bc-alert p{font-size:13px;color:var(--text-soft);margin:0 0 10px;line-height:1.6;}
-
-/* ── Triage wizard overlay ── */
-
-
-/* ── Simplified mode ── */
-[data-simplified="true"]{--fs-xs:.875rem;--fs-sm:1rem;--fs-base:1.125rem;--fs-lg:1.25rem;}
-
-/* ── Semantic pills ── */
-.pill-urgent{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger);}
-.pill-warning{background:var(--warning-soft);color:var(--warning);border:1px solid var(--warning);}
-.pill-success{background:var(--success-soft);color:var(--success);border:1px solid var(--success);}
-
-/* ── Case export bar ── */
-.case-xbar{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--line);}
-.case-xbar button{flex:1;padding:8px;border-radius:7px;border:1px solid var(--line-strong);background:var(--cream);font-size:12px;font-weight:600;color:var(--text-soft);cursor:pointer;font-family:var(--sans);min-height:44px;}
-
-/* ── Form pre-submit checklist ── */
-.form-chk{background:var(--warning-soft);border:1.5px solid var(--warning);border-radius:12px;padding:16px;margin-top:16px;}
-.form-chk h4{color:var(--warning);font-size:13px;margin:0 0 10px;}
-.fsc-r{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid rgba(183,121,31,.2);}
-.fsc-r:last-of-type{border-bottom:none;}
-.fsc-r input[type=checkbox]{width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:var(--forest);}
-.fsc-r label{font-size:13px;color:var(--ink);line-height:1.5;cursor:pointer;}
-
-/* ── Screen-reader live region ── */
-#lee-live{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-
-/* ── Action groups (Strategy tab restructure — UX Expert) ──────── */
-.action-group { margin-bottom: 26px; }
-.action-group-hdr {
-  display: flex; align-items: center; gap: 8px;
-  font-size: var(--fs-sm); font-weight: 700; color: var(--text-mute);
-  text-transform: uppercase; letter-spacing: .08em;
-  padding: 12px 0 8px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
-}
-.action-group-hdr .action-group-icon { width: 16px; height: 16px; color: var(--forest); flex-shrink: 0; }
-.action-group-label { color: var(--ink); }
-.action-group-desc { font-weight: 400; text-transform: none; letter-spacing: 0;
-  color: var(--text-mute); font-size: 12px; margin-left: auto; }
-
-/* ── Context-aware empty states ────────────────────────────────── */
-.empty-state-ctx { text-align: center; padding: 44px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.empty-state-ctx .empty-ico-lg { font-size: 36px; width: 64px; height: 64px; border-radius: 50%; background: var(--paper-2, #f0ede4); display: grid; place-items: center; }
-.empty-state-ctx h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: 0; }
-.empty-state-ctx p  { font-size: 13px; color: var(--text-soft); max-width: 30ch; line-height: 1.6; margin: 0; }
-
-  
-/* ── Taste-skill improvements: checker & verdict ────────────────── */
-.intake-dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong);
-  transition:background var(--dur) var(--ease-out),transform var(--dur) var(--ease-spring);}
-.intake-dot.active{background:var(--forest);transform:scale(1.3);}
-.intake-dot.done{background:var(--moss);}
-
-.verdict-card{animation:scaleIn .4s var(--ease-spring) both;}
-.verdict-card.green{border-left:4px solid var(--success);}
-.verdict-card.amber{border-left:4px solid var(--warning);}
-.verdict-card.red{border-left:4px solid var(--danger);}
-
-.checker-choice{transition:border-color var(--dur-fast) var(--ease-out),
-  background var(--dur-fast) var(--ease-out),
-  transform var(--dur-fast) var(--ease-spring);}
-.checker-choice:hover{transform:translateX(3px);}
-.checker-choice.selected{transform:translateX(3px);}
-
-/* ── Taste-skill improvements: next-move card ───────────────────── */
-.nm-card{transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-out);}
-.nm-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
-
-/* ── Taste-skill improvements: timeline & doc list ──────────────── */
-#tlTrack>.tl-ev{animation:fadeUp .35s var(--ease-out) both;}
-#tlTrack>.tl-ev:nth-child(1){animation-delay:0ms;}
-#tlTrack>.tl-ev:nth-child(2){animation-delay:60ms;}
-#tlTrack>.tl-ev:nth-child(3){animation-delay:120ms;}
-#tlTrack>.tl-ev:nth-child(n+4){animation-delay:180ms;}
-
-/* ── Taste-skill improvements: focus-visible outline ────────────── */
-:focus-visible{outline:2px solid var(--forest);outline-offset:3px;border-radius:4px;}
-button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
-
-/* ── Taste-skill improvements: selection colour ─────────────────── */
-::selection{background:rgba(199,154,62,.28);color:var(--ink);}
-
-/* ── Taste-skill improvements: scrollbar (Webkit) ───────────────── */
-::-webkit-scrollbar{width:6px;height:6px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:100px;}
-::-webkit-scrollbar-thumb:hover{background:var(--sage);}
 </style></head><body>
   <h1>${esc2(c.name)}</h1>
   <p class="sub">Case file prepared via MyLabourRights &middot; ${today}</p>
