@@ -1524,7 +1524,8 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .footer-grid p{font-size:var(--fs-sm);max-width:280px;}
 .footer h5{color:var(--paper);font-size:var(--fs-sm);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:13px;}
 .footer-links{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.footer-links a{font-size:var(--fs-sm);transition:color .15s;}
+.footer-links a{font-size:var(--fs-sm);transition:color .15s;display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none;cursor:pointer;}
+.info-page{max-width:760px;margin:0 auto;padding:28px 18px 60px}.info-page h1{font-family:var(--serif);font-size:var(--fs-xl,28px);margin:12px 0 16px}.info-page h2{font-size:18px;margin:22px 0 8px}.info-page p,.info-page li{line-height:1.6;margin-bottom:10px}.info-page .info-item{border-top:1px solid var(--line,#ddd);padding:14px 0}
 .footer-links a:hover{color:var(--gold-soft);}
 .footer-bot{
   border-top:1px solid rgba(255,255,255,.1);padding-top:20px;
@@ -4038,6 +4039,7 @@ function render() {
     else if (State.screen === 'checker') app.appendChild(Views.screenChecker());
     else if (State.screen === 'docprompt') app.appendChild(Views.screenDocPrompt());
     else if (State.screen === 'app') app.appendChild(Views.appShell());
+    else if (State.screen === 'info') app.appendChild(Views.infoPage(State.infoPage));
     else {
       // Never leave #app empty (blank beige) — recover to a known screen
       console.warn('Unknown screen:', State.screen);
@@ -4091,11 +4093,29 @@ function render() {
   }
 }
 
+function screenPath() {
+  if (State.screen === 'info') return '/' + (State.infoPage || 'faq');
+  return location.pathname.match(/^\/(firms|employers|blog|guides|rights|faq|privacy|terms|disclaimer)$/) ? '/' : location.pathname;
+}
 function go(screen, opts = {}) {
+  const changed = screen !== State.screen || (screen === 'info') || (opts.tab && opts.tab !== State.tab);
   State.screen = screen;
   if (opts.tab) State.tab = opts.tab;
+  // Keep Back inside the app: every screen/tab change is a history entry
+  if (changed && !opts.fromPop) {
+    try { history.pushState({ screen, tab: State.tab, info: State.infoPage }, '', screenPath() + location.search); } catch {}
+  }
   render();
 }
+window.addEventListener('popstate', (e) => {
+  const s = e.state;
+  if (!s || !s.screen) { // first entry: keep the user in the app rather than leaving the site
+    go(State.user ? 'app' : 'landing', { fromPop: true }); return;
+  }
+  if ((s.screen === 'app' || s.screen === 'intake' || s.screen === 'checker' || s.screen === 'docprompt') && !State.user) { go('landing', { fromPop: true }); return; }
+  State.infoPage = s.info || State.infoPage;
+  go(s.screen, { tab: s.tab, fromPop: true });
+});
 
 /* ============================================================
    SECTION 9 — MODAL SYSTEM
@@ -4227,11 +4247,14 @@ async function boot() {
       State.screen = 'app';
     }
   }
+  const infoMatch = location.pathname.match(/^\/(firms|employers|blog|guides|rights|faq|privacy|terms|disclaimer)$/);
+  if (infoMatch) { State.infoPage = infoMatch[1]; State.screen = 'info'; }
   // Pricing CTA deep-link: open signup with plan after session restore
   if (State.pendingPlan && !State.user) {
     State.authMode = 'signup';
     State.screen = 'auth';
   }
+  try { history.replaceState({ screen: State.screen, tab: State.tab, info: State.infoPage }, '', location.pathname + location.search); } catch {}
   render();
 }
 
@@ -4579,6 +4602,7 @@ const Views = (() => {
     root.querySelector('#navLogin').onclick = () => { State.authMode = 'login'; go('auth'); };
     root.querySelector('#navStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
     root.querySelector('#heroStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
+    wireFooter(root);
     root.querySelector('#heroPricing').onclick = () =>
       root.querySelector('#pricingSec').scrollIntoView({ behavior: 'smooth' });
     root.querySelectorAll('.price-pick').forEach(btn => {
@@ -4643,6 +4667,60 @@ const Views = (() => {
       </div>`;
   }
 
+
+  /* ====== INFO PAGES (footer links: 2026-11 stress test) ====== */
+  const INFO_PATHS = ['firms','employers','blog','guides','rights','faq','privacy','terms','disclaimer'];
+  function infoPage(key) {
+    const af = State.lang === 'af';
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const list = (arr, f) => (arr || []).map(f).join('');
+    const notAdvice = af ? '<p class="txt-muted"><em>Dit is algemene regsinligting, nie regsadvies nie.</em></p>' : '<p class="txt-muted"><em>This is general legal information, not legal advice.</em></p>';
+    const P = {
+      firms: [af ? 'Arbeidsreg-prokureurs' : 'Labour-law firms', list(window.FIRM_DIRECTORY, f => `<div class="info-item"><h2>${esc(f.name)}</h2><p>${esc(f.location)} \u00b7 ${esc((f.specialties||[]).join(', '))}</p></div>`) + '<p class="txt-muted">Listings are for information; MyLabourRights does not endorse any firm.</p>'],
+      employers: [af ? 'Vir werkgewers' : 'For employers', `<p>${af ? 'MyLabourRights help werknemers om voor te berei. Werkgewers kan die Kode van Goeie Praktyk: Ontslag en die KVBA-re\u00ebls gebruik om billike prosedures te volg.' : 'MyLabourRights is built for employees. Employers can use the same guides to run fair procedures: follow the Code of Good Practice: Dismissal, keep written records, and note the Amended CCMA Rules 2026 (WhatsApp service, e-filing, AI disclosure).'}</p><p>${af ? 'Kontak ons vir \u2019n groepsplan.' : 'Business plans are not available yet.'}</p>` + notAdvice],
+      blog: ['Blog', list(window.BLOG_POSTS, b => `<div class="info-item"><h2>${esc(b.title)}</h2><p class="txt-muted">${esc(b.category)}</p>${b.body}</div>`) + notAdvice],
+      guides: [af ? 'KVBA-gidse' : 'CCMA guides', list(window.HOW_TO_GUIDES, g => `<div class="info-item"><h2>${esc(g.title)}</h2><p>${esc(g.summary)}</p>${g.body}</div>`) + notAdvice],
+      rights: [af ? 'Ken jou regte' : 'Know your rights', `<ul>
+        <li>${af ? 'Ontslag moet om \u2019n billike rede en volgens \u2019n billike prosedure wees (WAV a188).' : 'A dismissal must be for a fair reason and follow a fair procedure (LRA s188).'}</li>
+        <li>${af ? 'Verwys \u2019n onbillike ontslag binne 30 dae na die KVBA; onbillike arbeidspraktyk binne 90 dae.' : 'Refer an unfair dismissal to the CCMA within 30 days; an unfair labour practice within 90 days.'}</li>
+        <li>${af ? 'Jy het reg op \u2019n skriftelike salarisstrokie en jaarlikse verlof (WBDV).' : 'You are entitled to a written payslip and annual leave (BCEA).'}</li>
+        <li>${af ? 'Onder die KVBA-re\u00ebls 2026 kan kennisgewings per WhatsApp beteken word en vorms elektronies ingedien word.' : 'Under the CCMA Rules 2026, notices may be served by WhatsApp and forms filed electronically.'}</li>
+        <li>${af ? 'Moenie onder druk teken nie; vra tyd om te lees.' : 'Never sign under pressure; ask for time to read.'}</li></ul>` + notAdvice],
+      faq: [af ? 'Algemene vrae' : 'FAQ', `
+        <div class="info-item"><h2>${af ? 'Is dit regsadvies?' : 'Is this legal advice?'}</h2><p>${af ? 'Nee. Dit is regsinligting en voorbereidingshulp. Raadpleeg \u2019n prokureur of vakbond vir advies.' : 'No. It is legal information and preparation help. For advice on your case speak to an attorney, a trade union or the CCMA.'}</p></div>
+        <div class="info-item"><h2>${af ? 'Waar word my data gestoor?' : 'Where is my data stored?'}</h2><p>${af ? 'Op hierdie toestel (IndexedDB). Vrae aan die KI word na ons bediener en KI-verskaffer gestuur.' : 'On this device (IndexedDB). Questions you send to the AI go to our server and an AI provider to generate an answer.'}</p></div>
+        <div class="info-item"><h2>${af ? 'Moet ek s\u00ea dat ek KI gebruik het?' : 'Must I say I used AI?'}</h2><p>${af ? 'Ja \u2014 die KVBA-re\u00ebls 2026 vereis dat KI-gebruik by die voor-arbitrasie-konferensie hanteer word.' : 'Yes \u2014 under the CCMA Rules 2026 the use of AI is dealt with at the pre-arbitration conference. Disclose it and check everything yourself.'}</p></div>
+        <div class="info-item"><h2>${af ? 'Is die aanmelding veilig?' : 'Is sign-in secure?'}</h2><p>${af ? 'Tans is rekeninge slegs \u2019n demonstrasie op hierdie toestel.' : 'Accounts are currently a demo stored on this device only. There is no cloud account yet.'}</p></div>`],
+      privacy: [af ? 'Privaatheidskennisgewing (POPIA)' : 'Privacy notice (POPIA)', `
+        <p>${af ? 'Hierdie kennisgewing verduidelik hoe MyLabourRights persoonlike inligting verwerk ingevolge die Wet op Beskerming van Persoonlike Inligting 4 van 2013 (POPIA).' : 'This notice explains how MyLabourRights processes personal information under the Protection of Personal Information Act 4 of 2013 (POPIA).'}</p>
+        <h2>${af ? 'Verantwoordelike party' : 'Responsible party'}</h2><p>MyLabourRights. ${af ? 'Inligtingsbeampte:' : 'Information Officer:'} <span data-todo="lee">[TO BE COMPLETED: name, email, physical address]</span></p>
+        <h2>${af ? 'Wat ons insamel' : 'What we collect'}</h2><ul><li>${af ? 'Naam, e-pos en taalvoorkeur (op jou toestel gestoor).' : 'Name, email and language preference (stored on your device).'}</li><li>${af ? 'Saakbesonderhede en dokumente wat jy invoer (op jou toestel).' : 'Case details and documents you enter (stored on your device).'}</li><li>${af ? 'Boodskappe wat jy aan die KI stuur (na ons bediener en KI-verskaffer gestuur, nie deur ons gestoor nie).' : 'Messages you send to the AI (sent to our server and AI provider to answer; not stored by us).'}</li><li>${af ? 'Betalings word deur PayFast verwerk; ons stoor nie kaartbesonderhede nie.' : 'Payments are processed by PayFast; we never see or store card details.'}</li></ul>
+        <h2>${af ? 'Spesiale persoonlike inligting' : 'Special personal information'}</h2><p>${af ? 'Saakbesonderhede kan gesondheid-, vakbond- of ander sensitiewe inligting bevat. Deel net wat nodig is.' : 'Case details may include health, trade-union or other special personal information. Only share what is needed for your case.'}</p>
+        <h2>${af ? 'Oorgrens-oordrag' : 'Cross-border transfer'}</h2><p>${af ? 'KI-verskaffers en gasheer kan buite Suid-Afrika wees (POPIA a72).' : 'Our AI providers and hosting may process data outside South Africa (POPIA s72), under their own data-protection terms.'}</p>
+        <h2>${af ? 'Jou regte' : 'Your rights'}</h2><p>${af ? 'Jy kan toegang, regstelling of uitwissing versoek, en \u2019n klag by die Inligtingsreguleerder indien (inforeg.org.za).' : 'You may request access, correction or deletion, object to processing, and complain to the Information Regulator (inforeg.org.za). You can delete all local data from Settings.'}</p>`],
+      terms: [af ? 'Gebruiksvoorwaardes' : 'Terms of use', `<ul><li>${af ? 'MyLabourRights is nie \u2019n regsfirma nie en verskaf nie regsadvies of verteenwoordiging nie.' : 'MyLabourRights is not a law firm and does not provide legal advice or representation.'}</li><li>${af ? 'Jy is verantwoordelik vir wat jy by die KVBA indien; verifieer alle KI-uitset.' : 'You are responsible for what you file with the CCMA; verify all AI output and disclose AI use as the CCMA Rules 2026 require.'}</li><li>${af ? 'Betaalde planne gee 6 maande toegang per saak.' : 'Paid plans give 6 months of access per case. Refunds follow the Consumer Protection Act.'}</li></ul><p class="txt-muted" data-todo="lee">[Full terms to be reviewed by an attorney before launch.]</p>`],
+      disclaimer: [af ? 'Vrywaring' : 'Disclaimer', `<p>${af ? 'MyLabourRights verskaf KI-ondersteunde regsinligting en voorbereidingsinstrumente. Dit is nie regsadvies nie. KI kan foute maak; kontroleer elke feit, datum en verwysing.' : 'MyLabourRights provides AI-assisted legal information and case-preparation tools. It is not legal advice. AI can make mistakes; check every fact, date and case reference, and consult a qualified attorney, trade union or the CCMA before acting.'}</p>`],
+    };
+    const [title, body] = P[key] || P.faq;
+    const root = el(`<div class="screen active"><main class="info-page" id="main" tabindex="-1">
+      <button class="btn btn-ghost btn-sm" id="infoBack">\u2190 ${af ? 'Terug' : 'Back'}</button>
+      <h1>${title}</h1>${body}</main>${footer()}</div>`);
+    root.querySelector('#infoBack').onclick = () => history.length > 1 ? history.back() : go(State.user ? 'app' : 'landing');
+    wireFooter(root);
+    return root;
+  }
+  function wireFooter(root) {
+    root.querySelectorAll('.footer a[data-info]').forEach(a => a.onclick = (e) => {
+      e.preventDefault(); State.infoPage = a.dataset.info; go('info'); window.scrollTo(0, 0);
+    });
+    root.querySelectorAll('.footer a[data-scroll]').forEach(a => a.onclick = (e) => {
+      e.preventDefault(); const id = a.dataset.scroll;
+      const jump = () => { const t = document.getElementById(id); if (t) t.scrollIntoView({ behavior: 'smooth' }); };
+      if (State.screen !== 'landing') { go('landing'); setTimeout(jump, 50); } else jump();
+    });
+  }
+  window.__INFO_PATHS = INFO_PATHS;
+
   function footer() {
     return `
       <footer class="footer"><div class="wrap">
@@ -4652,13 +4730,13 @@ const Views = (() => {
             <p>AI-assisted labour-law case preparation for South African employees. Built for mobile, ready for the CCMA.</p>
           </div>
           <div><h5>Platform</h5><ul class="footer-links">
-            <li><a>How it works</a></li><li><a>Pricing</a></li><li><a>Law firms</a></li><li><a>For employers</a></li>
+            <li><a href="/#how" data-scroll="howSec">${State.lang==='af'?'Hoe dit werk':'How it works'}</a></li><li><a href="/#pricing" data-scroll="pricingSec">${State.lang==='af'?'Pryse':'Pricing'}</a></li><li><a href="/firms" data-info="firms">${State.lang==='af'?'Prokureursfirmas':'Law firms'}</a></li><li><a href="/employers" data-info="employers">${State.lang==='af'?'Vir werkgewers':'For employers'}</a></li>
           </ul></div>
-          <div><h5>Resources</h5><ul class="footer-links">
-            <li><a>Blog</a></li><li><a>CCMA guides</a></li><li><a>Know your rights</a></li><li><a>FAQ</a></li>
+          <div><h5>${State.lang==='af'?'Hulpbronne':'Resources'}</h5><ul class="footer-links">
+            <li><a href="/blog" data-info="blog">Blog</a></li><li><a href="/guides" data-info="guides">${State.lang==='af'?'KVBA-gidse':'CCMA guides'}</a></li><li><a href="/rights" data-info="rights">${State.lang==='af'?'Ken jou regte':'Know your rights'}</a></li><li><a href="/faq" data-info="faq">${State.lang==='af'?'Algemene vrae':'FAQ'}</a></li>
           </ul></div>
-          <div><h5>Legal</h5><ul class="footer-links">
-            <li><a>Privacy (POPIA)</a></li><li><a>Terms of use</a></li><li><a>Disclaimer</a></li>
+          <div><h5>${State.lang==='af'?'Regsinligting':'Legal'}</h5><ul class="footer-links">
+            <li><a href="/privacy" data-info="privacy">${State.lang==='af'?'Privaatheid (POPIA)':'Privacy (POPIA)'}</a></li><li><a href="/terms" data-info="terms">${State.lang==='af'?'Gebruiksvoorwaardes':'Terms of use'}</a></li><li><a href="/disclaimer" data-info="disclaimer">${State.lang==='af'?'Vrywaring':'Disclaimer'}</a></li>
           </ul></div>
         </div>
         <div class="footer-disclaimer">
@@ -5674,7 +5752,7 @@ const Views = (() => {
 
   /* ====== expose ====== */
   return {
-    landing, auth, appShell,
+    landing, auth, appShell, infoPage,
     screenIntake, screenChecker, screenDocPrompt,
     openNewCaseModal, _activeCase: activeCase, _fmt: fmt, _el: el,
   };
