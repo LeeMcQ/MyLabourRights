@@ -1701,6 +1701,13 @@ img,svg,table,pre,video,iframe{max-width:100%;}
 }
 @media(max-width:360px){ .brand span{font-size:16px} }
 
+/* ── WCAG AA contrast fixes (axe, stress test 2026-11) ── */
+.step p,.section-alt .step p{color:var(--text-soft,#46564a);}
+.price-trial{color:#0d2818 !important;}
+.auth-divider{color:#56655a;}
+.sidebar .txt-muted,#caseList > .txt-muted,#logoutBtn{color:#c9d6cc;}
+:root[data-theme="dark"] .step p{color:var(--text-soft);}
+
 /* ── Rescued app CSS (was trapped in printable case-file template) ── */
 /* ── Semantic state tokens ── */
 :root {
@@ -5143,9 +5150,9 @@ const Views = (() => {
                 </div>
               </div>
             </div>
-            <div class="field mt16"><label>Give your case a name</label>
+            <div class="field mt16"><label for="mcN">Give your case a name</label>
               <input id="mcN" placeholder="e.g. Dismissal from Pick n Pay Malmesbury" /></div>
-            <div class="field"><label>Briefly, what happened?</label>
+            <div class="field"><label for="mcD">Briefly, what happened?</label>
               <textarea id="mcD" placeholder="A sentence or two is enough \u2014 the AI will ask the rest."></textarea></div>
             <div class="nc-protect">
               <p class="nc-protect-lead">${ICONS.clock} Roughly what kind of matter, and when? <span class="nc-optional">(optional)</span></p>
@@ -5272,9 +5279,9 @@ const Views = (() => {
             <span class="example">Tap any field to edit before we create your case.</span></div>
         </div>
         <div class="intake-confirm-fields">
-          <div class="confirm-field"><label>Case name</label>
+          <div class="confirm-field"><label for="cfN">Case name</label>
             <input id="cfN" value="${esc(parsed.name)}" /></div>
-          <div class="confirm-field"><label>Case type</label>
+          <div class="confirm-field"><label for="cfT">Case type</label>
             <select id="cfT">
               <option value="personal" ${parsed.caseType==='personal'?'selected':''}>Personal Legal Case (CCMA / dismissal)</option>
               <option value="grievance" ${parsed.caseType==='grievance'?'selected':''}>Company Grievance Labour Dispute</option>
@@ -6915,9 +6922,9 @@ function openNoteEdit(note, c, notesBody) {
       <div class="modal-head"><h3>${isNew ? 'Add a case note' : 'Edit note'}</h3>
         <button aria-label="Close" class="modal-close" id="neClose">${ICONS.x}</button></div>
       <div class="modal-body">
-        <div class="field"><label>The note</label>
+        <div class="field"><label for="neText">The note</label>
           <textarea id="neText" placeholder="e.g. No disciplinary hearing was held before dismissal.">${esc(note?.text || '')}</textarea></div>
-        <div class="field"><label>Category</label>
+        <div class="field"><label for="neTag">Category</label>
           <select id="neTag">
             ${tags.map(tg => `<option ${note?.tag === tg ? 'selected' : ''}>${tg}</option>`).join('')}
           </select></div>
@@ -7216,16 +7223,16 @@ function openShareModal(doc, c) {
       <div class="modal-body">
         <p class="txt-sm txt-muted" style="margin-bottom:14px">
           Share <strong>${esc(doc.name)}</strong> securely with your lawyer or the opposing party.</p>
-        <div class="field"><label>Share with</label>
+        <div class="field"><label for="shWho">Share with</label>
           <select id="shWho">
             <option>My matched law firm</option>
             <option>My own lawyer</option>
             <option>The employer / opposing party</option>
             <option>The CCMA commissioner</option>
           </select></div>
-        <div class="field"><label>Recipient email</label>
+        <div class="field"><label for="shEmail">Recipient email</label>
           <input id="shEmail" type="email" placeholder="recipient@email.co.za"></div>
-        <div class="field"><label>Method</label>
+        <div class="field"><label for="shMethod">Method</label>
           <select id="shMethod">
             <option>Secure link (expires in 14 days)</option>
             <option>Email attachment</option>
@@ -7338,13 +7345,13 @@ async function openTimelineEdit(item, c, tlBody) {
       <div class="modal-head"><h3>${isNew ? 'Add event' : 'Edit event'}</h3>
         <button aria-label="Close" class="modal-close" id="teClose">${ICONS.x}</button></div>
       <div class="modal-body">
-        <div class="field"><label>When</label>
+        <div class="field"><label for="teDate">When</label>
           <input id="teDate" placeholder="e.g. 14 March 2026" value="${esc(item?.date || '')}"></div>
-        <div class="field"><label>Event title</label>
+        <div class="field"><label for="teTitle">Event title</label>
           <input id="teTitle" placeholder="e.g. Disciplinary hearing held" value="${esc(item?.title || '')}"></div>
-        <div class="field"><label>What happened</label>
+        <div class="field"><label for="teText">What happened</label>
           <textarea id="teText" placeholder="Describe this event...">${esc(item?.text || '')}</textarea></div>
-        ${docs.length ? `<div class="field"><label>Link evidence (optional)</label>
+        ${docs.length ? `<div class="field"><label for="teDoc">Link evidence (optional)</label>
           <select id="teDoc"><option value="">\u2014 no document linked \u2014</option>
             ${docs.map(d => `<option value="${esc(d.name)}" ${item?.docName === d.name ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}
           </select></div>` : ''}
