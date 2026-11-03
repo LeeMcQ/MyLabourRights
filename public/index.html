@@ -5042,7 +5042,7 @@ const Views = (() => {
     State.activeCaseId = c.id;
     let introText;
     if (type === 'validity_check') {
-      introText = 'Hi \u2014 I\u2019m Lee, your AI labour-law advisor.\n\nTell me what happened at work and I\u2019ll give you an honest read on whether you have a valid case, what type it is, and what to do next.\n\nStart anywhere \u2014 there\u2019s no wrong place to begin.';
+      introText = 'Hi \u2014 I\u2019m Lee, your AI labour-law information assistant (not legal advice).\n\nTell me what happened at work and I\u2019ll give you an honest read on whether you have a valid case, what type it is, and what to do next.\n\nStart anywhere \u2014 there\u2019s no wrong place to begin.';
     } else if (intake.escalatedFrom === 'grievance') {
       introText = 'I can see your internal grievance has concluded. Let\u2019s build the strongest CCMA referral from everything you\u2019ve already gathered.\n\nBriefly \u2014 how did the hearing end, and what was the employer\u2019s stated reason for rejecting it?';
     } else if (intake.escalatedFrom === 'validity_check') {
@@ -5205,7 +5205,7 @@ const Views = (() => {
       body.innerHTML = `
         <div class="intake-lee-row">
           <div class="intake-avatar">L</div>
-          <div class="intake-bubble">Hi, I\u2019m <strong>Lee</strong> \u2014 your AI labour-law advisor.<br>
+          <div class="intake-bubble">Hi, I\u2019m <strong>Lee</strong> \u2014 your AI labour-law information assistant (not legal advice).<br>
             3 quick questions and I\u2019ll set up your case automatically.
             <span class="example">Takes about 60 seconds. Skip any time.</span></div>
         </div>
@@ -6701,7 +6701,7 @@ function renderMsg(m, c) {
   let inner = '';
   if (m.kind && tagMap[m.kind])
     inner += `<span class="chat-tag ${tagMap[m.kind][0]}">${tagMap[m.kind][1]}</span>`;
-  inner += `<div class="sender">Lee \u00b7 AI Labour-Law Advisor</div>`;
+  inner += `<div class="sender">Lee \u00b7 AI labour-law information</div>`;
   inner += fmt(m.text);
 
   // follow-up question highlighted
