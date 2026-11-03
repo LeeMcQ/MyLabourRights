@@ -8839,6 +8839,8 @@ function showCouncilAlert(council, container) {
   container.insertBefore(el2, container.firstChild);
 }
 
+/* Orphaned checker questions (previously a stray array tail that broke the whole script). Kept as data. */
+const CHECKER_EXTRA_QUESTIONS = [
   {
     q: { en:'When did this happen?', af:'Wanneer het dit gebeur?', zu:'Kwenzeka nini?', xh:'Kwenzeka nini?', st:'E ne e etsahala neng?' },
     opts: [
