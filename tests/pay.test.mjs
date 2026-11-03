@@ -25,6 +25,6 @@ const r = await status({ queryStringParameters: { caseId: 'case_1' } }, {}, { st
 t(JSON.parse(r.body).paid === true, 'pay-status reports paid');
 const r2 = await status({ queryStringParameters: { caseId: 'nope' } }, {}, { store });
 t(JSON.parse(r2.body).paid === false, 'unknown case unpaid');
-const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 t(!/params\.get\('paid'\)\s*===\s*'1'/.test(html), "index.html no longer trusts ?paid=1");
 if (fail) process.exit(1);
