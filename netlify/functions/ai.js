@@ -404,7 +404,7 @@ exports.handler = async (event) => {
   const ip = (event.headers['x-nf-client-connection-ip']
     || event.headers['client-ip']
     || event.headers['x-forwarded-for'] || 'unknown').split(',')[0].trim();
-  if (rateLimited(ip)) {
+  if (await rateLimited(ip)) {
     return { statusCode: 429, headers,
       body: JSON.stringify({ error: 'rate_limited', message: 'Too many requests — please wait a moment.' }) };
   }
