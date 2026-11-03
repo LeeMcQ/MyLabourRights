@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-ZA">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -4051,6 +4051,7 @@ const ICONS = {
    ============================================================ */
 function render() {
   const app = $('#app');
+  document.documentElement.lang = ({ en: 'en-ZA', af: 'af-ZA', zu: 'zu-ZA', xh: 'xh-ZA', st: 'st-ZA' })[State.lang] || 'en-ZA';
   // C5 — remember scroll position per tab so switching back doesn't reset to top
   const prevBody = app.querySelector('#mainBody');
   if (prevBody && State._scrollTab) State._scroll = State._scroll || {};
@@ -4815,9 +4816,9 @@ const Views = (() => {
               <span>${t('demo_google')}</span></button>
             <div class="auth-divider">${af?'of':'or'}</div>
             ${isSignup ? `<div class="field"><label for="auName">${af?'Volle naam':'Full name'}</label>
-              <input id="auName" required autocomplete="name" placeholder="e.g. Thabo Mokoena" /></div>` : ''}
+              <input id="auName" required maxlength="120" autocomplete="name" placeholder="e.g. Thabo Mokoena" /></div>` : ''}
             <div class="field"><label for="auEmail">${af?'E-posadres':'Email address'}</label>
-              <input id="auEmail" type="email" required autocomplete="email" placeholder="you@email.co.za" /></div>
+              <input id="auEmail" type="email" required maxlength="254" autocomplete="email" placeholder="you@email.co.za" /></div>
             <div class="field"><label for="auPass">${af?'Wagwoord':'Password'}</label>
               <input id="auPass" type="password" required minlength="8" autocomplete="${isSignup ? 'new-password' : 'current-password'}" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /></div>
             ${isSignup ? `<div class="field"><label for="auLang">${af?'Voorkeurtaal':'Preferred language'}</label>
@@ -4866,7 +4867,7 @@ const Views = (() => {
     } else {
       email = (($('#auEmail') || {}).value || '').trim().toLowerCase();
       pass = ($('#auPass') || {}).value || '';
-      const rawName = (($('#auName') || {}).value || '').trim();
+      const rawName = (($('#auName') || {}).value || '').trim().slice(0, 120);
       name = rawName || email.split('@')[0];
       lang = ($('#auLang') || {}).value || State.lang;
       if (!email || !pass) { showErr('err_fields'); return; }
