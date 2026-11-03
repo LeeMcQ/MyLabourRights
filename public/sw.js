@@ -6,7 +6,7 @@
    Bump CACHE_VERSION whenever you deploy a new build.
    ============================================================ */
 
-const CACHE_VERSION = 'mlr-v3';
+const CACHE_VERSION = 'mlr-v4';
 const SHELL_CACHE   = CACHE_VERSION + '-shell';
 const FONT_CACHE    = CACHE_VERSION + '-fonts';
 const DATA_CACHE    = CACHE_VERSION + '-data';

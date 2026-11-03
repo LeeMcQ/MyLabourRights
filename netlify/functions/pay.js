@@ -84,14 +84,23 @@ exports.handler = async (event) => {
     offtopic: 'MyLabourRights — Additional Case (6 months)',
   };
 
+  const SITE = (process.env.URL || 'https://mylabourights.co.za').replace(/\/$/, '');
+  const PRICES = { personal: 199, grievance: 99, offtopic: 100 }; // keep in sync with CASE_TYPES; server is authoritative
+  const serverAmount = PRICES[caseType] != null ? PRICES[caseType] : Number(amount);
+  const safeReturn = (typeof returnUrl === 'string' && returnUrl.startsWith(SITE)) ? returnUrl.split('?')[0] : SITE + '/';
+  try {
+    const { getStore } = require('@netlify/blobs');
+    await getStore('payments').setJSON(String(caseId), { paid: false, caseType, amount: serverAmount, createdAt: Date.now() });
+  } catch (e) { console.warn('payments store unavailable', e.message); }
+
   const data = {
     merchant_id: MID,
     merchant_key: MKEY,
-    return_url: returnUrl || 'https://your-site.netlify.app/?paid=1',
-    cancel_url: returnUrl || 'https://your-site.netlify.app/?paid=0',
-    notify_url: 'https://your-site.netlify.app/.netlify/functions/pay-notify',
+    return_url: safeReturn + '?payreturn=' + encodeURIComponent(caseId),
+    cancel_url: safeReturn + '?paycancel=1',
+    notify_url: SITE + '/.netlify/functions/pay-notify',
     m_payment_id: caseId,
-    amount: Number(amount).toFixed(2),
+    amount: Number(serverAmount).toFixed(2),
     item_name: itemNames[caseType] || 'MyLabourRights Case',
     custom_str1: caseType || '',
   };

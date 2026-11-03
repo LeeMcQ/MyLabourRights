@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "netlify dev",
-    "test": "node tests/engines.test.mjs && node tests/flow.test.mjs",
+    "test": "node tests/syntax.test.mjs && node --check netlify/functions/ai.js && node --check netlify/functions/pay.js && node --check netlify/functions/pay-notify.js && node tests/ai-ratelimit.test.mjs && node tests/pay.test.mjs && node tests/engines.test.mjs && node tests/flow.test.mjs",
     "test:engines": "node tests/engines.test.mjs",
     "test:flow": "node tests/flow.test.mjs"
   },
