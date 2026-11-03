@@ -1847,6 +1847,7 @@ button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
 .demo-banner{background:#fff4d6;color:#4a3500;border:1px solid #e0b84a;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;margin:0 0 12px}
 .field-err{color:#a01d1d;font-size:14px;min-height:0;margin:4px 0 8px}
 .field-err:empty{display:none}
+.ai-disclose{font-size:12px;line-height:1.4;color:var(--ink,#1b1b1b);opacity:.85;margin-top:4px}
 </style>
 </head>
 <body>
@@ -2049,7 +2050,8 @@ const I18N = {
     tab_prepare: 'File Forms', tab_resources: 'Know Your Rights', tab_notes: 'Case Notes', tab_builder: 'Build My Case',
     q_left: 'questions left today', q_unlimited: 'Unlimited questions',
     send: 'Send', new_case: 'New case',
-    lee_role: 'AI Labour-Law Advisor \u00b7 Preparation guidance only',
+    lee_role: 'AI labour-law information \u00b7 Not legal advice',
+    ai_disclose: 'If you use this AI help for anything you file at the CCMA, disclose it (CCMA Rules 2026) and check every fact, date and reference yourself.',
     ai_typing: 'Lee is thinking\u2026',
     deadline_days: 'Days to file', deadline_filed: 'Case filed',
     ctx_title: '\u25b8 What Lee knows about your case',
@@ -2076,7 +2078,8 @@ const I18N = {
     tab_prepare: 'Dien In', tab_resources: 'Ken Jou Regte', tab_notes: 'Saaknotas', tab_builder: 'Bou My Saak',
     q_left: 'vrae oor vandag', q_unlimited: 'Onbeperkte vrae',
     send: 'Stuur', new_case: 'Nuwe saak',
-    lee_role: 'KI Arbeidsreg-adviseur \u00b7 Slegs voorbereidingsleiding',
+    lee_role: 'KI-arbeidsreginligting \u00b7 Nie regsadvies nie',
+    ai_disclose: 'As jy hierdie KI-hulp gebruik het vir iets wat jy by die KVBA indien, s\u00ea so (KVBA-re\u00ebls 2026) en kontroleer elke feit, datum en verwysing self.',
     ai_typing: 'Lee dink na\u2026',
     deadline_days: 'Dae om in te dien', deadline_filed: 'Saak ingedien',
     ctx_title: '\u25b8 Wat Lee van jou saak weet',
@@ -4358,11 +4361,23 @@ window.HOW_TO_GUIDES = [
     summary: 'A step-by-step walkthrough of filing your dispute correctly and on time.',
     steps: 6,
     body: `<p><strong>Step 1.</strong> Confirm the CCMA has jurisdiction \u2014 most dismissal and unfair labour practice disputes qualify.</p>
-      <p><strong>Step 2.</strong> Complete the LRA 7.11 referral form. It is free and available on the CCMA website or at any office.</p>
+      <p><strong>Step 2.</strong> Complete the LRA 7.11 referral form. It is free and available on the CCMA website or at any office. Under the Amended CCMA Rules (2026) you can also file Forms 7.11 and 7.13 and a condonation application electronically.</p>
       <p><strong>Step 3.</strong> Refer within 30 days of dismissal. If late, attach a condonation application.</p>
-      <p><strong>Step 4.</strong> Serve a copy on your employer and keep proof of service.</p>
+      <p><strong>Step 4.</strong> Serve a copy on your employer and keep proof of service. Under the 2026 Rules, notices may also be served by WhatsApp \u2014 keep a screenshot showing the date, number and delivery.</p>
       <p><strong>Step 5.</strong> Wait for the CCMA to set a conciliation date.</p>
-      <p><strong>Step 6.</strong> Attend conciliation. If unresolved, request arbitration.</p>`,
+      <p><strong>Step 6.</strong> Attend conciliation. If unresolved, request arbitration.</p>
+      <p><em>Always attend.</em> Under the 2026 Rules the CCMA can dismiss a referral if the person who referred it wilfully or without explanation fails to attend.</p>`,
+  },
+  {
+    title: 'What changed: Amended CCMA Rules 2026',
+    summary: 'New rules in force from 23 October 2026 \u2014 WhatsApp notices, e-filing, AI disclosure and non-attendance.',
+    steps: 4,
+    body: `<p>The <strong>Amended Rules for the Conduct of Proceedings before the CCMA, 2026</strong> (General Notice 4208, Government Gazette 55620) came into force on <strong>23 October 2026</strong>. Key changes:</p>
+      <p><strong>1. WhatsApp service.</strong> Notices and documents may be served by WhatsApp. Keep proof (screenshot with date, number and delivery ticks).</p>
+      <p><strong>2. Electronic filing.</strong> LRA Forms 7.11 and 7.13 and condonation applications can be filed electronically.</p>
+      <p><strong>3. Use of AI must be raised.</strong> If a party used artificial intelligence to prepare documents or submissions, this is dealt with at the pre-arbitration conference. <strong>If you used MyLabourRights\u2019 AI help, say so, and check every fact, date and case reference yourself.</strong></p>
+      <p><strong>4. Non-attendance.</strong> A referral can be dismissed if the referring party wilfully or without explanation fails to attend.</p>
+      <p class="txt-muted">This is general legal information, not legal advice. Check the official Gazette text or ask the CCMA, a trade union or an attorney about your specific case.</p>`,
   },
   {
     title: 'How to write a grievance letter to your employer',
@@ -6233,7 +6248,8 @@ async function tabChat(body, c) {
     <div class="lee-av" aria-hidden="true">L</div>
     <div>
       <div class="lee-name">Lee</div>
-      <div class="lee-role">${t('lee_role') || 'AI Labour-Law Advisor \u00b7 Preparation guidance only'}</div>
+      <div class="lee-role">${t('lee_role')}</div>
+      <div class="ai-disclose" role="note">${t('ai_disclose')}</div>
     </div>
     <div class="lee-online">Online</div>
   </div>`);
