@@ -1844,6 +1844,9 @@ button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:100px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--sage);}
+.demo-banner{background:#fff4d6;color:#4a3500;border:1px solid #e0b84a;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;margin:0 0 12px}
+.field-err{color:#a01d1d;font-size:14px;min-height:0;margin:4px 0 8px}
+.field-err:empty{display:none}
 </style>
 </head>
 <body>
@@ -2031,6 +2034,13 @@ function toast(msg, icon = 'check') {
    ============================================================ */
 const I18N = {
   en: {
+    demo_banner: 'Demo mode: accounts are stored only on this device. There is no real sign-in server yet, so do not use a password you use elsewhere.',
+    demo_google: 'Try a demo account (not Google sign-in)',
+    err_email: 'Please enter a valid email address.',
+    err_name: 'Please enter your full name.',
+    err_pass_short: 'Password must be at least 8 characters.',
+    err_pass_wrong: 'Incorrect email or password.',
+    err_fields: 'Please enter your email and password.',
     nav_pricing: 'Pricing', nav_how: 'How it works', nav_resources: 'Resources',
     nav_login: 'Log in', nav_start: 'Start free trial',
     cta_start: 'Start your free case', cta_have: 'I already have an account',
@@ -2051,6 +2061,13 @@ const I18N = {
     continue_lee: 'Continue with Lee',
   },
   af: {
+    demo_banner: 'Demonstrasiemodus: rekeninge word slegs op hierdie toestel gestoor. Daar is nog geen regte aanmeldbediener nie, so moenie \u2019n wagwoord gebruik wat jy elders gebruik nie.',
+    demo_google: 'Probeer \u2019n demonstrasierekening (nie Google-aanmelding nie)',
+    err_email: 'Voer asseblief \u2019n geldige e-posadres in.',
+    err_name: 'Voer asseblief jou volle naam in.',
+    err_pass_short: 'Wagwoord moet minstens 8 karakters wees.',
+    err_pass_wrong: 'Verkeerde e-pos of wagwoord.',
+    err_fields: 'Voer asseblief jou e-pos en wagwoord in.',
     nav_pricing: 'Pryse', nav_how: 'Hoe dit werk', nav_resources: 'Hulpbronne',
     nav_login: 'Teken in', nav_start: 'Begin gratis proeftydperk',
     cta_start: 'Begin jou gratis saak', cta_have: 'Ek het reeds \u2019n rekening',
@@ -4197,7 +4214,7 @@ async function boot() {
       State.lang = u.lang || 'en';
       State.cases = await DB.byIndex('cases', 'userId', u.id);
       State.activeCaseId = State.cases.length ? State.cases[0].id : null;
-      State.screen = State.cases.length ? 'app' : 'auth';
+      State.screen = 'app';
     }
   }
   // Pricing CTA deep-link: open signup with plan after session restore
@@ -4662,20 +4679,22 @@ const Views = (() => {
             <h1>${isSignup ? 'Create your account' : 'Log in'}</h1>
             ${isSignup && State.pendingPlan ? `<div class="plan-chip">${ICONS.spark} ${(CASE_TYPES[State.pendingPlan]||{}).label || 'Selected plan'} · ${(CASE_TYPES[State.pendingPlan]||{}).trialDays || 7}-day free trial</div>` : ''}
             <p class="sub">${isSignup ? 'Email login \u2014 free to start, no card needed.' : 'Use the email you signed up with.'}</p>
-            <button class="google-btn" id="googleBtn">${ICONS.google}
-              <span>Continue with Google</span></button>
+            <div class="demo-banner" role="note">${t('demo_banner')}</div>
+            <button class="google-btn" id="googleBtn">
+              <span>${t('demo_google')}</span></button>
             <div class="auth-divider">or</div>
-            ${isSignup ? `<div class="field"><label>Full name</label>
-              <input id="auName" placeholder="e.g. Thabo Mokoena" /></div>` : ''}
-            <div class="field"><label>Email address</label>
-              <input id="auEmail" type="email" placeholder="you@email.co.za" /></div>
-            <div class="field"><label>Password</label>
-              <input id="auPass" type="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /></div>
-            ${isSignup ? `<div class="field"><label>Preferred language</label>
+            ${isSignup ? `<div class="field"><label for="auName">Full name</label>
+              <input id="auName" required autocomplete="name" placeholder="e.g. Thabo Mokoena" /></div>` : ''}
+            <div class="field"><label for="auEmail">Email address</label>
+              <input id="auEmail" type="email" required autocomplete="email" placeholder="you@email.co.za" /></div>
+            <div class="field"><label for="auPass">Password</label>
+              <input id="auPass" type="password" required minlength="8" autocomplete="${isSignup ? 'new-password' : 'current-password'}" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /></div>
+            ${isSignup ? `<div class="field"><label for="auLang">Preferred language</label>
               <select id="auLang">
                 <option value="en">English</option>
                 <option value="af">Afrikaans</option>
               </select></div>` : ''}
+            <div class="field-err" id="auErr" role="alert" aria-live="assertive"></div>
             <button class="btn btn-primary btn-block btn-lg" id="auSubmit">
               ${isSignup ? 'Create account & start' : 'Log in'}</button>
             <div class="auth-switch">
@@ -4696,29 +4715,49 @@ const Views = (() => {
     return root;
   }
 
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(e); }
+  function randSalt() { const a = new Uint8Array(16); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); }
+  // Local, device-only password check (DEMO): PBKDF2-SHA256. Not a substitute for a real auth server.
+  async function hashPass(email, pass, salt) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(salt + '|' + email), iterations: 100000 }, key, 256);
+    return Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+  }
   async function doAuth(viaGoogle) {
     const isSignup = State.authMode === 'signup';
     let name, email, lang = State.lang, pass;
 
+    const showErr = (k) => { const e = $('#auErr'); if (e) e.textContent = t(k); toast(t(k), 'alert'); };
     if (viaGoogle) {
-      // PHASE-2: replace with real Google OAuth verification
-      name = 'Thabo Mokoena'; email = 'thabo.demo@gmail.com';
+      // DEMO ONLY: no Google OAuth is configured. Clearly labelled in the UI.
+      name = 'Demo User'; email = 'demo@mylabourrights.local';
     } else {
-      email = ($('#auEmail') || {}).value?.trim();
-      pass = ($('#auPass') || {}).value;
-      name = ($('#auName') || {}).value?.trim() || email?.split('@')[0];
+      email = (($('#auEmail') || {}).value || '').trim().toLowerCase();
+      pass = ($('#auPass') || {}).value || '';
+      const rawName = (($('#auName') || {}).value || '').trim();
+      name = rawName || email.split('@')[0];
       lang = ($('#auLang') || {}).value || State.lang;
-      if (!email || !pass) { toast('Please enter your email and password.', 'alert'); return; }
+      if (!email || !pass) { showErr('err_fields'); return; }
+      if (!isValidEmail(email)) { showErr('err_email'); return; }
+      if (isSignup && rawName.length < 2) { showErr('err_name'); return; }
+      if (isSignup && pass.length < 8) { showErr('err_pass_short'); return; }
     }
 
     if (isSignup || viaGoogle) {
       let existing = (await DB.all('users')).find(u => u.email === email);
       let user;
       if (existing) {
+        if (!viaGoogle) {
+          if (existing.passHash && existing.passHash !== await hashPass(email, pass, existing.salt)) { showErr('err_pass_wrong'); return; }
+          if (!existing.passHash) { existing.salt = randSalt(); existing.passHash = await hashPass(email, pass, existing.salt); await DB.put('users', existing); }
+        }
         user = existing;
       } else {
+        const salt = viaGoogle ? null : randSalt();
         user = {
           id: uid('usr'), name, email, lang,
+          salt, passHash: viaGoogle ? null : await hashPass(email, pass, salt), demo: !!viaGoogle,
           createdAt: Date.now(),
           onboarded: false,
           firstLoginDone: false,
@@ -4740,8 +4779,13 @@ const Views = (() => {
       }
     } else {
       // login
-      const user = (await DB.all('users')).find(u => u.email === email);
+      const user = (await DB.all('users')).find(u => (u.email || '').toLowerCase() === email);
       if (!user) { toast('No account found \u2014 try signing up.', 'alert'); return; }
+      if (user.passHash) {
+        if (user.passHash !== await hashPass(email, pass, user.salt)) { showErr('err_pass_wrong'); return; }
+      } else if (!user.demo) {
+        user.salt = randSalt(); user.passHash = await hashPass(email, pass, user.salt); await DB.put('users', user);
+      }
       State.user = user; State.lang = user.lang || 'en';
       await DB.put('meta', { key: 'session', userId: user.id });
       State.cases = await DB.byIndex('cases', 'userId', user.id);
