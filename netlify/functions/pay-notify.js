@@ -10,12 +10,10 @@
      2. Verifies the source is a real PayFast server (host check)
      3. Logs the confirmed payment
 
-   IMPORTANT: Netlify functions are stateless. To actually mark a
-   case as paid from here you need a shared datastore both this
-   function and your app can read (Netlify Blobs, a database, or
-   a Google Sheet). Until that is added, the app unlocks the case
-   via the browser return (?paid=1) — fine for launch, but add a
-   datastore before you are taking real money at volume.
+   The ONLY way a case becomes paid: this ITN passes signature,
+   PayFast server validation (postback) and amount checks, then the
+   result is written to Netlify Blobs ('payments'). The browser asks
+   /.netlify/functions/pay-status on return; ?paid=1 is ignored.
 
    ENV VARS:
      PAYFAST_PASSPHRASE  - same passphrase as in pay.js
@@ -45,46 +43,53 @@ function parseBody(raw) {
   return out;
 }
 
-exports.handler = async (event) => {
-  // PayFast expects a 200 OK quickly, with no body
-  const ok = { statusCode: 200, body: '' };
 
-  if (event.httpMethod !== 'POST') return ok;
-
+async function validateWithPayFast(rawBody, mode) {
+  const host = mode === 'live' ? 'https://www.payfast.co.za' : 'https://sandbox.payfast.co.za';
   try {
-    const data = parseBody(event.body);
+    const r = await fetch(host + '/eng/query/validate', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: rawBody,
+    });
+    return (await r.text()).trim() === 'VALID';
+  } catch (e) { console.error('PayFast validate failed', e.message); return false; }
+}
+
+exports.handler = async (event, _ctx, deps = {}) => {
+  const ok = { statusCode: 200, body: '' };
+  if (event.httpMethod !== 'POST') return ok;
+  try {
+    const raw = event.isBase64Encoded ? Buffer.from(event.body || '', 'base64').toString() : (event.body || '');
+    const data = parseBody(raw);
     const PASS = process.env.PAYFAST_PASSPHRASE || '';
+    const MODE = process.env.PAYFAST_MODE || 'sandbox';
 
-    // 1. signature check
-    const expected = buildSignature(data, PASS);
-    if (data.signature && data.signature !== expected) {
-      console.warn('PayFast ITN: signature mismatch — ignored');
-      return ok;
+    // 1. signature is REQUIRED and must match
+    if (!data.signature || data.signature !== buildSignature(data, PASS)) {
+      console.warn('PayFast ITN: missing/invalid signature — ignored'); return ok;
     }
-
-    // 2. only accept COMPLETE payments
-    if (data.payment_status !== 'COMPLETE') {
-      console.log('PayFast ITN: status', data.payment_status, '— no action');
-      return ok;
+    // 2. merchant must be ours
+    if (process.env.PAYFAST_MERCHANT_ID && data.merchant_id !== process.env.PAYFAST_MERCHANT_ID) {
+      console.warn('PayFast ITN: merchant mismatch'); return ok;
     }
+    // 3. server-to-server validation with PayFast
+    const validate = deps.validate || validateWithPayFast;
+    if (!(await validate(raw.replace(/&signature=[^&]*/, '').replace(/^signature=[^&]*&?/, ''), MODE))) {
+      console.warn('PayFast ITN: postback validation failed'); return ok;
+    }
+    if (data.payment_status !== 'COMPLETE') return ok;
 
-    // 3. confirmed payment
-    const caseId = data.m_payment_id;
-    const amount = data.amount_gross;
-    const caseType = data.custom_str1;
-    console.log(`PayFast ITN CONFIRMED: case=${caseId} type=${caseType} amount=R${amount}`);
-
-    // 4. TODO (add datastore): mark the case paid here so it is
-    //    authoritative even if the user closes the browser.
-    //    e.g. with Netlify Blobs:
-    //      const { getStore } = require('@netlify/blobs');
-    //      await getStore('payments').setJSON(caseId, {
-    //        paid:true, caseType, amount, at:Date.now()
-    //      });
-
+    const caseId = String(data.m_payment_id || '');
+    const store = deps.store || require('@netlify/blobs').getStore('payments');
+    const pending = await store.get(caseId, { type: 'json' }).catch(() => null);
+    // 4. amount must match what pay.js asked for
+    if (!pending || Math.abs(Number(pending.amount) - Number(data.amount_gross)) > 0.01) {
+      console.warn('PayFast ITN: unknown case or amount mismatch', caseId); return ok;
+    }
+    await store.setJSON(caseId, { ...pending, paid: true, pfPaymentId: data.pf_payment_id, paidAt: Date.now() });
+    console.log('PayFast ITN CONFIRMED', caseId);
     return ok;
   } catch (err) {
     console.error('PayFast ITN error:', err);
-    return ok; // still 200 so PayFast does not retry forever
+    return ok;
   }
 };

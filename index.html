@@ -4186,23 +4186,30 @@ async function boot() {
     State.pendingPlan = CASE_TYPES[planParam] ? planParam : 'personal';
   }
 
-  // handle PayFast return: ?paid=1 unlocks the most recent trial case
-  if (params.get('paid') === '1') {
-    const meta = await DB.get('meta', 'session');
-    if (meta && meta.userId) {
-      const cs = await DB.byIndex('cases', 'userId', meta.userId);
-      const target = cs.filter(c => c.subscription !== 'paid')
-        .sort((a, b) => b.createdAt - a.createdAt)[0];
-      if (target) {
-        const cfg = CASE_TYPES[target.caseType];
+  // PayFast return: NEVER trust the query string. Ask the server (ITN-verified record).
+  if (params.has('paid')) history.replaceState({}, '', location.pathname); // legacy ?paid=1 is ignored
+  const payCaseId = params.get('payreturn');
+  if (payCaseId) {
+    history.replaceState({}, '', location.pathname);
+    const target = await DB.get('cases', payCaseId).catch(() => null);
+    if (target && target.subscription !== 'paid') {
+      let paid = false;
+      for (let k = 0; k < 6 && !paid; k++) {   // ITN can arrive a few seconds after the redirect
+        try { const r = await fetch('/.netlify/functions/pay-status?caseId=' + encodeURIComponent(payCaseId), { cache: 'no-store' });
+              paid = !!(await r.json()).paid; } catch {}
+        if (!paid) await new Promise(res => setTimeout(res, 2000));
+      }
+      if (paid) {
+        const cfg = CASE_TYPES[target.caseType] || { durationMonths: 6 };
         target.subscription = 'paid';
         target.paidUntil = Date.now() + cfg.durationMonths * 30 * 86400000;
         if (target.status === 'Intake') target.status = 'Building case';
         await DB.put('cases', target);
         setTimeout(() => toast('Payment confirmed \u2014 case unlocked for 6 months.'), 600);
+      } else {
+        setTimeout(() => toast('We have not received payment confirmation from PayFast yet. Refresh in a minute; you have not been charged twice.', 'alert'), 600);
       }
     }
-    history.replaceState({}, '', location.pathname);
   }
 
   // restore session
@@ -8568,6 +8575,7 @@ function openPaywall(c) {
         location.href = r.url;
         return;
       }
+      if (r.mode === 'error') { toast('Payment service unavailable \u2014 please try again later.', 'alert'); return; }
     }
     // simulated / fallback unlock
     c.subscription = 'paid';
@@ -8576,7 +8584,7 @@ function openPaywall(c) {
     await DB.put('cases', c);
     State.cases = await DB.byIndex('cases', 'userId', State.user.id);
     Modal.close();
-    toast('Payment successful \u2014 case unlocked for 6 months.');
+    toast('Demo payment (PayFast not configured) \u2014 case unlocked for 6 months.');
     render();
   };
   Modal.open(node);
@@ -8715,15 +8723,13 @@ const Backend = (() => {
         caseId: caseObj.id,
         caseType: caseObj.caseType,
         amount: cfg.price,
-        returnUrl: location.origin + location.pathname + '?paid=1',
+        returnUrl: location.origin + location.pathname,
       });
-      if (data && data.redirectUrl) {
-        // real PayFast — redirect the user
-        return { mode: 'redirect', url: data.redirectUrl };
-      }
-    } catch { /* fall through */ }
-    // FALLBACK — simulated payment
-    return { mode: 'simulated' };
+      if (data && data.redirectUrl) return { mode: 'redirect', url: data.redirectUrl };
+      // Only simulate when the server explicitly says PayFast is not configured (demo/dev)
+      if (data && data.fallback) return { mode: 'simulated' };
+    } catch { /* network error */ }
+    return { mode: 'error' };
   }
 
   /* ---- Blog draft / publish (used by admin panel) ---- */
