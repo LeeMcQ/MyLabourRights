@@ -2194,7 +2194,7 @@ const CASE_TYPES = {
     id: 'personal',
     label: 'Personal Legal Case',
     label_af: 'Persoonlike Regsaak',
-    scope: 'CCMA arbitration, Labour Court & unfair dismissal',
+    scope: 'CCMA arbitration, Labour Court & unfair dismissal', scope_af: 'KVBA-arbitrasie, Arbeidshof en onbillike ontslag',
     trialDays: 14,
     price: 199,
     durationMonths: 6,
@@ -2205,7 +2205,7 @@ const CASE_TYPES = {
     id: 'grievance',
     label: 'Company Grievance Labour Dispute',
     label_af: 'Maatskappy-Griefgeskil',
-    scope: 'Contracts, workplace policy & internal grievances',
+    scope: 'Contracts, workplace policy & internal grievances', scope_af: 'Kontrakte, werkplekbeleid en interne griewe',
     trialDays: 30,
     price: 99,
     durationMonths: 6,
@@ -2216,7 +2216,7 @@ const CASE_TYPES = {
     id: 'offtopic',
     label: 'Additional Case',
     label_af: 'Bykomende Saak',
-    scope: 'A new matter outside your current case',
+    scope: 'A new matter outside your current case', scope_af: '\u2019n Nuwe saak buite jou huidige saak',
     trialDays: 7,
     price: 100,
     durationMonths: 6,
@@ -4521,20 +4521,20 @@ const Views = (() => {
               <button class="btn btn-primary btn-lg" id="heroStart">${t('cta_start')} ${ICONS.arrow}</button>
             </div>
             <button class="hero-pricing-link" id="heroPricing">${State.lang === 'af' ? 'Sien pryse' : 'See pricing'}</button>
-            <p class="hero-micro">POPIA-private &middot; Chat with Lee free &middot; EN &middot; AF &middot; ZU &middot; XH &middot; ST</p>
+            <p class="hero-micro">${State.lang==='af'?'POPIA-privaat':'POPIA-private'} &middot; ${State.lang==='af'?'Gesels gratis met Lee':'Chat with Lee free'} &middot; EN &middot; AF &middot; ZU &middot; XH &middot; ST</p>
           </div>
           <div class="hero-card" aria-hidden="true">
             <div class="hcard-top">
-              <span class="pill pill-gold">CCMA matter</span>
-              <h3>Unfair dismissal \u2014 intake</h3>
+              <span class="pill pill-gold">${State.lang==='af'?'KVBA-saak':'CCMA matter'}</span>
+              <h3>${State.lang==='af'?'Onbillike ontslag \u2014 inname':'Unfair dismissal \u2014 intake'}</h3>
             </div>
             <div class="hcard-body">
-              <div class="hcard-msg"><div class="who">You</div>I was dismissed last week with no hearing.</div>
-              <div class="hcard-msg ai"><div class="who">Lee &middot; AI Advisor</div>That points to a possible <strong>procedurally unfair dismissal</strong> under the LRA. Were you given written notice with a reason?</div>
+              <div class="hcard-msg"><div class="who">${State.lang==='af'?'Jy':'You'}</div>${State.lang==='af'?'Ek is verlede week sonder verhoor ontslaan.':'I was dismissed last week with no hearing.'}</div>
+              <div class="hcard-msg ai"><div class="who">Lee &middot; ${State.lang==='af'?'KI-inligting':'AI information'}</div>${State.lang==='af'?'Dit dui op \u2019n moontlike <strong>prosedureel onbillike ontslag</strong> ingevolge die WAV. Het jy skriftelike kennisgewing met \u2019n rede gekry?':'That points to a possible <strong>procedurally unfair dismissal</strong> under the LRA. Were you given written notice with a reason?'}</div>
               <div class="hcard-meter">
                 <div class="meter-ring"><span>68%</span></div>
-                <div><strong style="font-family:var(--serif)">Estimated success</strong><br>
-                <span class="txt-sm txt-muted">Add 2 documents to refine this.</span></div>
+                <div><strong style="font-family:var(--serif)">${State.lang==='af'?'Geskatte sukses':'Estimated success'}</strong><br>
+                <span class="txt-sm txt-muted">${State.lang==='af'?'Voeg 2 dokumente by om dit te verfyn.':'Add 2 documents to refine this.'}</span></div>
               </div>
             </div>
           </div>
@@ -4586,29 +4586,29 @@ const Views = (() => {
             <div class="trust-col is">
               <h3>${ICONS.check} ${State.lang === 'af' ? 'Wat ons doen' : 'What we do'}</h3>
               <ul>
-                <li>Explain your rights in plain language</li>
-                <li>Work out your CCMA deadline and forum</li>
-                <li>Organise your evidence, timeline and file</li>
-                <li>Prepare you for conciliation and arbitration</li>
-                <li>Match you to vetted labour-law firms</li>
+                <li>${State.lang==='af'?'Verduidelik jou regte in eenvoudige taal':'Explain your rights in plain language'}</li>
+                <li>${State.lang==='af'?'Bereken jou KVBA-sperdatum en forum':'Work out your CCMA deadline and forum'}</li>
+                <li>${State.lang==='af'?'Orden jou bewyse, tydlyn en l\u00eaer':'Organise your evidence, timeline and file'}</li>
+                <li>${State.lang==='af'?'Berei jou voor vir versoening en arbitrasie':'Prepare you for conciliation and arbitration'}</li>
+                <li>${State.lang==='af'?'Koppel jou aan arbeidsreg-prokureursfirmas':'Match you to vetted labour-law firms'}</li>
               </ul>
             </div>
             <div class="trust-col isnt">
               <h3>${ICONS.shield} ${State.lang === 'af' ? 'Wat ons nie doen nie' : 'What we don\u2019t do'}</h3>
               <ul>
-                <li>We are <strong>not a law firm</strong> and don\u2019t represent you</li>
-                <li>We don\u2019t replace a qualified attorney</li>
-                <li>We don\u2019t make legal decisions for you</li>
-                <li>We don\u2019t guarantee any CCMA outcome</li>
-                <li>For complex matters, we tell you to see a lawyer</li>
+                <li>${State.lang==='af'?'Ons is <strong>nie \u2019n regsfirma nie</strong> en verteenwoordig jou nie':'We are <strong>not a law firm</strong> and don\u2019t represent you'}</li>
+                <li>${State.lang==='af'?'Ons vervang nie \u2019n gekwalifiseerde prokureur nie':'We don\u2019t replace a qualified attorney'}</li>
+                <li>${State.lang==='af'?'Ons neem nie regsbesluite vir jou nie':'We don\u2019t make legal decisions for you'}</li>
+                <li>${State.lang==='af'?'Ons waarborg geen KVBA-uitslag nie':'We don\u2019t guarantee any CCMA outcome'}</li>
+                <li>${State.lang==='af'?'Vir komplekse sake s\u00ea ons vir jou om \u2019n prokureur te sien':'For complex matters, we tell you to see a lawyer'}</li>
               </ul>
             </div>
           </div>
           <div class="trust-supervise">
             ${ICONS.scale}
             <div>
-              <strong>Lawyer-supervised by design.</strong>
-              <span>A labour-law attorney reviews anything that materially affects your matter. Final accountability stays with qualified human practitioners.</span>
+              <strong>${State.lang==='af'?'Kry \u2019n prokureur vir jou saak.':'See a lawyer for your matter.'}</strong>
+              <span>${State.lang==='af'?'MyLabourRights is inligting, nie regsadvies nie. Laat \u2019n arbeidsregprokureur, vakbond of die KVBA enigiets nagaan wat jou saak wesenlik raak.':'MyLabourRights is information, not legal advice. Have a labour-law attorney, trade union or the CCMA check anything that materially affects your matter.'}</span>
             </div>
           </div>
         </div>
@@ -4671,23 +4671,23 @@ const Views = (() => {
     const label = State.lang === 'af' ? cfg.label_af : cfg.label;
     return `
       <div class="price-card ${featured ? 'featured' : ''}">
-        ${featured ? '<span class="price-flag">Most chosen</span>' : ''}
+        ${featured ? '<span class="price-flag">'+(State.lang==='af'?'Gewildste':'Most chosen')+'</span>' : ''}
         <h3>${label}</h3>
-        <div class="ptype">${cfg.scope}</div>
+        <div class="ptype">${State.lang === 'af' ? (cfg.scope_af || cfg.scope) : cfg.scope}</div>
         <div class="price-amt">
           <span class="cur">R</span><span class="num">${cfg.price}</span>
-          <span class="per">once-off</span>
+          <span class="per">${State.lang==='af'?'eenmalig':'once-off'}</span>
         </div>
-        <span class="price-trial">${cfg.trialDays}-day free trial</span>
+        <span class="price-trial">${cfg.trialDays}${State.lang==='af'?'-dae gratis proeftydperk':'-day free trial'}</span>
         <ul class="price-feats">
-          <li>${ICONS.check}<span>Full case workspace for ${cfg.durationMonths} months</span></li>
-          <li>${ICONS.check}<span>Unlimited AI questions on the paid plan</span></li>
-          <li>${ICONS.check}<span>Document desk with AI prioritisation</span></li>
-          <li>${ICONS.check}<span>${cfg.ccmaValidity ? 'SAFLII + X validity cross-check' : 'Editable timeline & email drafts'}</span></li>
-          <li>${ICONS.check}<span>Matched labour-law firm referral</span></li>
+          <li>${ICONS.check}<span>${State.lang==='af'?'Volle saakwerkruimte vir '+cfg.durationMonths+' maande':'Full case workspace for '+cfg.durationMonths+' months'}</span></li>
+          <li>${ICONS.check}<span>${State.lang==='af'?'Onbeperkte KI-vrae op die betaalde plan':'Unlimited AI questions on the paid plan'}</span></li>
+          <li>${ICONS.check}<span>${State.lang==='af'?'Dokumentlessenaar met KI-prioritering':'Document desk with AI prioritisation'}</span></li>
+          <li>${ICONS.check}<span>${cfg.ccmaValidity ? 'SAFLII + X validity cross-check' : (State.lang==='af'?'Wysigbare tydlyn en e-posontwerpe':'Editable timeline & email drafts')}</span></li>
+          <li>${ICONS.check}<span>${State.lang==='af'?'Verwysing na \u2019n gepaste arbeidsregfirma':'Matched labour-law firm referral'}</span></li>
         </ul>
         <button class="btn ${featured ? 'btn-gold' : 'btn-ghost'} btn-block price-pick" data-type="${cfg.id === 'offtopic' ? 'personal' : cfg.id}">
-          Start ${cfg.trialDays}-day trial
+          ${State.lang==='af'?'Begin '+cfg.trialDays+'-dae proeftydperk':'Start '+cfg.trialDays+'-day trial'}
         </button>
       </div>`;
   }
@@ -4752,7 +4752,7 @@ const Views = (() => {
         <div class="footer-grid">
           <div>
             <div class="brand">${brandMark}<span>MyLabourRights</span></div>
-            <p>AI-assisted labour-law case preparation for South African employees. Built for mobile, ready for the CCMA.</p>
+            <p>${State.lang==='af'?'KI-ondersteunde voorbereiding van arbeidsregsake vir Suid-Afrikaanse werknemers. Gebou vir selfone, gereed vir die KVBA.':'AI-assisted labour-law case preparation for South African employees. Built for mobile, ready for the CCMA.'}</p>
           </div>
           <div><h5>Platform</h5><ul class="footer-links">
             <li><a href="/#how" data-scroll="howSec">${State.lang==='af'?'Hoe dit werk':'How it works'}</a></li><li><a href="/#pricing" data-scroll="pricingSec">${State.lang==='af'?'Pryse':'Pricing'}</a></li><li><a href="/firms" data-info="firms">${State.lang==='af'?'Prokureursfirmas':'Law firms'}</a></li><li><a href="/employers" data-info="employers">${State.lang==='af'?'Vir werkgewers':'For employers'}</a></li>
@@ -4765,9 +4765,7 @@ const Views = (() => {
           </ul></div>
         </div>
         <div class="footer-disclaimer">
-          <strong>Important:</strong> MyLabourRights provides AI-assisted legal information and case-preparation tools.
-          It is not a law firm and does not provide legal representation. Information here does not constitute
-          formal legal advice. Always consult a qualified attorney before acting on a CCMA or Labour Court matter.
+          ${State.lang==='af' ? '<strong>Belangrik:</strong> MyLabourRights verskaf KI-ondersteunde regsinligting en voorbereidingsinstrumente. Dit is nie \u2019n regsfirma nie en verskaf nie regsverteenwoordiging nie. Inligting hier is nie formele regsadvies nie. Raadpleeg altyd \u2019n gekwalifiseerde prokureur voordat jy in \u2019n KVBA- of Arbeidshofsaak optree.' : '<strong>Important:</strong> MyLabourRights provides AI-assisted legal information and case-preparation tools. It is not a law firm and does not provide legal representation. Information here does not constitute formal legal advice. Always consult a qualified attorney before acting on a CCMA or Labour Court matter.'}
         </div>
         <div class="footer-bot">
           <span>&copy; ${new Date().getFullYear()} MyLabourRights. All rights reserved.</span>
@@ -4782,52 +4780,53 @@ const Views = (() => {
   function auth() {
     const root = el(`<div class="screen active"></div>`);
     const isSignup = State.authMode === 'signup';
+    const af = State.lang === 'af';
     root.innerHTML = `
       <div class="auth-screen">
         <div class="auth-art">
           <div class="auth-art-grain"></div>
           <div class="auth-art-content">
             <div class="brand">${brandMark}<span>MyLabourRights</span></div>
-            <h2>${isSignup ? 'Your case deserves a fair hearing.' : 'Welcome back.'}</h2>
+            <h2>${isSignup ? (af?'Jou saak verdien \u2019n billike verhoor.':'Your case deserves a fair hearing.') : (af?'Welkom terug.':'Welcome back.')}</h2>
             <p>${isSignup
-              ? 'Join thousands of South Africans who walked into the CCMA prepared, not panicked.'
-              : 'Pick up exactly where you left off on your case.'}</p>
+              ? (af?'Stap voorbereid, nie paniekerig nie, die KVBA binne.':'Walk into the CCMA prepared, not panicked.')
+              : (af?'Gaan voort waar jy met jou saak opgehou het.':'Pick up exactly where you left off on your case.')}</p>
             <div class="auth-quotes">
-              <div class="auth-quote">${ICONS.shield}<span>Your documents stay private and POPIA-aligned.</span></div>
-              <div class="auth-quote">${ICONS.scale}<span>Guidance grounded in the LRA, BCEA & CCMA precedent.</span></div>
-              <div class="auth-quote">${ICONS.heart}<span>Built to give employees the strongest realistic position.</span></div>
+              <div class="auth-quote">${ICONS.shield}<span>${af?'Jou dokumente bly privaat op hierdie toestel.':'Your documents stay private on this device.'}</span></div>
+              <div class="auth-quote">${ICONS.scale}<span>${af?'Inligting gegrond op die WAV, WBDV en KVBA-presedent.':'Information grounded in the LRA, BCEA & CCMA precedent.'}</span></div>
+              <div class="auth-quote">${ICONS.heart}<span>${af?'Gebou om werknemers die sterkste realistiese posisie te gee.':'Built to give employees the strongest realistic position.'}</span></div>
             </div>
           </div>
         </div>
         <div class="auth-form-side">
           <div class="auth-box">
-            <h1>${isSignup ? 'Create your account' : 'Log in'}</h1>
+            <h1>${isSignup ? (af?'Skep jou rekening':'Create your account') : (af?'Teken in':'Log in')}</h1>
             ${isSignup && State.pendingPlan ? `<div class="plan-chip">${ICONS.spark} ${(CASE_TYPES[State.pendingPlan]||{}).label || 'Selected plan'} · ${(CASE_TYPES[State.pendingPlan]||{}).trialDays || 7}-day free trial</div>` : ''}
-            <p class="sub">${isSignup ? 'Email login \u2014 free to start, no card needed.' : 'Use the email you signed up with.'}</p>
+            <p class="sub">${isSignup ? (af?'E-posaanmelding \u2014 gratis om te begin, geen kaart nodig nie.':'Email login \u2014 free to start, no card needed.') : (af?'Gebruik die e-pos waarmee jy ingeskryf het.':'Use the email you signed up with.')}</p>
             <div class="demo-banner" role="note">${t('demo_banner')}</div>
             <button class="google-btn" id="googleBtn">
               <span>${t('demo_google')}</span></button>
-            <div class="auth-divider">or</div>
-            ${isSignup ? `<div class="field"><label for="auName">Full name</label>
+            <div class="auth-divider">${af?'of':'or'}</div>
+            ${isSignup ? `<div class="field"><label for="auName">${af?'Volle naam':'Full name'}</label>
               <input id="auName" required autocomplete="name" placeholder="e.g. Thabo Mokoena" /></div>` : ''}
-            <div class="field"><label for="auEmail">Email address</label>
+            <div class="field"><label for="auEmail">${af?'E-posadres':'Email address'}</label>
               <input id="auEmail" type="email" required autocomplete="email" placeholder="you@email.co.za" /></div>
-            <div class="field"><label for="auPass">Password</label>
+            <div class="field"><label for="auPass">${af?'Wagwoord':'Password'}</label>
               <input id="auPass" type="password" required minlength="8" autocomplete="${isSignup ? 'new-password' : 'current-password'}" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" /></div>
-            ${isSignup ? `<div class="field"><label for="auLang">Preferred language</label>
+            ${isSignup ? `<div class="field"><label for="auLang">${af?'Voorkeurtaal':'Preferred language'}</label>
               <select id="auLang">
                 <option value="en">English</option>
                 <option value="af">Afrikaans</option>
               </select></div>` : ''}
             <div class="field-err" id="auErr" role="alert" aria-live="assertive"></div>
             <button class="btn btn-primary btn-block btn-lg" id="auSubmit">
-              ${isSignup ? 'Create account & start' : 'Log in'}</button>
+              ${isSignup ? (af?'Skep rekening en begin':'Create account & start') : (af?'Teken in':'Log in')}</button>
             <div class="auth-switch">
-              ${isSignup ? 'Already have an account?' : 'New to MyLabourRights?'}
-              <button id="auSwitch">${isSignup ? 'Log in' : 'Create one'}</button>
+              ${isSignup ? (af?'Het jy reeds \u2019n rekening?':'Already have an account?') : (af?'Nuut by MyLabourRights?':'New to MyLabourRights?')}
+              <button id="auSwitch">${isSignup ? (af?'Teken in':'Log in') : (af?'Skep een':'Create one')}</button>
             </div>
             <div class="auth-switch" style="margin-top:8px">
-              <button id="auBack" class="txt-muted">\u2190 Back to home</button>
+              <button id="auBack" class="txt-muted">\u2190 ${af?'Terug na tuisblad':'Back to home'}</button>
             </div>
           </div>
         </div>
