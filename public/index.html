@@ -1684,6 +1684,23 @@ img,svg,table,pre,video,iframe{max-width:100%;}
   .topbar-inner{align-items:flex-start;}
 }
 
+/* ── Header on phones (stress test 2026-11: iPhone SE 375 / iPhone 13 390) ── */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lang-select{display:none;min-height:44px;border:1px solid var(--line-strong,#bbb);border-radius:999px;padding:0 12px;background:var(--paper,#fff);color:var(--ink,#111);font:inherit;font-size:15px}
+.lang-toggle button{min-height:44px;min-width:44px}
+@media(max-width:640px){
+  .topbar-inner{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 10px;padding-top:8px;padding-bottom:8px}
+  .nav-actions{display:contents}
+  .lang-toggle{display:none}
+  .lang-select{display:block;grid-column:2;grid-row:1}
+  .brand{grid-column:1;grid-row:1;min-width:0}
+  .brand span{max-width:none;font-size:18px}
+  .nav-actions .btn:not(.btn-gold){display:inline-flex}
+  #navLogin{grid-column:1;grid-row:2;justify-self:start;min-height:44px}
+  #navStart{grid-column:2;grid-row:2;min-height:44px}
+}
+@media(max-width:360px){ .brand span{font-size:16px} }
+
 /* ── Rescued app CSS (was trapped in printable case-file template) ── */
 /* ── Semantic state tokens ── */
 :root {
@@ -4477,6 +4494,10 @@ const Views = (() => {
             <button data-l="xh" class="${State.lang === 'xh' ? 'on' : ''}">XH</button>
             <button data-l="st" class="${State.lang === 'st' ? 'on' : ''}">ST</button>
           </div>
+          <label class="sr-only" for="langSelect">Language</label>
+          <select class="lang-select" id="langSelect" aria-label="Language">
+            ${['en','af','zu','xh','st'].map(l => `<option value="${l}" ${State.lang === l ? 'selected' : ''}>${({en:'English',af:'Afrikaans',zu:'isiZulu',xh:'isiXhosa',st:'Sesotho'})[l]}</option>`).join('')}
+          </select>
           <button class="btn btn-ghost btn-sm" id="navLogin">${t('nav_login')}</button>
           <button class="btn btn-gold btn-sm" id="navStart">${t('nav_start')}</button>
         </div>
@@ -4597,8 +4618,12 @@ const Views = (() => {
     `;
 
     // wire landing
-    root.querySelectorAll('#langToggle button').forEach(b =>
-      b.onclick = () => { State.lang = b.dataset.l; render(); });
+    root.querySelectorAll('#langToggle button').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.l === State.lang ? 'true' : 'false');
+      b.onclick = () => { State.lang = b.dataset.l; render(); };
+    });
+    const ls = root.querySelector('#langSelect');
+    if (ls) ls.onchange = () => { State.lang = ls.value; render(); };
     root.querySelector('#navLogin').onclick = () => { State.authMode = 'login'; go('auth'); };
     root.querySelector('#navStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
     root.querySelector('#heroStart').onclick = () => { State.authMode = 'signup'; go('auth'); };
