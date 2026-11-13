@@ -24,6 +24,8 @@
    admin panel (admin/index.html) drives this function.
    ============================================================ */
 
+const Models = require('./_shared/models');
+
 async function aiDraft(topic) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return null;
@@ -39,20 +41,10 @@ Return ONLY valid JSON, no markdown:
   "body": "HTML with 4-5 <p> tags, <strong> for emphasis"
 }`;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1500 },
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  // Model chosen by the shared resolver (env pin → daily check → newest Flash).
+  const r = await Models.callGemini('', [], prompt, 2048);
+  if (!r) return null;
+  let raw = r.text || '';
   raw = raw.trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
   try { return JSON.parse(raw); } catch {
     const m = raw.match(/\{[\s\S]*\}/);
@@ -114,6 +106,7 @@ async function postToSocial(post, siteUrl) {
 }
 
 exports.handler = async (event) => {
+  Models.connectBlobs(event);
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
