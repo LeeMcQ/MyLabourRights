@@ -2,6 +2,11 @@
   publish = "public"
   functions = "netlify/functions"
 
+# Daily AI model check — 01:17 UTC = 03:17 SAST. Finds the newest working
+# Claude/Gemini model, saves it for ai.js, emails if anything changed or broke.
+[functions."model-check"]
+  schedule = "17 1 * * *"
+
 [[headers]]
   for = "/*"
   [headers.values]

@@ -287,65 +287,25 @@ function cheapAnswerLooksWeak(parsed, tier) {
   if (t.length < 25) return true;                          // too short
   if (/i (can'?t|cannot|am not able to) (help|answer)/i.test(t)) return true;
   if (/(consult|see) (a|your) (lawyer|attorney)/i.test(t) && tier !== 'easy') return true;
-  if (/\b(not sure|unsure|don'?t know|unclear)\b/i.test(t)) return true;
+  if (/\b(not sure|unsure|don'?t know)\b/i.test(t) && !/needs confirmation/i.test(t)) return true;
   return false;
 }
 
 /* ============================================================
    SECTION 4 — MODEL CALLS
    ============================================================ */
-async function callGemini(system, history, userText, maxTokens) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return null;
-  const contents = history.map(h => ({
-    role: h.role === 'ai' ? 'model' : 'user',
-    parts: [{ text: h.text }],
-  }));
-  contents.push({ role: 'user', parts: [{ text: fenceUserText(userText) }] });
+/* Model choice, retired-model fallback and the daily health check live in
+   _shared/models.js — no model IDs are hard-coded here any more. */
+const Models = require('./_shared/models');
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents,
-        generationConfig: { temperature: 0.5, maxOutputTokens: maxTokens || 1024 },
-      }),
-    }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+async function callGemini(system, history, userText, maxTokens) {
+  const r = await Models.callGemini(system, history, fenceUserText(userText), maxTokens);
+  return r ? { text: r.text, model: r.model } : null;
 }
 
 async function callClaude(system, history, userText, maxTokens) {
-  const key = process.env.CLAUDE_API_KEY;
-  if (!key) return null;
-  const messages = history.map(h => ({
-    role: h.role === 'ai' ? 'assistant' : 'user',
-    content: h.text,
-  }));
-  messages.push({ role: 'user', content: fenceUserText(userText) });
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: maxTokens || 1024,
-      system,
-      messages,
-    }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data?.content?.[0]?.text || null;
+  const r = await Models.callClaude(system, history, fenceUserText(userText), maxTokens);
+  return r ? { text: r.text, model: r.model } : null;
 }
 
 /* ---- robust JSON parse from model output ---- */
@@ -376,6 +336,30 @@ function normalise(parsed, ccmaValidity, provider, tier, routed) {
   };
 }
 
+/* Compact, trusted case facts from the client (deadline, strength, etc.).
+   Only whitelisted primitive fields are used, so nothing user-typed can
+   smuggle instructions into the system prompt. */
+function caseContextBlock(cc) {
+  if (!cc || typeof cc !== 'object') return '';
+  const clean = v => (v === null || v === undefined) ? null
+    : String(v).replace(/[^\w .,:/()+-]/g, '').slice(0, 60);
+  const lines = [];
+  if (cc.disputeKey)      lines.push('Dispute type: ' + clean(cc.disputeKey));
+  if (cc.deadlineStatus)  lines.push('CCMA deadline: ' + clean(cc.deadlineStatus)
+    + (Number.isFinite(cc.daysToDeadline) ? ` (${cc.daysToDeadline} days ${cc.daysToDeadline < 0 ? 'overdue' : 'left'})` : ''));
+  if (cc.desiredOutcome)  lines.push('Wants: ' + clean(cc.desiredOutcome));
+  if (Number.isFinite(cc.docCount)) lines.push('Documents uploaded: ' + cc.docCount);
+  if (Number.isFinite(cc.strength)) lines.push('App case-strength score: ' + cc.strength + '/100');
+  if (!lines.length) return '';
+  return '\n\nCASE FACTS (from the app, trusted):\n' + lines.join('\n')
+    + '\nIf the deadline is overdue or under 7 days, say so first, with what to do.';
+}
+
+/* The case rules above describe answer layout; the wire format must stay JSON. */
+const JSON_REMINDER = `\n\nOUTPUT FORMAT OVERRIDE: whatever layout rules appear above apply to the
+content of the "text" field only. Your whole reply must be the single JSON
+object described at the top — no markdown fences, no text outside it.`;
+
 /* ============================================================
    SECTION 5 — HANDLER
    ============================================================ */
@@ -384,6 +368,8 @@ function normalise(parsed, ccmaValidity, provider, tier, routed) {
    Add staging/preview URLs here if needed; never use '*' in production
    as it allows any site to burn your API quota. */
 const ALLOWED_ORIGINS = [
+  'https://mylabourrights.co.za',
+  'https://www.mylabourrights.co.za',
   'https://mylabourights.co.za',
   'https://www.mylabourights.co.za',
   'https://chipper-manatee-569bf6.netlify.app',
@@ -403,6 +389,7 @@ function corsHeaders(event) {
 }
 
 exports.handler = async (event) => {
+  Models.connectBlobs(event);   // enables persistent rate limits + model config
   const headers = corsHeaders(event);
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers };
   if (event.httpMethod !== 'POST')
@@ -422,7 +409,7 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return { statusCode: 400, headers, body: JSON.stringify({ error: 'bad json' }) }; }
 
-  let { persona = '', history = [], userText = '', mode = null, ccmaValidity = false, forceTier = null } = body;
+  let { persona = '', history = [], userText = '', mode = null, ccmaValidity = false, forceTier = null, caseContext = null } = body;
 
   // ---- input validation (OWASP LLM01/LLM05) ----
   if (typeof userText !== 'string' || !userText.trim())
@@ -436,7 +423,7 @@ exports.handler = async (event) => {
   const screen = screenInput(userText);
 
   // ---- no keys -> tell UI to use simulation ----
-  if (!process.env.GEMINI_API_KEY && !process.env.CLAUDE_API_KEY) {
+  if (!Models.geminiKey() && !Models.claudeKey()) {
     return { statusCode: 200, headers,
       body: JSON.stringify({ fallback: true, message: 'No AI keys configured — using built-in simulation.' }) };
   }
@@ -447,45 +434,52 @@ exports.handler = async (event) => {
   // stronger system instruction (with hardening) handles it
   if (screen.flagged && tier === 'easy') tier = 'medium';
 
-  const hasClaude = !!process.env.CLAUDE_API_KEY;
-  const hasGemini = !!process.env.GEMINI_API_KEY;
+  const hasClaude = !!Models.claudeKey();
+  const hasGemini = !!Models.geminiKey();
 
   try {
-    let raw = null, provider = null, routed = { from: tier, cascaded: false };
+    let res = null, provider = null, routed = { from: tier, cascaded: false };
     // Build system prompt once — shared across hard/medium cascade and easy tiers
     const modePrompt = MODE_PROMPTS[mode] || '';
-    const baseSys = SYSTEM_BASE + (modePrompt ? '\n\n' + modePrompt : '') + '\n\n' + persona;
+    const baseSys = SYSTEM_BASE + (modePrompt ? '\n\n' + modePrompt : '')
+      + '\n\n' + String(persona || '').slice(0, 6000)
+      + caseContextBlock(caseContext)
+      + JSON_REMINDER;
 
     if (tier === 'hard') {
       // capable model first; fall back to Gemini if Claude unavailable
-      if (hasClaude) { raw = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
-      if (!raw && hasGemini) { raw = await callGemini(baseSys, history, userText, 1024); provider = 'Gemini'; }
+      if (hasClaude) { res = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
+      if (!res && hasGemini) { res = await callGemini(baseSys, history, userText, 2048); provider = 'Gemini'; }
     } else {
       // easy/medium -> cheap model first (easy uses lighter system prompt, no mode addendum)
       const sys = (tier === 'easy' ? SYSTEM_LIGHT : baseSys);
-      if (hasGemini) { raw = await callGemini(sys, history, userText, tier === 'easy' ? 512 : 1024); provider = 'Gemini'; }
+      if (hasGemini) { res = await callGemini(sys, history, userText, tier === 'easy' ? 1024 : 2048); provider = 'Gemini'; }
 
       // CASCADE: if the cheap answer looks weak, escalate to the capable model
-      const parsedCheap = safeParse(raw);
+      const parsedCheap = safeParse(res && res.text);
       if (cheapAnswerLooksWeak(parsedCheap, tier) && hasClaude) {
         const up = await callClaude(baseSys, history, userText, 1024);
-        if (up) { raw = up; provider = 'Claude'; routed.cascaded = true; routed.to = 'hard'; }
+        if (up) { res = up; provider = 'Claude'; routed.cascaded = true; routed.to = 'hard'; }
       }
       // if no Gemini at all, use Claude directly
-      if (!raw && hasClaude) { raw = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
+      if (!res && hasClaude) { res = await callClaude(baseSys, history, userText, 1024); provider = 'Claude'; }
     }
 
-    const parsed = safeParse(raw);
+    const parsed = safeParse(res && res.text);
     if (!parsed) {
+      console.error('[ai] no usable output', { tier, provider, model: res && res.model,
+        sample: res && res.text ? res.text.slice(0, 200) : null });
       return { statusCode: 200, headers,
         body: JSON.stringify({ fallback: true, message: 'AI returned no usable output — using simulation.' }) };
     }
 
     let result = normalise(parsed, ccmaValidity, provider, tier, routed);
+    result.model = res.model;
     result = sanitiseOutput(result);
     return { statusCode: 200, headers, body: JSON.stringify(result) };
 
   } catch (err) {
+    console.error('[ai] handler error', err && err.message);
     return { statusCode: 200, headers,
       body: JSON.stringify({ fallback: true, message: 'AI error — using simulation.' }) };
   }
