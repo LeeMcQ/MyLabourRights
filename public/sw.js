@@ -6,7 +6,7 @@
    Bump CACHE_VERSION whenever you deploy a new build.
    ============================================================ */
 
-const CACHE_VERSION = 'mlr-v4';
+const CACHE_VERSION = 'mlr-v5';
 const SHELL_CACHE   = CACHE_VERSION + '-shell';
 const FONT_CACHE    = CACHE_VERSION + '-fonts';
 const DATA_CACHE    = CACHE_VERSION + '-data';
@@ -19,6 +19,7 @@ const CORE_ASSETS = [
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
+  './fonts/fraunces-latin-opsz-normal.woff2',
 ];
 
 self.addEventListener('install', (event) => {
@@ -49,6 +50,7 @@ const isShell = (url) =>
   (url.pathname === '/' || url.pathname.endsWith('/index.html'));
 
 const isFont = (url) =>
+  (url.origin === location.origin && url.pathname.startsWith('/fonts/')) ||
   url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com');
 
 self.addEventListener('fetch', (event) => {
