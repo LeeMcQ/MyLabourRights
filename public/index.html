@@ -51,12 +51,16 @@
   }
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Outfit:wght@400;500;600;700&display=swap" />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<!-- Fonts: self-hosted Fraunces (headings only: one variable file with optical sizing + one italic, no
+     render-blocking third-party CSS). Body/UI uses the system font — San
+     Francisco on Apple devices, Roboto/Segoe elsewhere. -->
+<link rel="preload" href="/fonts/fraunces-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
 <style>
 /* ============ DESIGN TOKENS ============ */
+@font-face{font-family:'Fraunces';font-style:normal;font-weight:100 900;font-display:swap;src:url(/fonts/fraunces-latin-opsz-normal.woff2) format('woff2-variations'),url(/fonts/fraunces-latin-opsz-normal.woff2) format('woff2');}
+@font-face{font-family:'Fraunces';font-style:italic;font-weight:600 900;font-display:swap;src:url(/fonts/fraunces-latin-900-italic.woff2) format('woff2');}
+/* Metric-matched fallback so the swap to Fraunces doesn't shift the layout */
+@font-face{font-family:'Fraunces Fallback';src:local('Georgia');size-adjust:104%;ascent-override:96%;descent-override:25%;line-gap-override:0%;}
 :root{
   /* ── Trusted Counsel design tokens (aligned with public site) ── */
   --ink:#0d2818;
@@ -84,8 +88,8 @@
   --shadow-md:0 8px 26px rgba(13,40,24,.13),0 2px 8px rgba(13,40,24,.07);
   --shadow-lg:0 22px 56px rgba(13,40,24,.20),0 8px 18px rgba(13,40,24,.10);
   --r-sm:10px; --r-md:16px; --r-lg:24px; --r-xl:32px;
-  --serif:'Fraunces',Georgia,'Times New Roman',serif;
-  --sans:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;
+  --serif:'Fraunces','Fraunces Fallback',Georgia,'Times New Roman',serif;
+  --sans:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --tap:48px;
   --maxw:1240px;
 
@@ -1300,7 +1304,7 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .vmode-btn{
   flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
   font-size:var(--fs-sm);font-weight:600;padding:7px 10px;border-radius:var(--r-sm);
-  border:1.4px solid var(--line-strong);color:var(--text-mute);transition:all .15s;
+  border:1.4px solid var(--line-strong);color:var(--text-mute);transition:background-color .15s var(--ease-out),color .15s var(--ease-out),border-color .15s var(--ease-out);
 }
 .vmode-btn svg{width:14px;height:14px;}
 .vmode-btn:hover{border-color:var(--moss);}
@@ -1498,7 +1502,7 @@ select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--gold);outl
 .onb-card h3{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;margin-bottom:10px;}
 .onb-card p{font-size:var(--fs-base);color:var(--text-soft);margin-bottom:22px;}
 .onb-dots{display:flex;gap:7px;justify-content:center;margin-bottom:20px;}
-.onb-dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong);transition:all .2s;}
+.onb-dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong);transition:width .28s var(--ease-spring),background-color .2s var(--ease-out);}
 .onb-dot.on{width:24px;border-radius:5px;background:var(--gold);}
 
 /* paywall / quota modal */
@@ -1873,6 +1877,133 @@ button:focus-visible{outline:2px solid var(--forest);outline-offset:3px;}
 .field-err{color:#a01d1d;font-size:14px;min-height:0;margin:4px 0 8px}
 .field-err:empty{display:none}
 .ai-disclose{font-size:12px;line-height:1.4;color:var(--ink,#1b1b1b);opacity:.85;margin-top:4px}
+
+/* ============================================================
+   APPLE-FEEL LAYER (2026-11) — responsiveness, motion, materials
+   Based on emilkowalski/skills: apple-design + animation-performance.
+   Rules: respond on press (not release) · animate transform/opacity only ·
+   springs over fixed curves · motion only when the screen changes ·
+   hover effects only on devices that can hover · honour reduced
+   motion / transparency / contrast.
+   ============================================================ */
+
+/* 1. Motion tokens. --ease-out / --ease-spring were referenced 42 times but
+      never defined, so every transition using them was silently dropped. */
+:root{
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --ease-spring:cubic-bezier(.2,.9,.25,1);   /* fallback for old browsers */
+  --ease-bounce:cubic-bezier(.3,1.2,.5,1);
+  --dur-press:100ms;
+  --dur-release:320ms;
+}
+@supports (transition-timing-function:linear(0,1)){
+  :root{
+    /* critically damped spring (damping 1.0) — Apple's default, no overshoot */
+    --ease-spring:linear(0, .033 4%, .109 8%, .206 12%, .308 16%, .408 20%, .522 25%, .62 30%, .702 35%, .769 40%, .822 45%, .864 50%, .922 60%, .956 70%, .976 80%, .987 90%, 1);
+    /* damping 0.8 — a hint of overshoot, only for things that arrive with momentum */
+    --ease-bounce:linear(0, .043 4%, .145 8%, .274 12%, .409 16%, .537 20%, .676 25%, .787 30%, .871 35%, .93 40%, .969 45%, .993 50%, 1.013 60%, 1.014 70%, 1.01 80%, 1.005 90%, 1);
+  }
+}
+
+/* 2. Screen transitions: short, and only when the screen actually changes.
+      render() adds .no-enter when it re-draws the same screen, so taps
+      inside a screen update instantly instead of re-playing an entrance. */
+.screen{animation:screenIn 260ms var(--ease-out) both;}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.screen.no-enter,.screen.no-enter .stagger-children>*{animation:none;}
+.stagger-children>*{animation-duration:.32s;}
+
+/* 3. Instant press feedback on everything tappable (pointer-down, 100ms),
+      spring back on release. touch-action removes double-tap-zoom delay. */
+button,a,label,select,summary,[role="button"],input[type="checkbox"],input[type="radio"]{touch-action:manipulation;}
+.btn{
+  will-change:auto;
+  transition:transform var(--dur-release) var(--ease-spring),
+             background-color 180ms var(--ease-out),color 180ms var(--ease-out),border-color 180ms var(--ease-out);
+}
+.btn:active:not(:disabled){transform:scale(.97);transition:transform var(--dur-press) var(--ease-out);}
+.intake-choice,.checker-choice,.action-card,.oc-opt,.nc-dchip,.validity-tile,.vmode-btn,
+.mtab,.subnav button,.modal-close,.lang-toggle button{
+  transition:transform var(--dur-release) var(--ease-spring),
+             background-color 160ms var(--ease-out),border-color 160ms var(--ease-out),color 160ms var(--ease-out);
+}
+.intake-choice:active,.checker-choice:active,.action-card:active,.oc-opt:active,.nc-dchip:active,
+.validity-tile:active,.vmode-btn:active,.mtab:active,.subnav button:active,.modal-close:active,
+.lang-toggle button:active{transform:scale(.98);transition:transform var(--dur-press) var(--ease-out);}
+.mobnav button{transition:color 160ms var(--ease-out),transform var(--dur-release) var(--ease-spring);}
+.mobnav button:active{transform:scale(.9);transition:transform var(--dur-press) var(--ease-out);}
+
+/* Hover lifts are for mice. On touch screens a tapped button would otherwise
+   stay in its hover state (e.g. "Log in" turning dark and staying dark). */
+@media (hover:none){
+  .btn-primary:hover{background:var(--ink);}
+  .btn-gold:hover{transform:none;}
+  .btn-ghost:hover{background:transparent;color:var(--ink);border-color:var(--line-strong);}
+  .btn-rust:hover{background:var(--rust);}
+  .vmode-btn:hover{border-color:var(--line-strong);}
+}
+
+/* 4. Modals: dim to focus, surface arrives on a spring. */
+.modal-overlay{animation:fadeIn 200ms var(--ease-out);}
+.modal{animation:modalIn 340ms var(--ease-spring) both;transform-origin:50% 60%;}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(10px);}to{opacity:1;transform:none;}}
+@media(max-width:640px){
+  /* phones: sheets rise from the bottom edge and leave the same way */
+  .modal-overlay.show{align-items:flex-end;padding:0;}
+  .modal-overlay.show #modalHost{width:100%;display:flex;justify-content:center;}
+  .modal{border-radius:22px 22px 0 0;max-height:92dvh;padding-bottom:var(--safe-bottom);
+         animation:sheetIn 380ms var(--ease-bounce) both;}
+  @keyframes sheetIn{from{transform:translateY(100%);}to{transform:none;}}
+}
+.cite-sheet{animation:sheetIn 380ms var(--ease-bounce) both;}
+
+/* 5. Materials: translucent header that content scrolls under.
+      Uses the theme's paper colour, so it is correct in dark mode too. */
+.topbar,.main-top{
+  background:color-mix(in srgb,var(--paper) 74%,transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);
+  border-bottom-color:transparent;box-shadow:0 1px 0 var(--line);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .topbar,.main-top{background:var(--paper);}
+}
+
+/* 6. Skeletons: shimmer with transform (compositor-only) instead of
+      animating background-position (repaints every frame). */
+.skel{position:relative;overflow:hidden;background:var(--paper-2);animation:none;}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--cream) 70%,transparent),transparent);
+  animation:skelSweep 1.4s var(--ease-in-out) infinite;}
+@keyframes skelSweep{to{transform:translateX(100%);}}
+
+/* 7. Typography: size-specific tracking. Small caps labels read cleaner
+      with less spacing; big serif headlines tighter. */
+.hero-eyebrow,.sec-eyebrow,.onb-step{letter-spacing:.08em;}
+h1,h2{text-wrap:balance;}
+p{text-wrap:pretty;}
+
+/* 8. Skip rendering landing sections until they're near the viewport. */
+#howSec,#pricingSec,.trust-section,.footer{content-visibility:auto;contain-intrinsic-size:auto 720px;}
+
+/* Icons inside buttons size with the text (the hero CTA arrow was rendering
+   ~70px wide on phones, making the button 140px tall). Zero specificity so
+   any existing icon rule still wins. */
+:where(.btn)>svg{width:1.15em;height:1.15em;flex-shrink:0;}
+
+/* 9. Accessibility variants of the above. */
+@media (prefers-reduced-motion:reduce){
+  .screen,.modal,.cite-sheet,.skel::after{animation:none!important;}
+  .btn:active:not(:disabled),.mobnav button:active{transform:none;}
+}
+@media (prefers-reduced-transparency:reduce){
+  .topbar,.main-top{background:var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 1px 0 var(--line-2);}
+  .modal-overlay{-webkit-backdrop-filter:none;backdrop-filter:none;}
+}
+@media (prefers-contrast:more){
+  .topbar,.main-top{background:var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 1px 0 var(--ink);}
+  .btn-ghost{border-color:var(--ink);}
+}
 </style>
 </head>
 <body>
@@ -4108,6 +4239,13 @@ function render() {
       app.innerHTML = '<div class="screen-error"><h2>MyLabourRights</h2><p>Please refresh the page.</p></div>';
     }
   }
+  // Apple-feel: only animate when the screen actually changes, not on every
+  // re-render inside the same screen (intake steps, tab switches, toggles).
+  const screenKey = State.screen + '|' + (State.screen === 'info' ? State.infoPage : '');
+  const first = app.firstElementChild;
+  // First paint never fades in (it would delay FCP/LCP); same-screen re-renders don't either.
+  if (first && (State._lastScreenKey === undefined || State._lastScreenKey === screenKey)) first.classList.add('no-enter');
+  State._lastScreenKey = screenKey;
   window.scrollTo(0, 0);
   // restore scroll for the tab we're now on
   const newBody = app.querySelector('#mainBody');
